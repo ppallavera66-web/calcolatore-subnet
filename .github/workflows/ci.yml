@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Controlli, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - run: npm ci
+
+      - name: Oracolo (i fixture salvati devono coincidere con quelli rigenerati)
+        run: |
+          npm run oracle
+          git diff --exit-code -- tests/fixtures
+
+      - name: Controllo dei tipi
+        run: npm run check
+
+      - name: Test con copertura
+        run: npm run coverage
+
+      - name: Build (file unico)
+        run: npm run build
+
+      - name: Limite di peso
+        run: npm run size
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/index.html
+          retention-days: 14
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+      - name: Crea la Release con il file unico
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          cp index.html "calcolatore-subnet-${TAG}.html"
+          gh release create "$TAG" "calcolatore-subnet-${TAG}.html" \
+            --repo "$GITHUB_REPOSITORY" --title "Calcolatore Subnet ${TAG}" --generate-notes
+
+  pages:
+    name: GitHub Pages
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
