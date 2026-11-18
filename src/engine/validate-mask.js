@@ -23,8 +23,9 @@ export function validateMaskValue(m) {
   /** @type {import('./result.js').Warning[]} */
   const warnings = [];
   if (!check.valid) {
+    // Una mask non valida ha al più 31 bit a 1 consecutivi da sinistra: q + 1 ≤ 32.
     const q = leadingOnes(m);
-    for (const p of [q, q + 1]) if (p <= 32) suggestions.push({ prefix: p, mask: maskOf(p) });
+    suggestions.push({ prefix: q, mask: maskOf(q) }, { prefix: q + 1, mask: maskOf(q + 1) });
     const inverse = checkMask(~m >>> 0);
     if (inverse.valid) warnings.push(warn(WARN.W_LOOKS_LIKE_WILDCARD, { prefix: inverse.prefix }));
   }

@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.js", "tools/**/*.js", "tests/**/*.js", "vite.config.js"]
+  "include": ["src/**/*.js", "src/**/*.d.ts", "tools/**/*.js", "tests/**/*.js", "vite.config.js"]
 }

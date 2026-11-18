@@ -53,12 +53,3 @@ export function warn(code, params = {}) {
   return { code, params };
 }
 
-/**
- * Riassegna il campo di un errore (per esempio da `ip` a `gateway`).
- * @param {Fail} failure
- * @param {string} field
- * @returns {Fail}
- */
-export function withField(failure, field) {
-  return fail(failure.error.code, field, failure.error.params);
-}
