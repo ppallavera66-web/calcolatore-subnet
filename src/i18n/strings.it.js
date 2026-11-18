@@ -178,6 +178,14 @@ export const STRINGS = {
   chapter: (p) => `Capitolo ${String(p.chapter).replace(/^cap-/, '')}`,
   none: 'nessuno',
 
+  // ---------------------------------------------------------------- interfaccia (fase 4): etichette comuni
+  'ui.class': 'Classe',
+  'ui.reserved': 'riservato',
+  'ui.base': 'base',
+  'ui.history.hosts': (p) => `${p.hosts} host`,
+  'ui.history.subnets': (p) => `/${p.prefix} in ${p.subnets} subnet`,
+  'ui.history.both': (p) => `/${p.prefix}, ${p.hosts} host, ${p.subnets} subnet`,
+
   // ---------------------------------------------------------------- passaggi: F01 binario (cap. 7)
   'step.mask-binary': (p) => `La mask /${p.prefix} in binario è ${p.maskBinary}, cioè ${p.mask}. Ottetto interessante: il ${ord(p.index)} (mask ${p.maskOctet}).`,
   'step.ip-binary': (p) => {
