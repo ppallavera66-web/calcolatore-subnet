@@ -32,7 +32,7 @@ describe('10.2 J · stessa subnet (F07)', () => {
     expect(r.verdict).toBe('asymmetric');
     expect(r.aSeesBLocal).toBe(true);
     expect(r.bSeesALocal).toBe(false);
-    expect(r.gatewayCheck).toEqual({ a: { inSubnet: true }, b: { inSubnet: false } });
+    expect(r.gatewayInSubnet).toEqual({ a: true, b: false });
     expect(warnCodes(res)).toEqual(['W_MASKS_DIFFER', 'W_GATEWAY_OUTSIDE']);
     expect(res.ok && res.warnings[1].params).toEqual({ host: 'b', gateway: '192.168.1.1', network: '192.168.1.128', prefix: 25 });
   });

@@ -72,8 +72,8 @@ export function sameSubnet({ a, prefixA, b, prefixB = null, gateway = null }) {
     if (s.hostKind === 'standard' && ip === s.broadcast) warnings.push(warn(WARN.W_IS_BROADCAST, { host, ip: toDotted(ip), prefix: s.prefix }));
   }
 
-  /** @type {null | { a: { inSubnet: boolean }, b: { inSubnet: boolean } }} */
-  let gatewayCheck = null;
+  /** @type {null | { a: boolean, b: boolean }} */
+  let gatewayInSubnet = null;
   if (gateway !== null) {
     const check = (/** @type {'a' | 'b'} */ host, /** @type {number} */ ip, /** @type {ReturnType<typeof side>} */ s) => {
       const inSubnet = ((gateway & s.mask) >>> 0) === s.network;
@@ -82,9 +82,9 @@ export function sameSubnet({ a, prefixA, b, prefixB = null, gateway = null }) {
       else if (gateway === ip) warnings.push(warn(WARN.W_GATEWAY_IS_HOST, { host, gateway: g }));
       else if (s.hostKind === 'standard' && gateway === s.network) warnings.push(warn(WARN.W_GATEWAY_IS_NETWORK, { host, gateway: g }));
       else if (s.hostKind === 'standard' && gateway === s.broadcast) warnings.push(warn(WARN.W_GATEWAY_IS_BROADCAST, { host, gateway: g }));
-      return { inSubnet };
+      return inSubnet;
     };
-    gatewayCheck = { a: check('a', a, sideA), b: check('b', b, sideB) };
+    gatewayInSubnet = { a: check('a', a, sideA), b: check('b', b, sideB) };
   }
 
   return ok(
@@ -100,7 +100,7 @@ export function sameSubnet({ a, prefixA, b, prefixB = null, gateway = null }) {
       bSeesALocal: sideB.otherIsLocal,
       sideA,
       sideB,
-      gatewayCheck,
+      gatewayInSubnet,
     },
     warnings,
   );
