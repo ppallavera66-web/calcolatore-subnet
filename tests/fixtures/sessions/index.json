@@ -1,0 +1,204 @@
+{
+ "01-valido-esempio-6.1.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 1,
+   "historySkipped": 0,
+   "plansImported": 1,
+   "plansSkipped": 0,
+   "settingsIgnored": 0,
+   "unknownKeys": 0
+  }
+ },
+ "02-valido-minimo.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 0,
+   "plansImported": 0
+  }
+ },
+ "03-valido-tutte-le-funzioni.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 14,
+   "historySkipped": 0
+  }
+ },
+ "10-regola2-non-json.json": {
+  "ok": false,
+  "code": "IMPORT_NOT_JSON"
+ },
+ "20-regola3-formato-sconosciuto.json": {
+  "ok": false,
+  "code": "IMPORT_UNKNOWN_FORMAT"
+ },
+ "21-regola3-radice-array.json": {
+  "ok": false,
+  "code": "IMPORT_UNKNOWN_FORMAT"
+ },
+ "22-regola3-risultato-non-sessione.json": {
+  "ok": false,
+  "code": "IMPORT_UNKNOWN_FORMAT"
+ },
+ "23-regola3-busta-cifrata.json": {
+  "ok": true,
+  "kind": "encrypted"
+ },
+ "30-regola4-versione-successiva.json": {
+  "ok": false,
+  "code": "IMPORT_NEWER_VERSION"
+ },
+ "31-regola4-versione-testo.json": {
+  "ok": false,
+  "code": "IMPORT_BAD_FIELD",
+  "params": {
+   "field": "version"
+  }
+ },
+ "32-regola4-versione-zero-senza-migrazione.json": {
+  "ok": false,
+  "code": "IMPORT_BAD_FIELD",
+  "params": {
+   "field": "version"
+  }
+ },
+ "40-regola5-data-mancante.json": {
+  "ok": false,
+  "code": "IMPORT_BAD_FIELD",
+  "params": {
+   "field": "exportedAt"
+  }
+ },
+ "41-regola5-data-impossibile.json": {
+  "ok": false,
+  "code": "IMPORT_BAD_FIELD",
+  "params": {
+   "field": "exportedAt"
+  }
+ },
+ "42-regola5-data-non-utc.json": {
+  "ok": false,
+  "code": "IMPORT_BAD_FIELD",
+  "params": {
+   "field": "exportedAt"
+  }
+ },
+ "50-regola6-chiavi-sconosciute.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 1,
+   "plansImported": 1,
+   "unknownKeys": 9
+  },
+  "settings": {
+   "theme": "dark"
+  }
+ },
+ "60-regola7-impostazioni-non-valide.json": {
+  "ok": true,
+  "report": {
+   "settingsIgnored": 3
+  },
+  "settings": {
+   "didacticMethod": "magic"
+  }
+ },
+ "61-regola7-impostazioni-non-oggetto.json": {
+  "ok": true,
+  "report": {
+   "settingsIgnored": 1
+  },
+  "settings": {}
+ },
+ "70-regola8-cronologia-mista.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 2,
+   "historySkipped": 14
+  },
+  "historyIds": [
+   "ok1",
+   "ok2"
+  ],
+  "warnings": [
+   "IMPORT_W_DUPLICATE_ID"
+  ]
+ },
+ "71-regola8-cronologia-250-voci.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 200,
+   "historySkipped": 50
+  },
+  "firstHistoryId": "v249",
+  "warnings": [
+   "IMPORT_W_HISTORY_TRUNCATED"
+  ]
+ },
+ "72-regola8-cronologia-non-array.json": {
+  "ok": true,
+  "report": {
+   "historyImported": 0
+  },
+  "warnings": [
+   "IMPORT_BAD_FIELD"
+  ]
+ },
+ "80-regola9-piani-misti.json": {
+  "ok": true,
+  "report": {
+   "plansImported": 2,
+   "plansSkipped": 8
+  },
+  "planIds": [
+   "buono",
+   "note-ok"
+  ],
+  "warnings": [
+   "IMPORT_W_LABELS_DROPPED",
+   "IMPORT_W_DUPLICATE_ID"
+  ],
+  "labels": {
+   "buono": {
+    "0": "VLAN 10",
+    "3": "VLAN 40"
+   }
+  },
+  "notes": {
+   "note-ok": "riga 1\nriga 2\nriga 3"
+  },
+  "block": {
+   "note-ok": "10.0.0.0"
+  }
+ },
+ "81-regola9-piani-105.json": {
+  "ok": true,
+  "report": {
+   "plansImported": 100,
+   "plansSkipped": 5
+  },
+  "warnings": [
+   "IMPORT_W_PLANS_TRUNCATED"
+  ],
+  "missingPlanIds": [
+   "q000",
+   "q001",
+   "q002",
+   "q003",
+   "q004"
+  ]
+ },
+ "90-regola10-caratteri-di-controllo.json": {
+  "ok": true,
+  "report": {
+   "plansImported": 1,
+   "plansSkipped": 3
+  },
+  "planIds": [
+   "bidi"
+  ],
+  "labels": {
+   "bidi": {}
+  }
+ }
+}

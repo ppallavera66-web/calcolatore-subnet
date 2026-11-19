@@ -1,0 +1,161 @@
+{
+ "format": "subnetcalc-session",
+ "version": 1,
+ "exportedAt": "2026-11-18T22:33:00.000Z",
+ "app": {
+  "name": "Calcolatore Subnet",
+  "version": "1.0.0"
+ },
+ "plans": [
+  {
+   "id": "buono",
+   "type": "subdivision",
+   "name": "Piano",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {
+    "0": "VLAN 10",
+    "3": "VLAN 40",
+    "4": "fuori",
+    "-1": "neg",
+    "01": "zero",
+    "2": "",
+    "1": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   }
+  },
+  {
+   "id": "tipo-v2",
+   "type": "vlsm",
+   "name": "Piano",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {}
+  },
+  {
+   "id": "nome-lungo",
+   "type": "subdivision",
+   "name": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {}
+  },
+  {
+   "id": "nome-vuoto",
+   "type": "subdivision",
+   "name": "  ",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {}
+  },
+  {
+   "id": "note-lunghe",
+   "type": "subdivision",
+   "name": "Piano",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {}
+  },
+  {
+   "id": "blocco-cattivo",
+   "type": "subdivision",
+   "name": "Piano",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 23
+   },
+   "labels": {}
+  },
+  {
+   "id": "date",
+   "type": "subdivision",
+   "name": "Piano",
+   "createdAt": "oggi",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {}
+  },
+  {
+   "id": "etichette-array",
+   "type": "subdivision",
+   "name": "Piano",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": [
+    "a"
+   ]
+  },
+  {
+   "id": "buono",
+   "type": "subdivision",
+   "name": "doppione",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 26
+   },
+   "labels": {}
+  },
+  {
+   "id": "note-ok",
+   "type": "subdivision",
+   "name": "Piano",
+   "createdAt": "2026-11-18T22:33:00.000Z",
+   "updatedAt": "2026-11-18T22:33:00.000Z",
+   "notes": "riga 1\r\nriga 2\nriga 3",
+   "input": {
+    "block": "10.0.0.77",
+    "prefix": 24,
+    "newPrefix": 24
+   },
+   "labels": {}
+  }
+ ]
+}

@@ -1,0 +1,163 @@
+{
+ "format": "subnetcalc-session",
+ "version": 1,
+ "exportedAt": "2026-11-18T22:33:00.000Z",
+ "app": {
+  "name": "Calcolatore Subnet",
+  "version": "1.0.0"
+ },
+ "history": [
+  {
+   "id": "tutte00",
+   "at": "2026-11-18T22:59:00.000Z",
+   "fn": "F01",
+   "input": {
+    "ip": "192.168.10.75",
+    "prefix": 26
+   }
+  },
+  {
+   "id": "tutte01",
+   "at": "2026-11-18T22:58:00.000Z",
+   "fn": "F02",
+   "input": {
+    "kind": "number",
+    "text": "203",
+    "base": 10
+   }
+  },
+  {
+   "id": "tutte02",
+   "at": "2026-11-18T22:57:00.000Z",
+   "fn": "F02",
+   "input": {
+    "kind": "number",
+    "text": "1100 1011",
+    "base": 2
+   }
+  },
+  {
+   "id": "tutte03",
+   "at": "2026-11-18T22:56:00.000Z",
+   "fn": "F02",
+   "input": {
+    "kind": "address",
+    "text": "192.168.10.75"
+   }
+  },
+  {
+   "id": "tutte04",
+   "at": "2026-11-18T22:55:00.000Z",
+   "fn": "F03",
+   "input": {
+    "mask": "255.255.250.0"
+   }
+  },
+  {
+   "id": "tutte05",
+   "at": "2026-11-18T22:54:00.000Z",
+   "fn": "F04",
+   "input": {
+    "ip": "10.1.2.3"
+   }
+  },
+  {
+   "id": "tutte06",
+   "at": "2026-11-18T22:53:00.000Z",
+   "fn": "F05",
+   "input": {
+    "mode": "hosts",
+    "hosts": 50
+   }
+  },
+  {
+   "id": "tutte07",
+   "at": "2026-11-18T22:52:00.000Z",
+   "fn": "F05",
+   "input": {
+    "mode": "subnets",
+    "prefix": 16,
+    "subnets": 6
+   }
+  },
+  {
+   "id": "tutte08",
+   "at": "2026-11-18T22:51:00.000Z",
+   "fn": "F05",
+   "input": {
+    "mode": "both",
+    "prefix": 24,
+    "hosts": 20,
+    "subnets": 8
+   }
+  },
+  {
+   "id": "tutte09",
+   "at": "2026-11-18T22:50:00.000Z",
+   "fn": "F06",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 16,
+    "newPrefix": 19
+   }
+  },
+  {
+   "id": "tutte10",
+   "at": "2026-11-18T22:49:00.000Z",
+   "fn": "F07",
+   "input": {
+    "a": "192.168.1.10",
+    "prefixA": 24,
+    "b": "192.168.1.200",
+    "prefixB": 25,
+    "gateway": "192.168.1.1"
+   }
+  },
+  {
+   "id": "tutte11",
+   "at": "2026-11-18T22:48:00.000Z",
+   "fn": "F07",
+   "input": {
+    "a": "10.1.63.5",
+    "prefixA": 19,
+    "b": "10.1.64.5"
+   }
+  },
+  {
+   "id": "tutte12",
+   "at": "2026-11-18T22:47:00.000Z",
+   "fn": "F10",
+   "input": {
+    "network": "192.168.10.64",
+    "prefix": 26,
+    "acl": {
+     "number": 10,
+     "name": "SUBNET",
+     "action": "permit"
+    },
+    "ospf": {
+     "process": 1,
+     "area": 0
+    }
+   }
+  },
+  {
+   "id": "tutte13",
+   "at": "2026-11-18T22:46:00.000Z",
+   "fn": "F10",
+   "input": {
+    "network": "10.1.64.0",
+    "prefix": 19,
+    "acl": {
+     "number": 1300,
+     "name": "LAB-1",
+     "action": "deny"
+    },
+    "ospf": {
+     "process": 10,
+     "area": "0.0.0.1"
+    }
+   }
+  }
+ ]
+}

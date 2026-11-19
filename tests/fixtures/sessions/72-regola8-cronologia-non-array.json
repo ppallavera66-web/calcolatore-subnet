@@ -1,0 +1,12 @@
+{
+ "format": "subnetcalc-session",
+ "version": 1,
+ "exportedAt": "2026-11-18T22:33:00.000Z",
+ "app": {
+  "name": "Calcolatore Subnet",
+  "version": "1.0.0"
+ },
+ "history": {
+  "id": "x"
+ }
+}

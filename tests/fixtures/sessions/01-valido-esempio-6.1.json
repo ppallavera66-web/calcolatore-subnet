@@ -1,0 +1,45 @@
+{
+ "format": "subnetcalc-session",
+ "version": 1,
+ "exportedAt": "2026-11-18T22:33:00.000Z",
+ "app": {
+  "name": "Calcolatore Subnet",
+  "version": "1.0.0"
+ },
+ "settings": {
+  "theme": "auto",
+  "didactic": false,
+  "didacticMethod": "binary",
+  "exportBar": false
+ },
+ "history": [
+  {
+   "id": "h7Kq2mX9pA4c",
+   "at": "2026-11-18T22:30:12.000Z",
+   "fn": "F01",
+   "input": {
+    "ip": "172.16.45.200",
+    "prefix": 20
+   }
+  }
+ ],
+ "plans": [
+  {
+   "id": "p3Vn8sT1wE6b",
+   "type": "subdivision",
+   "name": "Sede via Celoria",
+   "createdAt": "2026-11-18T22:00:00.000Z",
+   "updatedAt": "2026-11-18T22:31:00.000Z",
+   "notes": "",
+   "input": {
+    "block": "10.40.0.0",
+    "prefix": 16,
+    "newPrefix": 24
+   },
+   "labels": {
+    "10": "VLAN 10 · Uffici",
+    "20": "VLAN 20 · Laboratori"
+   }
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "format": "subnetcalc-encrypted",
+ "version": 1,
+ "kdf": {
+  "name": "PBKDF2-SHA-256",
+  "iterations": 600000,
+  "salt": "AAAAAAAAAAAAAAAAAAAAAA=="
+ },
+ "cipher": {
+  "name": "AES-256-GCM",
+  "iv": "AAAAAAAAAAAAAAAA"
+ },
+ "data": "AAAAAAAAAAAAAAAAAAAAAA=="
+}

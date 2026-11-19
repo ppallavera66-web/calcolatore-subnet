@@ -1,0 +1,145 @@
+{
+ "format": "subnetcalc-session",
+ "version": 1,
+ "exportedAt": "2026-11-18T22:33:00.000Z",
+ "app": {
+  "name": "Calcolatore Subnet",
+  "version": "1.0.0"
+ },
+ "history": [
+  {
+   "id": "ok1",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F01",
+   "input": {
+    "ip": "10.0.0.1",
+    "prefix": 24
+   }
+  },
+  {
+   "id": "ip-cattivo",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F01",
+   "input": {
+    "ip": "10.0.0.256",
+    "prefix": 24
+   }
+  },
+  {
+   "id": "zero-iniziale",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F04",
+   "input": {
+    "ip": "10.0.01.1"
+   }
+  },
+  {
+   "id": "prefisso-testo",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F01",
+   "input": {
+    "ip": "10.0.0.1",
+    "prefix": "24"
+   }
+  },
+  {
+   "id": "prefisso-33",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F01",
+   "input": {
+    "ip": "10.0.0.1",
+    "prefix": 33
+   }
+  },
+  {
+   "id": "fn-v2",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F08",
+   "input": {}
+  },
+  {
+   "id": "id con spazi",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F04",
+   "input": {
+    "ip": "10.0.0.1"
+   }
+  },
+  {
+   "id": "data",
+   "at": "ieri",
+   "fn": "F04",
+   "input": {
+    "ip": "10.0.0.1"
+   }
+  },
+  {
+   "id": "ok1",
+   "at": "2026-11-18T22:31:00.000Z",
+   "fn": "F04",
+   "input": {
+    "ip": "10.0.0.2"
+   }
+  },
+  {
+   "id": "f05-fuori",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F05",
+   "input": {
+    "mode": "subnets",
+    "prefix": 32,
+    "subnets": 2
+   }
+  },
+  {
+   "id": "f06-corto",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F06",
+   "input": {
+    "block": "10.0.0.0",
+    "prefix": 24,
+    "newPrefix": 16
+   }
+  },
+  {
+   "id": "f10-acl",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F10",
+   "input": {
+    "network": "10.0.0.0",
+    "prefix": 8,
+    "acl": {
+     "number": 100,
+     "name": "A",
+     "action": "permit"
+    },
+    "ospf": {
+     "process": 1,
+     "area": 0
+    }
+   }
+  },
+  {
+   "id": "f02-base",
+   "at": "2026-11-18T22:30:00.000Z",
+   "fn": "F02",
+   "input": {
+    "kind": "number",
+    "text": "12",
+    "base": 8
+   }
+  },
+  "stringa",
+  null,
+  {
+   "id": "ok2",
+   "at": "2026-11-18T22:29:00.000Z",
+   "fn": "F06",
+   "input": {
+    "block": "10.0.5.0",
+    "prefix": 16,
+    "newPrefix": 19
+   }
+  }
+ ]
+}
