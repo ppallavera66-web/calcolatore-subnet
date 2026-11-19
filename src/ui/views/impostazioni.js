@@ -17,8 +17,8 @@ import { cryptoAvailable } from '../../session/envelope.js';
 import { t, fmtNumber } from '../../i18n/strings.it.js';
 import ofl from '../../assets/fonts/OFL.txt?raw';
 
-/** Indirizzo del repository pubblico: da completare con il nome utente GitHub (vedi STATO_PROGETTO.md). */
-export const REPO_URL = '';
+/** Indirizzo del repository pubblico. */
+export const REPO_URL = 'https://github.com/ppallavera66-web/calcolatore-subnet';
 
 /**
  * Compatibilità del browser per la pagina aperta così (verifiche della fase 5, sezione 11).
@@ -183,7 +183,7 @@ export function createImpostazioni(ctx) {
         row(t('ui.about.code'), t('ui.about.codeLicense')),
         row(t('ui.about.fonts'), t('ui.about.fontsLicense')),
         row(t('ui.about.engine'), t('ui.about.engineText')),
-        row(t('ui.about.repo'), REPO_URL ? h('a', { href: REPO_URL, rel: 'noopener' }, t('ui.about.repoText')) : t('ui.about.repoText'))),
+        row(t('ui.about.repo'), REPO_URL ? h('a', { href: REPO_URL, target: '_blank', rel: 'noopener noreferrer' }, t('ui.about.repoText')) : t('ui.about.repoText'))),
       h('h3', { class: 'subhead' }, t('ui.about.env')),
       h('dl', { class: 'kv kv-compact env-list', 'data-env': JSON.stringify(env) },
         row(t('ui.env.protocol'), t(`ui.env.protocol.${env.protocol}`)),

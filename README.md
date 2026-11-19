@@ -2,7 +2,11 @@
 
 Calcolatore di subnet IPv4 in un **unico file HTML** autosufficiente, che funziona offline e si apre da disco o da qualunque web server. Serve per il calcolo rapido, la didattica (passaggi con il metodo binario, del numero magico o dei multipli) e il lavoro professionale.
 
-Stato: **fase 6 completata** (guida all'uso e guida al subnetting integrate, collegamenti "Apri nel calcolatore"). Prossima: fase 7, verifica finale e rilascio v1. Specifiche e stato del progetto sono in [`docs/`](docs/).
+**Versione 1.0.0.**
+- **Scarica** il file unico dalla pagina [Releases](https://github.com/ppallavera66-web/calcolatore-subnet/releases) e aprilo con un doppio clic;
+- **oppure usalo online**: <https://ppallavera66-web.github.io/calcolatore-subnet/>.
+
+Novità e verifiche sono in [`CHANGELOG.md`](CHANGELOG.md). Specifiche, stato del progetto, tabella dei requisiti e revisione indipendente sono in [`docs/`](docs/).
 
 ## Requisiti
 
@@ -52,7 +56,7 @@ La regola delle dipendenze tra i moduli (specifica tecnica, 2.3) è verificata d
 
 ## Prova nel browser
 
-`npm run e2e` fa la build e apre `dist/index.html` da disco in Chrome con `playwright-core`, senza scaricare browser: usa `CHROME_PATH` o i percorsi usuali di Chrome/Chromium. Verifica layout e aree di tocco, i quattro temi con axe-core (WCAG 2.2 AA), tastiera, frammento, cronologia, Suddivisione, persistenza, export, sessione e busta cifrata, piani, guide (ancore con focus, glossario da tastiera, tema, stampa), stampa e PDF, assenza di errori JavaScript. Schermate e PDF in `e2e-report/`.
+`npm run e2e` fa la build e apre `dist/index.html` da disco in Chrome con `playwright-core`, senza scaricare browser: usa `CHROME_PATH` o i percorsi usuali di Chrome/Chromium. Verifica layout e aree di tocco, i quattro temi con axe-core (WCAG 2.2 AA), tastiera, frammento, cronologia, Suddivisione, persistenza, export, sessione e busta cifrata, piani, guide (ancore con focus, glossario da tastiera, tema, stampa), stampa e PDF, focus e annunci, assenza di errori JavaScript e di richieste di rete (anche con il browser offline). Schermate e PDF in `e2e-report/`.
 
 ## Uso del motore
 
@@ -71,9 +75,23 @@ if (r.ok) {
 
 Ogni funzione pubblica restituisce `{ ok: true, value, warnings }` oppure `{ ok: false, error: { code, field, params } }` e non lancia eccezioni per input dell'utente.
 
-## Integrazione continua
+## Integrazione continua e rilascio
 
-`.github/workflows/ci.yml`: a ogni push e pull request rigenera i fixture dell'oracolo e verifica che coincidano con quelli salvati, poi esegue check, test con copertura, build e controllo del peso. Sui tag `v*` crea la Release con il file `calcolatore-subnet-vX.Y.Z.html`; dal ramo `main` pubblica su GitHub Pages (da abilitare in Settings → Pages → Source: GitHub Actions).
+`.github/workflows/ci.yml`:
+- **a ogni push e pull request**:
+  - job `test`: rigenera i fixture dell'oracolo e verifica che coincidano con quelli salvati, poi check, test con copertura, build (con `SOURCE_DATE_EPOCH` = data dell'ultimo commit) e controllo del peso;
+  - job `e2e`: `npm run e2e` con il Chrome del runner (`CHROME_PATH`); schermate, PDF e `risultati.json` come artefatto `e2e-report`.
+- **dal ramo `main`**, con i due job verdi: pubblicazione su GitHub Pages.
+- **sui tag `v*`**:
+  - controlla che il tag coincida con la versione di `package.json` e che esista `docs/note-rilascio/<tag>.md`;
+  - poi crea la Release con `calcolatore-subnet-vX.Y.Z.html`, la sua impronta `.sha256` e la nota di rilascio.
+
+**Per un nuovo rilascio**:
+1. aggiornare la versione con `npm version X.Y.Z --no-git-tag-version`;
+2. aggiornare `CHANGELOG.md` e scrivere `docs/note-rilascio/vX.Y.Z.md`;
+3. fare il commit, poi `git tag -a vX.Y.Z -m "Calcolatore Subnet vX.Y.Z"` e `git push origin main vX.Y.Z`.
+
+**GitHub Pages** va abilitato una volta: Settings → Pages → Source: **GitHub Actions**.
 
 ## Licenza
 
