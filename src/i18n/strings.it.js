@@ -697,9 +697,10 @@ export const STRINGS = {
   'ui.si.replace': 'Sostituisci',
   'ui.si.replace.desc': 'Cronologia e piani del file prendono il posto di quelli attuali.',
   'ui.si.merge': 'Unisci',
-  'ui.si.merge.desc': 'Cronologia e piani del file si aggiungono a quelli attuali; gli elementi già presenti restano.',
+  'ui.si.merge.desc': 'Cronologia e piani del file si aggiungono a quelli attuali; a parità di elemento resta quello attuale. La cronologia tiene le 200 voci più recenti e i piani sono al massimo 100: oltre, gli elementi più vecchi della cronologia e i piani nuovi in più restano fuori.',
+  'ui.si.merge.dropped': (p) => `Con Unisci ${plural(p.n, 'elemento resterebbe fuori', 'elementi resterebbero fuori')} per questi limiti.`,
   'ui.si.done': (p) =>
-    `Importate ${plural(p.history, 'voce', 'voci')} e ${plural(p.plans, 'piano', 'piani')}${p.skipped ? `; ${plural(p.skipped, 'voce scartata', 'voci scartate')}` : ''}.${p.settings ? ' Impostazioni applicate.' : ''}`,
+    `Importate ${plural(p.history, 'voce', 'voci')} e ${plural(p.plans, 'piano', 'piani')}${p.skipped ? `; ${plural(p.skipped, 'voce scartata', 'voci scartate')}` : ''}${p.dropped ? `; ${plural(p.dropped, 'elemento escluso', 'elementi esclusi')} per il limite di 200 calcoli e 100 piani` : ''}.${p.settings ? ' Impostazioni applicate.' : ''}`,
   'ui.si.failed': 'Import non riuscito',
   'ui.si.reading': 'Lettura del file…',
 

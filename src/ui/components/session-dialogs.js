@@ -252,13 +252,15 @@ function preview(ctx, r) {
     report.unknownKeys ? t('ui.si.unknown', { n: report.unknownKeys }) : null,
   ].filter(Boolean);
   const warnings = report.warnings.map((w) => t(w.code, w.params));
+  // quanti elementi resterebbero fuori con Unisci (limiti di 200 voci e 100 piani, revisione I1)
+  const mergeDropped = applyImport(ctx.store.get(), data, { mode: 'merge' }).summary.dropped;
 
   /** @param {'replace' | 'merge'} mode */
   const choose = (mode) => {
     const cur = ctx.store.get();
     const res = applyImport(cur, data, { mode, applySettings: apply.input.checked });
     ctx.store.set((s) => ({ ...s, settings: /** @type {any} */ (res.settings), history: res.history, plans: res.plans }));
-    ctx.toast(t('ui.si.done', { history: res.summary.history, plans: res.summary.plans, skipped: report.historySkipped + report.plansSkipped, settings: res.summary.settingsApplied }));
+    ctx.toast(t('ui.si.done', { history: res.summary.history, plans: res.summary.plans, skipped: report.historySkipped + report.plansSkipped, dropped: res.summary.dropped, settings: res.summary.settingsApplied }));
   };
 
   const body = [
@@ -267,7 +269,7 @@ function preview(ctx, r) {
     hasSettings ? apply.el : notice(t('ui.si.noSettings')),
     h('dl', { class: 'choice-list' },
       h('dt', {}, t('ui.si.replace')), h('dd', {}, t('ui.si.replace.desc')),
-      h('dt', {}, t('ui.si.merge')), h('dd', {}, t('ui.si.merge.desc'))),
+      h('dt', {}, t('ui.si.merge')), h('dd', {}, t('ui.si.merge.desc'), mergeDropped ? ` ${t('ui.si.merge.dropped', { n: mergeDropped })}` : '')),
   ];
   openDialog({
     title: t('ui.si.preview'),

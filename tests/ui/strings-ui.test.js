@@ -24,6 +24,13 @@ const walk = (dir) => readdirSync(dir).flatMap((n) => (statSync(join(dir, n)).is
 describe('testi dell\'interfaccia', () => {
   const keys = Object.keys(STRINGS).filter((k) => k.startsWith('ui.') || k.startsWith('export.') || k.startsWith('IMPORT_'));
 
+  test('riepilogo dell\'import: dice quanti elementi restano fuori per i limiti (revisione I1)', () => {
+    const base = { history: 150, plans: 0, skipped: 0, settings: false };
+    expect(t('ui.si.done', { ...base, dropped: 0 })).toBe('Importate 150 voci e 0 piani.');
+    expect(t('ui.si.done', { ...base, dropped: 100 })).toBe('Importate 150 voci e 0 piani; 100 elementi esclusi per il limite di 200 calcoli e 100 piani.');
+    expect(t('ui.si.merge.dropped', { n: 1 })).toBe('Con Unisci 1 elemento resterebbe fuori per questi limiti.');
+  });
+
   test('ci sono testi dell\'interfaccia', () => {
     expect(keys.length).toBeGreaterThan(200);
   });
