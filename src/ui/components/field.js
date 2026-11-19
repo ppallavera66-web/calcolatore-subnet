@@ -77,9 +77,12 @@ export function textField(o) {
   });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
       show();
-      o.onEnter?.();
+      // senza onEnter, Invio fa il suo lavoro: nelle finestre conferma il modulo (revisione M1, C7)
+      if (o.onEnter) {
+        e.preventDefault();
+        o.onEnter();
+      }
     }
   });
   if (o.beforeInput) {
