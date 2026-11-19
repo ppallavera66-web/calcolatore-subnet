@@ -144,6 +144,8 @@ export function createGlossaryPopover(root, byId, hrefOf) {
   let cur = null;
   /** @type {ReturnType<typeof setTimeout> | undefined} */
   let hideTimer;
+  /** @type {HTMLElement | null} termine che riceve il focus alla chiusura con Esc */
+  let quiet = null;
 
   function place() {
     if (!cur) return;
@@ -190,12 +192,17 @@ export function createGlossaryPopover(root, byId, hrefOf) {
     clearTimeout(hideTimer);
     const run = () => {
       pop.hidden = true;
-      if (cur) {
-        cur.classList.remove('open');
-        cur.setAttribute('aria-expanded', 'false');
-        if (refocus) cur.focus();
-      }
+      const term = cur;
       cur = null;
+      if (!term) return;
+      term.classList.remove('open');
+      term.setAttribute('aria-expanded', 'false');
+      if (refocus) {
+        // il focus torna sul termine senza riaprire il riquadro (focusin è sincrono)
+        quiet = term;
+        term.focus();
+        quiet = null;
+      }
     };
     if (now) run();
     else hideTimer = setTimeout(run, 180);
@@ -218,7 +225,7 @@ export function createGlossaryPopover(root, byId, hrefOf) {
     }],
     ['focusin', (e) => {
       const term = termOf(e.target);
-      if (term) show(term);
+      if (term && term !== quiet) show(term);
       else if (inPop(e.target)) clearTimeout(hideTimer);
     }],
     ['focusout', (e) => {

@@ -96,8 +96,8 @@ export function createGuide(ctx, route) {
       ...groups.flatMap((g) => [
         g.title ? h('p', { class: 'guide-toc-group' }, g.title) : null,
         h('ol', { class: 'guide-toc-list' }, g.items.map((it) => {
-          const a = h('a', { href: hrefOf(it.id), dataset: { id: it.id } }, it.num ? h('span', { class: 'n', 'aria-hidden': 'true' }, it.num) : null, h('span', {}, it.title));
-          if (it.num) a.setAttribute('aria-label', `${/^\d+$/.test(it.num) ? Number(it.num) : it.num} · ${it.title}`);
+          // nome accessibile = testo visibile ("09 Il numero magico"), come chiede WCAG 2.5.3
+          const a = h('a', { href: hrefOf(it.id), dataset: { id: it.id } }, it.num ? [h('span', { class: 'n' }, it.num), ' '] : null, h('span', {}, it.title));
           tocLinks.push(a);
           return h('li', {}, a);
         })),
