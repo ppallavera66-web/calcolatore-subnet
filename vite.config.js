@@ -28,7 +28,7 @@ export default defineConfig({
     setupFiles: ['tests/setup.js'],
     coverage: {
       provider: 'v8',
-      include: ['src/engine/**/*.js', 'src/i18n/**/*.js'],
+      include: ['src/engine/**/*.js', 'src/i18n/**/*.js', 'src/storage/**/*.js', 'src/session/**/*.js', 'src/export/**/*.js'],
       reporter: ['text', 'json-summary', 'html'],
       thresholds: {
         statements: 95,
