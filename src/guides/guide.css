@@ -1,0 +1,173 @@
+/* Guide integrate (fase 6): stili della guida al subnetting v0.3, confinati in .guide e riportati sulle
+   variabili di tokens.css (stessi nomi, quindi stessi temi dell'app). Impaginazione:
+   - indice laterale fisso da 1180 px (accanto alla barra laterale dell'app), testo a 68ch;
+   - sotto i 1180 px indice richiudibile in cima alla guida.
+   Codice colore semantico: ambra = bit di rete (--net), verde acqua = bit di host (--host). */
+
+.guide{--guide-gap:28px;gap:var(--sp-4)}
+.guide-layout{display:block}
+.guide-toc{display:none}
+.guide-body{min-width:0;font-size:16.5px;line-height:1.65}
+.guide [id]{scroll-margin-top:84px}
+@media (min-width:980px){ .guide [id]{scroll-margin-top:20px} }
+
+/* ---------- indice ---------- */
+.guide-toc-mobile{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.guide-toc-mobile > summary{min-height:var(--touch-min);display:flex;align-items:center;padding:0 var(--sp-4);cursor:pointer;
+  font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--strong)}
+.guide-toc-mobile > nav{max-height:60vh;overflow-y:auto;padding:0 var(--sp-3) var(--sp-3)}
+.guide-toc-mobile .guide-toc-list a{min-height:var(--touch-min)}
+.guide-theme-row{display:flex;align-items:center;gap:10px;margin:var(--sp-2) 0 var(--sp-3)}
+.guide-theme-row label{font-family:var(--font-display);letter-spacing:.08em;text-transform:uppercase;font-size:12px;font-weight:600;color:var(--muted)}
+.guide-theme{flex:1;min-width:0;min-height:40px;padding:6px 8px;font-size:15px;background:var(--bg);color:var(--strong);
+  border:1px solid var(--line-strong);border-radius:var(--r-md)}
+.guide-quick{display:flex;gap:8px;margin:0 0 var(--sp-2)}
+.guide-quick a{flex:1;display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid var(--line-strong);
+  border-radius:var(--r-md);color:var(--text);text-decoration:none;font-size:14px;padding:4px 8px;text-align:center}
+.guide-quick a:hover{background:var(--surface-2)}
+.guide-toc-group{font-family:var(--font-display);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  margin:var(--sp-4) 0 4px;font-weight:600;line-height:1.3}
+.guide-toc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.guide-toc-list a{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-size:14px;line-height:1.35;
+  padding:5px 8px;border-radius:var(--r-md)}
+.guide-toc-list a:hover{background:var(--surface-2)}
+.guide-toc-list a[aria-current]{background:var(--surface-2);color:var(--net);box-shadow:inset 3px 0 0 var(--net)}
+.guide-toc-list .n{font-family:var(--font-mono);color:var(--muted);font-size:12px;min-width:20px}
+.guide-toc-list a[aria-current] .n{color:var(--net)}
+
+@media (min-width:1180px){
+  .guide-toc-mobile{display:none}
+  .guide-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:var(--guide-gap);align-items:start}
+  .guide-toc{display:block;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;padding:0 6px 16px 0}
+}
+
+/* ---------- testo ---------- */
+.guide-body .prose{max-width:68ch}
+.guide-body .hero{padding:4px 0 28px;border-bottom:1px solid var(--line)}
+.guide-body .eyebrow{font-family:var(--font-mono);font-size:12.5px;color:var(--net);letter-spacing:.06em;margin:0 0 10px}
+.guide-body .hero-title{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,4.5vw,42px);line-height:1.08;margin:0 0 14px}
+.guide-body .lead{font-size:18px;max-width:62ch;margin:0 0 18px}
+.guide-body .legend{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:14px;color:var(--muted)}
+.guide-body .legend b{font-family:var(--font-mono);font-weight:600}
+.guide-body .gl-sample{border-bottom:1px dotted var(--host)}
+
+.guide-body .part{margin:64px 0 0;padding:20px 0 0;border-top:3px solid var(--net)}
+.guide-body .part .eyebrow{margin-bottom:4px}
+.guide-body .part h2{font-size:32px;line-height:1.1;margin:0 0 8px}
+.guide-body .part p.intro{color:var(--muted);max-width:64ch;margin:0}
+.guide-body section.chap{margin-top:52px}
+.guide-body section.chap > h3{font-size:26px;line-height:1.15;font-weight:700;margin:0 0 14px;display:flex;gap:14px;align-items:baseline;outline:none}
+.guide-body section.chap > h3 .num{font-family:var(--font-mono);font-size:15px;color:var(--net);font-weight:500;flex:none}
+.guide-body h4{font-size:19px;letter-spacing:0;text-transform:none;color:var(--strong);margin:28px 0 8px;font-weight:600;outline:none}
+.guide-body h2,.guide-body h3,.guide-body h4{outline:none}
+.guide-body h2:focus-visible,.guide-body h3:focus-visible,.guide-body h4:focus-visible,.guide-body tr:focus-visible{outline:2px solid var(--net);outline-offset:4px}
+.guide-body p{margin:0 0 14px}
+.guide-body ul,.guide-body ol{margin:0 0 14px;padding-left:22px}
+.guide-body li{margin:3px 0}
+.guide-body .small{font-size:14px}
+.guide-body figure{margin:18px 0 24px}
+.guide-body figure svg{max-width:100%;height:auto;display:block}
+.guide-body figcaption{font-size:13.5px;color:var(--muted);margin-top:8px}
+.guide-foot{margin-top:72px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+
+/* ---------- blocchi binari ---------- */
+.guide-body pre.bin{font-family:var(--font-mono);font-size:15px;line-height:1.7;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--line);border-radius:var(--r-md);padding:14px 18px;margin:6px 0 18px;overflow-x:auto;color:var(--text);
+  font-variant-numeric:tabular-nums}
+.guide-body pre.bin .n{color:var(--net)} .guide-body pre.bin .h{color:var(--host)} .guide-body pre.bin .m{color:var(--muted)}
+.guide-body pre.bin .r{color:var(--strong);font-weight:600} .guide-body pre.bin .w{color:var(--warn)}
+
+/* ---------- riquadri ---------- */
+.guide-body .box{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-lg);padding:14px 18px 4px;margin:18px 0 22px;border-left-width:4px}
+.guide-body .box .lbl{font-family:var(--font-display);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin:0 0 6px;display:block}
+.guide-body .box.trick{border-left-color:var(--net)} .guide-body .box.trick .lbl{color:var(--net)}
+.guide-body .box.note{border-left-color:var(--host)} .guide-body .box.note .lbl{color:var(--host)}
+.guide-body .box.warn{border-left-color:var(--warn)} .guide-body .box.warn .lbl{color:var(--warn)}
+.guide-body .box.key{border-left-color:var(--strong);background:var(--surface-2)} .guide-body .box.key .lbl{color:var(--strong)}
+
+/* ---------- tabelle ---------- */
+.guide-body .tbl{overflow-x:auto;margin:8px 0 20px;border:1px solid var(--line);border-radius:var(--r-lg)}
+.guide-body td{white-space:normal}
+.guide-body th{white-space:nowrap;background:var(--surface);position:static}
+.guide-body td.mono,.guide-body th.mono{font-family:var(--font-mono);font-size:13.5px;white-space:nowrap}
+.guide-body tr.hl td{background:var(--hl-row)}
+.guide-body .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:0 16px;align-items:start}
+.guide-body table.gloss tr.is-target td{background:var(--host-soft)}
+.guide-body table.gloss tr{outline:none}
+
+/* ---------- tabella a scaletta ---------- */
+.guide-body .scale-wrap{overflow-x:auto;margin:8px 0 20px}
+.guide-body .scale{display:grid;grid-template-columns:auto repeat(8,minmax(44px,1fr));border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;font-family:var(--font-mono);font-size:14.5px;min-width:520px}
+.guide-body .scale div{padding:7px 8px;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.guide-body .scale div.h{font-family:var(--font-display);text-align:left;color:var(--muted);background:var(--surface);font-size:13px;white-space:nowrap}
+.guide-body .scale div.c4{color:var(--host)} .guide-body .scale div.mg{color:var(--net);font-weight:600} .guide-body .scale div.mk{color:var(--strong)}
+
+/* ---------- esercizi ---------- */
+.guide-body .ex{border:1px solid var(--line);border-radius:var(--r-lg);margin:12px 0;background:var(--surface)}
+.guide-body .ex .q{padding:12px 16px;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.guide-body .ex .q .tag{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.guide-body .ex .q .addr{font-family:var(--font-mono);font-size:17px;color:var(--strong);font-weight:500}
+.guide-body details.sol{border-top:1px solid var(--line)}
+.guide-body details.sol summary{cursor:pointer;padding:0 16px;min-height:var(--touch-min);display:flex;align-items:center;color:var(--host);
+  font-size:14.5px;font-weight:600;list-style:none}
+.guide-body details.sol summary::-webkit-details-marker{display:none}
+.guide-body details.sol summary::before{content:"▸";margin-right:6px}
+.guide-body details.sol[open] summary::before{content:"▾"}
+.guide-body details.sol .body{padding:2px 16px 8px}
+
+/* ---------- Apri nel calcolatore (al posto dei widget della v0.3) ---------- */
+.guide-body .open-calc{border:1px solid var(--line);border-left:4px solid var(--host);border-radius:var(--r-lg);background:var(--surface-2);
+  padding:10px 14px 8px;margin:14px 0 22px}
+.guide-body .open-calc .oc-label{font-family:var(--font-display);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
+  color:var(--host);margin:0 0 4px}
+.guide-body .open-calc ul{list-style:none;margin:0;padding:0}
+.guide-body .open-calc li{margin:0}
+.guide-body .open-calc a,.guide-body .open-calc-inline a{display:inline-flex;align-items:center;gap:6px;min-height:var(--touch-min);font-weight:600}
+.guide-body .open-calc a::after,.guide-body .open-calc-inline a::after{content:"→";font-weight:400}
+.guide-body .open-calc-inline{margin:4px 0 6px}
+
+/* ---------- guida all'uso ---------- */
+.guide-body .steps-list{counter-reset:s;list-style:none;padding-left:0}
+.guide-body .steps-list > li{counter-increment:s;position:relative;padding-left:34px;margin:8px 0}
+.guide-body .steps-list > li::before{content:counter(s);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;
+  background:var(--surface-2);border:1px solid var(--line-strong);color:var(--strong);font-family:var(--font-mono);font-size:13px;
+  display:flex;align-items:center;justify-content:center}
+.guide-body .ui{font-weight:600;color:var(--strong)}
+.guide-body dl.facts{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 14px}
+.guide-body dl.facts dt{font-weight:600;color:var(--strong)}
+.guide-body dl.facts dd{margin:0}
+@media (max-width:560px){ .guide-body dl.facts{grid-template-columns:1fr} .guide-body dl.facts dd{margin-bottom:6px} }
+
+/* ---------- termini del glossario e riquadro ---------- */
+.guide-body .gl-term{border-bottom:1px dotted var(--host);cursor:help;border-radius:2px}
+.guide-body .gl-term:hover,.guide-body .gl-term:focus-visible,.guide-body .gl-term.open{background:var(--host-soft)}
+.guide-body .gl-term:focus-visible{outline:2px solid var(--net);outline-offset:2px}
+.gl-pop{position:fixed;z-index:var(--z-top);display:block;max-width:min(320px,calc(100vw - 20px));background:var(--surface-2);
+  border:1px solid var(--host);border-radius:var(--r-lg);padding:10px 13px 6px;font-size:14px;line-height:1.5;box-shadow:var(--shadow);
+  white-space:normal;text-align:left;font-weight:400}
+.gl-pop[hidden]{display:none}
+.gl-pop .gl-pop-title{display:block;font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--host);
+  font-weight:700;margin-bottom:3px}
+.gl-pop .gl-pop-def{display:block;margin:0 0 4px;color:var(--text)}
+.gl-pop .gl-pop-links{display:flex;gap:4px 14px;flex-wrap:wrap;font-size:13.5px}
+.gl-pop .gl-pop-links a{display:inline-flex;align-items:center;min-height:32px}
+
+/* ---------- stampa: tutta la guida, su fondo chiaro, senza indice e senza collegamenti all'app ---------- */
+@media print{
+  .app[data-section="guide"] .print-head,.app[data-section="guide"] .view-lead{display:none !important}
+  .guide-toc,.guide-toc-mobile,.gl-pop,.guide-status,.guide-body .open-calc,.guide-body .open-calc-inline{display:none !important}
+  .guide-layout{display:block}
+  .guide-body{font-size:11pt;line-height:1.5}
+  .guide-body .gl-term{border-bottom:none;background:none}
+  .guide-body pre.bin{font-size:9.5pt;white-space:pre-wrap}
+  .guide-body .part{break-before:page;margin-top:0}
+  .guide-body section.chap{break-inside:auto}
+  .guide-body pre.bin,.guide-body .box,.guide-body .tbl,.guide-body .ex,.guide-body figure{break-inside:avoid}
+  .guide-body section.chap > h3,.guide-body h4{break-after:avoid}
+  .guide-body details.sol summary{display:none !important}
+  .guide-body details.sol .body{display:block}
+  .guide-body details.sol .body::before{content:"Soluzione";display:block;font-family:var(--font-display);font-size:9pt;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:700;color:var(--host);margin:6px 0 4px}
+  .guide-body a{color:#000;text-decoration:none}
+}

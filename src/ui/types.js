@@ -28,5 +28,6 @@
  * @property {(route: Route) => void} [update] la rotta della stessa vista è cambiata (tasto indietro, collegamento)
  * @property {() => void} [destroy]
  * @property {() => string[]} [printInputs] righe con gli input, per l'intestazione di stampa
+ * @property {(route: Route, info: { initial: boolean }) => boolean} [reveal] vista appena aperta con un'ancora (guide): scorre fino all'ancora e sposta il focus; vero se l'ha trovata
  */
 export {};

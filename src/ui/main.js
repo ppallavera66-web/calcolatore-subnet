@@ -9,6 +9,7 @@ import '../styles/base.css';
 import '../styles/layout.css';
 import '../styles/components.css';
 import '../styles/print.css';
+import '../guides/guide.css';
 
 import { h, replace, debounce, reducedMotion } from './dom.js';
 import { icon } from './icons.js';
@@ -138,7 +139,9 @@ toTop.addEventListener('click', () => {
 const updateToTop = () => toTop.classList.toggle('show', window.scrollY > 400);
 window.addEventListener('scroll', updateToTop, { passive: true });
 
-document.body.replaceChildren(shell.skip, shell.root, live, toastEl, toTop);
+// i template delle guide (tools/guides.js) restano nella pagina: la vista delle guide li clona
+const guideTemplates = [...document.querySelectorAll('template[data-guide]')];
+document.body.replaceChildren(shell.skip, shell.root, live, toastEl, toTop, ...guideTemplates);
 
 // ---------------------------------------------------------------- tema
 applyTheme(document.documentElement, store.get().settings.theme);
@@ -188,7 +191,9 @@ function onRoute(route, info) {
     view = next;
     viewName = route.view;
     shell.viewHost.replaceChildren(next.el);
-    if (!info.initial) {
+    // guide: arrivo su un'ancora (capitolo, sezione) con il focus sul titolo del paragrafo
+    const revealed = route.anchor ? (next.reveal?.(route, info) ?? false) : false;
+    if (!revealed && !info.initial) {
       window.scrollTo({ top: 0 });
       shell.title.focus({ preventScroll: true });
     }
