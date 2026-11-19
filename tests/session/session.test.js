@@ -281,6 +281,12 @@ describe('strumenti dello schema', () => {
     expect(validateInput('F07', { a: '10.0.0.1', prefixA: 24, b: '10.0.0.2', gateway: '' })).toEqual({ ok: true, input: { a: '10.0.0.1', prefixA: 24, b: '10.0.0.2' }, unknownKeys: 0 });
     expect(validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: {}, ospf: { process: 1, area: true } }).ok).toBe(false);
     expect(validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: null, ospf: {} }).ok).toBe(false);
+    // F10: area OSPF come testo solo in forma pulita e breve, riportata in forma canonica (revisione I4)
+    const f10i = (/** @type {any} */ area) => validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: { number: 10, name: 'A', action: 'permit' }, ospf: { process: 1, area } });
+    for (const bad of ['\t\u000b 0 \n', ' 0', ' '.repeat(4000) + '0', '0.0.0.0\u0000', '1'.repeat(16)]) expect(f10i(bad).ok).toBe(false);
+    expect(f10i('0.0.0.1').ok && f10i('0.0.0.1').input.ospf.area).toBe('0.0.0.1');
+    expect(f10i('7').ok && f10i('7').input.ospf.area).toBe('7');
+    expect(f10i(7).ok && f10i(7).input.ospf.area).toBe(7);
     // F10: rete normalizzata
     const f10 = validateInput('F10', { network: '10.1.77.5', prefix: 19, acl: { number: 10, name: 'A', action: 'permit' }, ospf: { process: 1, area: 0 } });
     expect(f10.ok && f10.input.network).toBe('10.1.64.0');

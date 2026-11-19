@@ -129,9 +129,13 @@ function canonical(fn, i) {
       const acl = { number: i.acl.number, name: i.acl.name, action: i.acl.action };
       const ospf = { process: i.ospf.process, area: i.ospf.area };
       if (typeof ospf.area !== 'number' && typeof ospf.area !== 'string') return null;
+      // area come testo: solo cifre e punti, al massimo 15 caratteri, niente spazi né caratteri
+      // di controllo; nel risultato la forma canonica del motore (revisione I4)
+      if (typeof ospf.area === 'string' && !/^[0-9.]{1,15}$/.test(ospf.area)) return null;
       const r = snippets(net, i.prefix, { acl, ospf });
       if (!r.ok) return null;
-      return { network: toDotted(r.value.network), prefix: i.prefix, acl, ospf };
+      const area = typeof ospf.area === 'number' ? ospf.area : r.value.options.ospf.area;
+      return { network: toDotted(r.value.network), prefix: i.prefix, acl, ospf: { process: ospf.process, area } };
     }
     /* c8 ignore next 2 */
     default:
