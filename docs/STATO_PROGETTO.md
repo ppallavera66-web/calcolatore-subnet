@@ -3,16 +3,17 @@
 Ultimo aggiornamento: 19 novembre 2026
 
 ## Fase corrente
-**Fase 4 · Interfaccia, navigazione mobile, temi**
-Modello consigliato: **Opus 5.5** (prima stesura), poi Sonnet 5.5 per le iterazioni · Impegno: **Alto**, poi medio
-Contenuto: interfaccia completa al posto del guscio di collaudo, secondo la sezione 9 di `02_specifica_tecnica_v1.md` (schermate, layout, navigazione con frammento, componenti, temi, font, accessibilità, stampa), sopra il motore della fase 3.
+**Fase 5 · Impostazioni, persistenza, export/import, cifratura**
+Modello consigliato: **Opus 5.5** · Impegno: **Alto**
+Contenuto: salvataggio nel browser con "Memorizza i dati", export v1 collegato alla barra già predisposta, sessione JSON con validazione e import, busta cifrata con Web Crypto, piani salvati da Suddivisione, secondo le sezioni 5, 6, 7, 8 e 9.5 di `02_specifica_tecnica_v1.md`.
 
-**Prima di iniziare (azione per Paolo):** pubblicare su GitHub l'archivio della fase 3 (vedi "Repository" più sotto) e, se si vuole che la fase 4 lavori direttamente sul repository, collegare l'account GitHub nelle impostazioni di claude.ai (Connettori). In alternativa basta allegare l'archivio alla conversazione.
+**Prima di iniziare (azione per Paolo):** allegare `calcolatore-subnet-fase4.zip` alla conversazione, oppure pubblicarlo su GitHub (vedi "Repository") e collegare l'account GitHub nelle impostazioni di claude.ai (Connettori).
 
 ## Repository
-- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase3.zip` alla fine della fase 3: l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione.
+- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase4.zip` alla fine della fase 4 (comprende anche i commit della fase 3): l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione.
 - Per pubblicarlo nel repository pubblico vuoto `calcolatore-subnet`: estrarre l'archivio, entrare nella cartella ed eseguire `git remote add origin https://github.com/<utente>/calcolatore-subnet.git` e `git push -u origin main`.
-- Dopo il primo push: in GitHub, Settings → Pages → Source: **GitHub Actions**, per la pubblicazione HTTPS dal ramo `main`. Il primo giro reale della CI avviene con quel push (in locale tutti i passi del workflow sono già stati eseguiti su un clone pulito).
+- Dopo il primo push: in GitHub, Settings → Pages → Source: **GitHub Actions**, per la pubblicazione HTTPS dal ramo `main`. Il primo giro reale della CI avviene con quel push (in locale tutti i passi del workflow, più `npm run e2e`, sono stati eseguiti su un clone pulito).
+- Da completare: in `src/ui/views/impostazioni.js` la costante `REPO_URL` è vuota finché non si conosce il nome utente GitHub; la sezione Informazioni mostra per ora il nome del repository senza collegamento.
 
 ## Completato
 - **Fase 0 · Impostazione** (conversazione iniziale):
@@ -55,6 +56,22 @@ Contenuto: interfaccia completa al posto del guscio di collaudo, secondo la sezi
     - `npm run check` senza errori;
     - `dist/index.html` di 42.874 byte (4,1% del limite di 1 MB), senza riferimenti esterni, aperto da disco in Chrome senza errori JavaScript (risultato, passaggi, errori, avvisi, tabella, vista mobile);
     - tutti i passi del workflow eseguiti su un clone pulito con `npm ci`.
+- **Fase 4 · Interfaccia, navigazione mobile, temi** (19 novembre 2026):
+  - **temi** in `src/styles/tokens.css`: le variabili della guida v0.3 (Automatico con `prefers-color-scheme` e `prefers-contrast`, Chiaro, Scuro, Alto contrasto) più `--line-strong` per i bordi dei controlli (≥ 3:1); test di contrasto su tutte le coppie testo/sfondo e controllo/sfondo e sull'allineamento dei blocchi di Automatico;
+  - **font IBM Plex** incorporati (D3): Sans 400/600, Mono 400/600, Sans Condensed 600/700, sottoinsiemi Latin1 e Pi distribuiti da IBM **senza modifiche** (`tools/fonts.js`, `src/styles/fonts.css`), licenza OFL in `src/assets/fonts/OFL.txt` e nella sezione Informazioni;
+  - **moduli puri** con test: `format.js` (numeri, indirizzi, intervalli abbreviati, righe binarie rete/host, tipo di indirizzo, pagine, cronologia), `state.js` (archivio con sottoscrizioni, impostazioni in memoria, metodo per funzione, `did=1`, cronologia da 200 voci, id casuali), `router.js` (frammento della 9.3, normalizzazione, sostituzione mentre si scrive, nuova voce al cambio di scheda, ripiego su `location.replace` da disco), `history-map.js` (voci di cronologia nel formato 6.2 e riapertura);
+  - **guscio e layout 9.2**: barra in basso sotto 720 px con aree sicure, schede in alto fino a 979 px, barra laterale di 240 px da 980 px; sottoschede come controllo segmentato scorrevole; "Salta al contenuto", titolo e focus a ogni cambio di vista, pulsante "torna su";
+  - **componenti 9.4**: campo IP (virgola, divisione di `IP/n` e `IP mask`, la barra sposta nel campo del prefisso), prefisso o mask con cursore e − / +, calcolo dal vivo (150 ms, Invio forza, errori dopo 400 ms o all'uscita), scheda risultato con copia, pannello dei passaggi persistente con righe binarie colorate ed etichettate e collegamento "Capitolo N · titolo", interruttori `role="switch"`, controlli segmentati, `<dialog>`, esempi cliccabili, pulsante "?", barra di export predisposta (stampa attiva, formati in fase 5; su telefono pannello dal basso "Esporta");
+  - **schermate**: Calcola (Analisi con F01, tipo di indirizzo F04 e sezione richiudibile F10 base con opzioni e passaggi; Conversioni con numero, indirizzo, prefisso e mask; Mask con ottetti in binario, motivo e suggerimenti cliccabili; Stessa subnet con verdetto, punti di vista di A e B e gateway); Pianifica (Calcolo inverso nei casi A, B, C; Suddivisione a pagine da 256 righe con "Vai alla subnet che contiene l'IP"; Piani salvati segnaposto); Guide (segnaposto con le rotte dei capitoli); Impostazioni (didattica, metodo predefinito, export, tema, dati, informazioni);
+  - **cronologia della visita** in memoria con pannello e riapertura (registrata dopo 2 s di calma o subito con Invio);
+  - **stampa 9.9** (`print.css`) e **accessibilità 9.7**: aree di tocco ≥ 44 px su telefono e schermi touch, focus visibile, errori collegati con `aria-describedby` e `aria-invalid`, risultati annunciati, nessuna informazione affidata al solo colore, movimento ridotto;
+  - **prova nel browser** `npm run e2e` (playwright-core e axe-core, Chrome già installato, nessun download): 27 prove;
+  - **verifiche** (su un clone pulito con `npm ci`):
+    - 677 test in 22 file; copertura di motore e testi 100% istruzioni, 99,2% rami, 100% funzioni;
+    - oracolo: fixture rigenerati identici; `npm run check` senza errori; test di architettura verde;
+    - `dist/index.html` di 412.781 byte (39,4% del limite di 1 MB): JavaScript 123 KB, CSS 34 KB, font 245 KB;
+    - e2e 27/27 in Chrome 153.0.8010.12 (headless, Linux) da `file://`: layout a 390, 800 e 1280 px senza scorrimento orizzontale; aree di tocco ≥ 44 px a 390 px; quattro temi e Automatico con sistema chiaro, scuro e contrasto elevato; **axe-core WCAG 2.2 AA senza violazioni** su otto schermate in ogni tema e a 390 px; tastiera (salta al contenuto, campi, Invio, frecce nel metodo con focus conservato, interruttori, Esc nei dialog con ritorno del focus); frammento e tasto indietro; collegamenti con input non validi; incolla di `IP mask`; cronologia; Suddivisione con ricerca dell'IP fino all'ultima pagina di un /8 → /30; stampa con PDF; nessun errore JavaScript.
+
 
 ## Decisioni di Paolo
 **Fase 1**
@@ -74,6 +91,12 @@ Contenuto: interfaccia completa al posto del guscio di collaudo, secondo la sezi
 - **TypeScript 5.9** invece della 7.0 (riscrittura nativa, supporto a JSDoc e checkJs meno collaudato); serve solo al controllo dei tipi.
 - Repository consegnato come archivio con storia git (account GitHub non collegato a Claude).
 
+**Fase 4**
+- Piano dei 16 interventi approvato.
+- **Prova nel browser** con Playwright e axe-core come dipendenze di sviluppo (`npm run e2e`); l'inserimento in CI si valuta in fase 7.
+- **Cronologia** fatta ora, solo in memoria; il salvataggio arriva in fase 5.
+- **`--line-strong`** per i bordi dei controlli (≥ 3:1), senza toccare le variabili della guida.
+
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
 - **Codici aggiunti**: `MASK_OCTET_VALUE` e `MASK_NONCONTIGUOUS` anche come errori, sul campo `mask`, per una mask non valida dentro `IP mask` o `IP/mask` (caso E della 10.2); `ACL_NAME_FORMAT` e `ACL_ACTION_VALUE` per F10; motivi `BOTH_BLOCK_TOO_SMALL` e `BOTH_CONFLICT` per F05 caso C.
 - **Parametri**: gli indici degli ottetti sono da 0 (l'interfaccia mostra l'ordinale); gli indirizzi negli avvisi sono stringhe puntate, pronte per i testi.
@@ -84,42 +107,61 @@ Contenuto: interfaccia completa al posto del guscio di collaudo, secondo la sezi
 - **Vite**: `base: './'` per l'apertura da disco; versione dell'app iniettata come `__APP_VERSION__`.
 - **Guida v0.3 non copiata in `docs/`**: entra nel repository in fase 6, in `src/guides/`, presa dal progetto.
 
+## Scelte tecniche della fase 4 (dove la specifica non decideva)
+- **Font**: al posto di un sottoinsieme creato da noi (circa 69 KB) si usano i file "split" di IBM non modificati (Latin1 + Pi, 245 KB in base64): un sottoinsieme fatto da noi sarebbe una versione modificata, che per la OFL non può usare il nome riservato "Plex". Il sottoinsieme latino di Google/Fontsource non ha gli apici dei passaggi (2⁶), le frecce e ≤ ≥. I caratteri ▸ ▾ ⧉ non esistono in Plex: chevron e icona di copia sono SVG.
+- **Parametri del frammento in più** rispetto alla 9.3: Conversioni `w` (larghezza), `a` (indirizzo), `pm` (prefisso o mask); Calcolo inverso `caso` (scritto solo quando non si deduce dagli altri parametri; ordine `p`, `h`, `s` come negli esempi); Suddivisione `ip` (un collegamento con `ip=` apre la pagina della subnet che lo contiene). Valori troncati a 200 caratteri e ripuliti dai caratteri di controllo.
+- **Opzioni di F10** (numero e nome ACL, azione, processo e area OSPF) restano nella vista e non nel frammento.
+- **"Cancella tutti i dati"** funziona già sullo stato in memoria (cronologia e impostazioni), con conferma; "Memorizza i dati", esporta e importa sessione sono visibili ma disattivati con la nota sulla fase 5.
+- **Barra di export**: la stampa funziona; gli altri formati sono `aria-disabled` con la nota sulla fase 5.
+- **Cronologia**: voce registrata dopo 2 s senza modifiche o subito con Invio; lo stesso input già presente torna in cima con la data nuova.
+- **Su telefono** i valori della scheda risultato sono righe compatte (etichetta a sinistra, valore e copia a destra); rete e broadcast restano in evidenza.
+- **Data di build** iniettata come `__BUILD_DATE__` (riproducibile con `SOURCE_DATE_EPOCH`); testo della OFL incorporato con `?raw`.
+- **Titoli dei capitoli** della guida v0.3 in `strings.it.js` (`ui.cap.cap-N`), usati nei collegamenti "Capitolo N · titolo" e nel segnaposto delle Guide.
+- **Test di completezza** dei testi `ui.*`: ogni testo è pulito e ogni chiave usata nel codice esiste (serve anche a tenere la copertura delle funzioni sopra il 95%).
+
 ## Segnalazioni da applicare nella revisione finale
 - Guida, widget del cap. 7 e 15: la funzione `analyze()` tratta /8, /16, /24 come "confine sull'ottetto" senza numero magico; l'app segue la convenzione "1 · ottetto". Si risolve in fase 6 con la sostituzione dei widget (difetto n. 6).
 - Guida, cap. 6 e cheat sheet: valutare l'aggiunta della convenzione per **/0** (M = 256 nel 1° ottetto, decisa in fase 2) e delle righe /0–/7 nella cheat sheet.
 - Guida, cap. 4: eventuali blocchi speciali aggiuntivi (per esempio 198.18.0.0/15, 192.0.0.0/24) solo insieme all'app (decisione m11).
 - Testi dei passaggi didattici (`strings.it.js`): rileggerli insieme alla guida, per tono e coerenza con i capitoli.
+- App, F03 (passaggi): con una mask non valida la riga binaria dei passaggi colora come "rete" gli 1 contigui da sinistra (prefisso calcolato dal motore); valutare se mostrare invece 1 e 0 bit per bit, come la tabella degli ottetti.
+- App, testi dell'interfaccia (`ui.*` di `strings.it.js`): rileggerli insieme ai testi dei passaggi, per tono e coerenza con le guide.
+
 
 ## Problemi aperti
 - Primo giro reale di GitHub Actions al primo push; abilitare GitHub Pages con sorgente "GitHub Actions".
+- Nome utente GitHub da inserire in `REPO_URL` (`src/ui/views/impostazioni.js`) per il collegamento nella sezione Informazioni.
 - Difetto noto n. 6 della guida (widget interni da sostituire con collegamenti "Apri nel calcolatore"): **fase 6**.
-- Da verificare in **fase 4**: tastiera numerica iOS in italiano (virgola al posto del punto, già accettata dal motore), contrasto dei componenti nuovi nei quattro temi, peso del file con i font IBM Plex incorporati.
-- Da verificare in **fase 5**: Web Crypto API, localStorage e appunti con la pagina aperta da `file://` in Chrome, Edge, Firefox, Safari.
-- Peso del file unico: controllo `npm run size` a ogni build (fase 3: 42.874 byte).
+- Da verificare su dispositivo: **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata), Safari su iPhone e Android con Chrome. In fase 4 la prova è stata fatta solo in Chrome desktop, con emulazione del telefono.
+- Da verificare in **fase 5**: Web Crypto API, localStorage e appunti con la pagina aperta da `file://` in Chrome, Edge, Firefox, Safari (la copia ha già il ripiego su `execCommand`).
+- `npm run e2e` in CI: da valutare in fase 7 (serve Chrome nel runner; `CHROME_PATH` già supportato).
+- Peso del file unico: controllo `npm run size` a ogni build (fase 4: 412.781 byte, 39,4%; restano circa 620 KB per le guide e la fase 5).
 
 ## Prossima conversazione
-**Titolo:** Fase 4 · Interfaccia, navigazione mobile, temi
-**Modello:** Opus 5.5 · **Impegno:** Alto (le iterazioni successive con Sonnet 5.5, impegno medio)
+**Titolo:** Fase 5 · Impostazioni, persistenza, export/import, cifratura
+**Modello:** Opus 5.5 · **Impegno:** Alto
 
 **Prompt da incollare:**
 
-> Iniziamo la fase 4: interfaccia, navigazione mobile e temi del Calcolatore Subnet.
+> Iniziamo la fase 5: impostazioni, persistenza, export/import e cifratura del Calcolatore Subnet.
 >
-> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md e 02_specifica_tecnica_v1.md (soprattutto le sezioni 2, 3, 4 e 9); usa guida-subnetting.html (v0.3) come riferimento per variabili dei temi, colori di rete e host e stile. Poi conferma modello e impegno per questa fase.
+> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md e 02_specifica_tecnica_v1.md (soprattutto le sezioni 2, 5, 6, 7, 8, 9.5, 10.4 e 11). Poi conferma modello e impegno per questa fase.
 >
-> Il codice della fase 3 è [nel repository GitHub `calcolatore-subnet`, da collegare alla sessione / nell'archivio calcolatore-subnet-fase3.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
+> Il codice della fase 4 è [nel repository GitHub `calcolatore-subnet`, collegato alla sessione / nell'archivio calcolatore-subnet-fase4.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
 >
-> Obiettivo, secondo la sezione 9 della specifica tecnica:
-> - sostituire il guscio di collaudo con l'interfaccia vera in src/ui (main, router, state, theme, format) e src/styles (tokens, base, layout, components, print);
-> - schermate: Calcola (Analisi con F04 e F10 base nella scheda risultato, Conversioni, Mask, Stessa subnet), Pianifica (Calcolo inverso nei casi A, B, C; Suddivisione a pagine con "vai alla subnet che contiene l'IP"; Piani salvati come segnaposto per la fase 5), Guide (segnaposto per la fase 6), Impostazioni (interruttori e tema, per ora solo in memoria);
-> - layout delle 9.2 (barra in basso sotto 720 px, schede, barra laterale da 980 px), navigazione con frammento della 9.3, componenti della 9.4 (campo IP, prefisso o mask con cursore, calcolo dal vivo, scheda risultato con copia, pannello dei passaggi con righe binarie colorate e collegamento al capitolo, pulsante "torna su"), barra di export predisposta ma collegata in fase 5;
-> - temi Automatico, Chiaro, Scuro, Alto contrasto con le variabili della guida; font IBM Plex incorporati (D3) con licenza OFL; stampa della 9.9; accessibilità della 9.7;
-> - test per format.js, router e stato; prova nel browser (desktop e mobile, quattro temi, tastiera, apertura da disco); npm run size sotto 1 MB.
+> Obiettivo, secondo la specifica tecnica:
+> - persistenza (sezione 8): adattatore `src/storage/storage.js` su localStorage, interruttore "Memorizza i dati" con salvataggio immediato e ritardato di 300 ms, spegnimento con conferma, avvio con migrazioni, spazio esaurito, più schede, "Cancella tutti i dati"; impostazioni, tema, cronologia e piani salvati solo con l'interruttore acceso;
+> - export v1 (sezione 5): `src/export/` con toRows, appunti, CSV, JSON, Markdown, testo, snippet, stampa, nomi dei file, opzione "Includi i passaggi"; collegamento della barra di export già predisposta in fase 4, anche nel pannello dal basso su telefono; Suddivisione con intervallo di indici oltre 65.536 righe;
+> - sessione JSON (sezione 6): `src/session/` con schema, validazione 6.3, migrazioni, Sostituisci e Unisci, anteprima, rapporto; esporta e importa da Impostazioni → Dati;
+> - busta cifrata (sezione 7): Web Crypto, AES-256-GCM con PBKDF2 e AAD, passphrase con conferma e indicatore di robustezza, avvisi, funzione disattivata con spiegazione se `crypto.subtle` manca;
+> - Piani salvati: "Salva come piano" da Suddivisione con nome, note ed etichette per subnet, al posto del segnaposto;
+> - test della 10.4 (corpus di sessioni, andata e ritorno, inquinamento del prototipo, busta alterata) ed estensione di `npm run e2e`;
+> - verifiche da `file://` di crypto.subtle, localStorage e appunti in Chrome, Edge, Firefox e Safari: quelle che non puoi fare tu preparale come lista di prove per me;
+> - `npm run size` sotto 1 MB.
 >
-> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 5.
+> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 6.
 
 ## Fasi successive
-- Fase 5 · Impostazioni, persistenza, export/import, cifratura · Opus 5.5 · Impegno alto
 - Fase 6 · Integrazione delle due guide e collegamenti con l'app · Sonnet 5.5 · Impegno medio
 - Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1 · Opus 5.5 · Impegno medio
 - Fase 8 · Revisione finale di Paolo su applicazione e guide · Opus 5.5 · Impegno medio
