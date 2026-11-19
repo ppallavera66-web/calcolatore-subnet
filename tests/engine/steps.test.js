@@ -32,7 +32,14 @@ function consistent(fn, r, f, method) {
         f.lastHost === dd(r.lastHost) &&
         f.usableHosts === r.usableHosts &&
         (r.broadcast === null ? f.broadcast === undefined : f.broadcast === dd(r.broadcast));
-      if (method === 'multiples') return base && f.offset === r.offset && f.blockStart === r.interesting.blockStart;
+      if (method === 'multiples') {
+        // "è il broadcast" (detto solo quando l'ottetto interessante è l'ultimo) compare solo se l'IP
+        // è il broadcast, e in quel caso compare sempre (revisione A1, A6)
+        const saysBroadcast = !!f.remainderIsLast && f.rightOctets === 0;
+        const isBroadcast = r.role === 'broadcast';
+        return base && f.offset === r.offset && f.blockStart === r.interesting.blockStart &&
+          (!saysBroadcast || isBroadcast) && (!(isBroadcast && f.rightOctets === 0) || saysBroadcast);
+      }
       if (method === 'magic') return base && f.blockStart === r.interesting.blockStart && f.blockEnd === r.interesting.blockEnd;
       return base;
     }

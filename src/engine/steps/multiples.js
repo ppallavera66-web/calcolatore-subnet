@@ -43,7 +43,8 @@ export function analyzeMultiples(r) {
       rightOctets: rightOf(io.index),
       offset,
       position: offset + 1,
-      remainderIsLast: remainder === M - 1,
+      // con /31 e /32 non c'è broadcast (3.3): resto = M − 1 non vuol dire "broadcast"
+      remainderIsLast: p <= 30 && remainder === M - 1,
     }),
   );
   return steps.concat(broadcastAndHosts(ipO, p, blockStart));
