@@ -3,14 +3,14 @@
 Ultimo aggiornamento: 19 novembre 2026
 
 ## Fase corrente
-**Fase 5 · Impostazioni, persistenza, export/import, cifratura**
-Modello consigliato: **Opus 5.5** · Impegno: **Alto**
-Contenuto: salvataggio nel browser con "Memorizza i dati", export v1 collegato alla barra già predisposta, sessione JSON con validazione e import, busta cifrata con Web Crypto, piani salvati da Suddivisione, secondo le sezioni 5, 6, 7, 8 e 9.5 di `02_specifica_tecnica_v1.md`.
+**Fase 6 · Integrazione delle due guide e collegamenti con l'app**
+Modello consigliato: **Sonnet 5.5** · Impegno: **Medio**
+Contenuto: guida all'uso nuova e guida al subnetting v0.3 dentro l'app (`src/guides/`), stesso tema dell'app, collegamenti "Apri nel calcolatore" al posto dei widget interni (difetto n. 6), pulsanti "?" e collegamenti "Capitolo N" verso i paragrafi giusti, peso sotto 1 MB.
 
-**Prima di iniziare (azione per Paolo):** allegare `calcolatore-subnet-fase4.zip` alla conversazione, oppure pubblicarlo su GitHub (vedi "Repository") e collegare l'account GitHub nelle impostazioni di claude.ai (Connettori).
+**Prima di iniziare (azione per Paolo):** allegare `calcolatore-subnet-fase5.zip` alla conversazione (oppure pubblicarlo su GitHub e collegare l'account GitHub in claude.ai, Connettori); se possibile, compilare la tabella di `docs/verifiche-browser-fase5.md` e incollarla nel prompt.
 
 ## Repository
-- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase4.zip` alla fine della fase 4 (comprende anche i commit della fase 3): l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione.
+- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase5.zip` alla fine della fase 5 (comprende i commit delle fasi 3, 4 e 5): l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione. Insieme all'archivio c'è `calcolatore-subnet-fase5.html`, il file unico pronto da aprire.
 - Per pubblicarlo nel repository pubblico vuoto `calcolatore-subnet`: estrarre l'archivio, entrare nella cartella ed eseguire `git remote add origin https://github.com/<utente>/calcolatore-subnet.git` e `git push -u origin main`.
 - Dopo il primo push: in GitHub, Settings → Pages → Source: **GitHub Actions**, per la pubblicazione HTTPS dal ramo `main`. Il primo giro reale della CI avviene con quel push (in locale tutti i passi del workflow, più `npm run e2e`, sono stati eseguiti su un clone pulito).
 - Da completare: in `src/ui/views/impostazioni.js` la costante `REPO_URL` è vuota finché non si conosce il nome utente GitHub; la sezione Informazioni mostra per ora il nome del repository senza collegamento.
@@ -72,6 +72,21 @@ Contenuto: salvataggio nel browser con "Memorizza i dati", export v1 collegato a
     - `dist/index.html` di 412.781 byte (39,4% del limite di 1 MB): JavaScript 123 KB, CSS 34 KB, font 245 KB;
     - e2e 27/27 in Chrome 153.0.8010.12 (headless, Linux) da `file://`: layout a 390, 800 e 1280 px senza scorrimento orizzontale; aree di tocco ≥ 44 px a 390 px; quattro temi e Automatico con sistema chiaro, scuro e contrasto elevato; **axe-core WCAG 2.2 AA senza violazioni** su otto schermate in ogni tema e a 390 px; tastiera (salta al contenuto, campi, Invio, frecce nel metodo con focus conservato, interruttori, Esc nei dialog con ritorno del focus); frammento e tasto indietro; collegamenti con input non validi; incolla di `IP mask`; cronologia; Suddivisione con ricerca dell'IP fino all'ultima pagina di un /8 → /30; stampa con PDF; nessun errore JavaScript.
 
+- **Fase 5 · Impostazioni, persistenza, export/import, cifratura** (19 novembre 2026):
+  - **persistenza** (8): adattatore `src/storage/storage.js` (asincrono, `try/catch` ovunque, riconosce `QuotaExceededError` nelle varianti dei browser, solo chiavi `subnetcalc:`) e `src/ui/persistence.js`. "Memorizza i dati" acceso salva subito e poi dopo 300 ms, scrivendo solo le chiavi cambiate; lo spegnimento chiede conferma e cancella le chiavi, i dati della visita restano. All'avvio i dati si leggono prima del primo disegno (il tema non lampeggia) e passano per la validazione e le migrazioni dell'import; i dati illeggibili o di una versione successiva vengono ignorati, con l'avviso e il pulsante "Cancella i dati salvati". Con lo spazio esaurito la cronologia scende a 100 voci, poi c'è l'avviso. Con più schede l'evento `storage` ricarica lo stato; lo spegnimento in un'altra scheda ferma il salvataggio. "Cancella tutti i dati" toglie anche chiavi e piani e spegne l'interruttore. Se il browser rifiuta lo storage, l'interruttore è disattivato con la spiegazione;
+  - **export v1** (5): `src/export/` con `rows.js` (toRows per F01–F07 e F10, colonne e intervalli di F06), `csv.js` (`;`, CRLF, BOM, protezione dalle formule sui testi dell'utente), `json.js` (`subnetcalc-result`, indirizzi in forma puntata, passaggi strutturati), `markdown.js`, `text.js` (colonne allineate, usato anche per la copia), `steps.js` ("Includi i passaggi", righe binarie rete | host), `filename.js`, `download.js`, `clipboard.js` (spostato da `ui/`), `print.js`. Barra collegata in tutte le viste di calcolo e nel pannello dal basso su telefono; Snippet in Analisi. Per Suddivisione si sceglie tra pagina corrente, tutte (fino a 65.536 righe) e intervallo di indici, obbligatorio oltre quel limite;
+  - **sessione JSON** (6): `src/session/` con `schema.js`, `inputs.js` (input della 6.2 validati dal motore e riportati in forma canonica), `validate.js` (regole 5–10), `migrate.js` (catena di migrazioni, oggi vuota, meccanismo provato), `session.js` (costruzione, regole 1–4, Sostituisci e Unisci, riepilogo). In Impostazioni → Dati: esporta e importa, anteprima, Sostituisci o Unisci, casella "Applica anche le impostazioni del file" spenta, riepilogo finale;
+  - **busta cifrata** (7): `src/session/envelope.js` con AES-256-GCM, PBKDF2-SHA-256 a 600.000 iterazioni, sale di 16 byte e IV di 12 nuovi a ogni export, AAD come nella 7.2. Controllo dell'intestazione prima della passphrase (iterazioni 600.000–10.000.000, lunghezze, base64 canonico), nessuna busta annidata. Finestra con passphrase e conferma (minimo 12 caratteri Unicode), indicatore a quattro livelli, avviso, avanzamento; casella mai ricordata, campi svuotati alla fine. Se `crypto.subtle` manca, la funzione è disattivata con la spiegazione;
+  - **piani salvati** (9.1): "Salva come piano" da Suddivisione (nome proposto, note), piano aperto con `piano=<id>` nel frammento, colonna Etichetta modificabile e salvata mentre si scrive, etichette nell'export. Cambiare blocco o prefissi chiude il piano. Vista Piani salvati con apertura, nome e note, eliminazione con conferma;
+  - **Impostazioni → Informazioni**: riga "Compatibilità di questo browser" (pagina aperta da, contesto sicuro, Web Crypto, localStorage, appunti), utile per le prove nei browser;
+  - **correzione della fase 4**: al passaggio del mouse il pulsante primario prendeva il colore del testo normale (regola più specifica di `.btn:hover`), con contrasto 3,4:1 nel tema chiaro; trovato da axe nella nuova prova;
+  - **verifiche** (su un clone pulito con `npm ci`):
+    - 988 test in 27 file (erano 677), anche con tre semi diversi per le proprietà; nuovi: storage (8), sessione con corpus di 23 file uno per regola della 6.3 più andata e ritorno, Unisci, limiti, migrazioni e inquinamento del prototipo anche a proprietà (45), busta cifrata con tutte le alterazioni della 10.4 (44), export (47), persistenza e piani (17), testi di export e import;
+    - copertura di motore, testi, export, sessione e storage: 99,6% istruzioni, 97,1% rami, 99,8% funzioni (soglia 95%);
+    - oracolo: fixture rigenerati identici; `npm run check` senza errori; test di architettura verde con i nuovi moduli;
+    - `dist/index.html` di 481.672 byte (45,9% del limite di 1 MB): JavaScript 187 KB, CSS 38 KB, font 245 KB;
+    - e2e 40/40 in Chrome 153.0.8010.12 (headless, Linux) da `file://`: le 27 prove della fase 4 più 13 nuove (persistenza, spegnimento con conferma, due schede, dati illeggibili, storage rifiutato, export in tutti i formati con passaggi, intervalli di F06, sessione con Sostituisci e Unisci, busta cifrata con passphrase errata e file manomesso, errori di import, Web Crypto assente, piani con etichette e ricaricamento, telefono a 390 px con aree di tocco); axe-core senza violazioni anche su finestre di export e import, intervallo di F06, Piani salvati e Suddivisione con un piano aperto;
+    - da `file://` in Chrome: contesto sicuro, `crypto.subtle`, localStorage e appunti disponibili. Edge, Firefox, Safari e telefoni: lista di prove in `docs/verifiche-browser-fase5.md`, da compilare.
 
 ## Decisioni di Paolo
 **Fase 1**
@@ -97,6 +112,10 @@ Contenuto: salvataggio nel browser con "Memorizza i dati", export v1 collegato a
 - **Cronologia** fatta ora, solo in memoria; il salvataggio arriva in fase 5.
 - **`--line-strong`** per i bordi dei controlli (≥ 3:1), senza toccare le variabili della guida.
 
+**Fase 5**
+- Piano dei 13 interventi approvato, con le scelte a–f: riga "Compatibilità di questo browser" in Informazioni; Unisci toglie anche i doppioni per contenuto; si salvano impostazioni, tema, cronologia e piani (non il metodo per funzione né gli input delle viste); più schede come descritto sopra; nomi dei file con l'input principale per le funzioni senza rete; "Includi i passaggi" nei formati testuali come testo e nel JSON come dati strutturati.
+- Repository consegnato come archivio con storia git (account GitHub non collegato a Claude).
+
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
 - **Codici aggiunti**: `MASK_OCTET_VALUE` e `MASK_NONCONTIGUOUS` anche come errori, sul campo `mask`, per una mask non valida dentro `IP mask` o `IP/mask` (caso E della 10.2); `ACL_NAME_FORMAT` e `ACL_ACTION_VALUE` per F10; motivi `BOTH_BLOCK_TOO_SMALL` e `BOTH_CONFLICT` per F05 caso C.
 - **Parametri**: gli indici degli ottetti sono da 0 (l'interfaccia mostra l'ordinale); gli indirizzi negli avvisi sono stringhe puntate, pronte per i testi.
@@ -119,6 +138,19 @@ Contenuto: salvataggio nel browser con "Memorizza i dati", export v1 collegato a
 - **Titoli dei capitoli** della guida v0.3 in `strings.it.js` (`ui.cap.cap-N`), usati nei collegamenti "Capitolo N · titolo" e nel segnaposto delle Guide.
 - **Test di completezza** dei testi `ui.*`: ogni testo è pulito e ogni chiave usata nel codice esiste (serve anche a tenere la copertura delle funzioni sopra il 95%).
 
+## Scelte tecniche della fase 5 (dove la specifica non decideva)
+- **Codici dell'import** in `session/schema.js`: oltre a quelli della 6.3 e della 7.3, `IMPORT_NESTED_ENVELOPE` (busta dentro la busta), `IMPORT_CRYPTO_UNAVAILABLE` e gli avvisi `IMPORT_W_MIGRATED`, `IMPORT_W_HISTORY_TRUNCATED`, `IMPORT_W_PLANS_TRUNCATED`, `IMPORT_W_LABELS_DROPPED`, `IMPORT_W_DUPLICATE_ID`. `version` non intera o negativa, e versioni precedenti senza migrazione, danno `IMPORT_BAD_FIELD` sul campo `version`.
+- **Validazione**: un piano con un campo non valido viene scartato per intero; le etichette non valide si scartano una per una. Date ISO in UTC controllate anche sul calendario (niente 30 febbraio). Testi senza caratteri di controllo, separatori di riga Unicode e override bidirezionali; nelle note sono ammessi gli a capo (CRLF diventa LF). Lunghezze contate in caratteri Unicode. BOM iniziale del file accettato.
+- **Unisci**: a parità di `id` resta l'elemento presente; poi i doppioni per contenuto (stessa funzione e stesso input) tengono la voce più recente; ordine per data, tagli a 200 voci e 100 piani (i piani nuovi in eccesso restano fuori).
+- **Persistenza**: le chiavi salvate passano all'avvio per la stessa validazione dell'import (`meta.schema` fa da versione). `meta` contiene `{ schema, savedAt }`. Si scrivono solo le chiavi il cui JSON è cambiato, così il ricaricamento da un'altra scheda non provoca scritture a catena. Prima di chiudere la pagina (`pagehide`) si registrano la voce di cronologia in attesa e il salvataggio ritardato.
+- **Base64** della busta: standard, con padding obbligatorio e forma canonica (bit di riempimento a zero), altrimenti `IMPORT_BAD_ENVELOPE`.
+- **Robustezza della passphrase**: bit stimati come lunghezza × log2 dell'alfabeto usato (minuscole, maiuscole, cifre, simboli, altri caratteri), con un limite per i caratteri ripetuti; livelli a 50, 70 e 90 bit. Sotto i 12 caratteri è sempre "debole" e l'export non parte.
+- **Export**: righe con valori grezzi (numeri senza separatori, indirizzi puntati, `null` = "nessuno"); testo, Markdown e copia mostrano i numeri con il separatore delle migliaia, CSV e JSON no. Nel CSV di F06 un broadcast assente è una cella vuota. Il JSON di F06 su un intervallo contiene il riepilogo senza la pagina, `range` e le subnet (con `label` se c'è un piano). Conversioni ha una barra per riquadro (numero, indirizzo, prefisso e mask). Lo Snippet scarica le tre configurazioni in un `.txt` con un'intestazione `!` per ciascuna. "Includi i passaggi" vale per la visita e non viene salvato.
+- **Nomi dei file**: `subnet-tipo-<ip>` per un IP senza prefisso, `subnet-conversioni-<numero>-b<base>`, `subnet-conversioni-p<prefisso>`, `subnet-stessa-<a>-<b>`, `subnet-inverso-h…`/`-p…-s…`, `subnet-suddivisione-<rete>-<prefisso>-<nuovo>`, con `-n<da>-<a>` per un intervallo diverso da "tutte"; parti ripulite (lettere, cifre, `.`, `_`, `-`, al massimo 40 caratteri).
+- **Piani**: parametro `piano` aggiunto al frammento di Suddivisione; etichette salvate mentre si scrive (al massimo 80 caratteri, 4.096 per piano, ripulite dai caratteri di controllo); nuovi piani in cima all'elenco.
+- **Interfaccia**: nuove icone `import`, `save`, `edit`; `textField` accetta `type: "password"` e `autocomplete`; casella di spunta con l'etichetta come area di tocco da 44 px.
+- **Copertura**: estesa a `src/export`, `src/session` e `src/storage` (prima solo motore e testi).
+
 ## Segnalazioni da applicare nella revisione finale
 - Guida, widget del cap. 7 e 15: la funzione `analyze()` tratta /8, /16, /24 come "confine sull'ottetto" senza numero magico; l'app segue la convenzione "1 · ottetto". Si risolve in fase 6 con la sostituzione dei widget (difetto n. 6).
 - Guida, cap. 6 e cheat sheet: valutare l'aggiunta della convenzione per **/0** (M = 256 nel 1° ottetto, decisa in fase 2) e delle righe /0–/7 nella cheat sheet.
@@ -133,35 +165,35 @@ Contenuto: salvataggio nel browser con "Memorizza i dati", export v1 collegato a
 - Nome utente GitHub da inserire in `REPO_URL` (`src/ui/views/impostazioni.js`) per il collegamento nella sezione Informazioni.
 - Difetto noto n. 6 della guida (widget interni da sostituire con collegamenti "Apri nel calcolatore"): **fase 6**.
 - Da verificare su dispositivo: **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata), Safari su iPhone e Android con Chrome. In fase 4 la prova è stata fatta solo in Chrome desktop, con emulazione del telefono.
-- Da verificare in **fase 5**: Web Crypto API, localStorage e appunti con la pagina aperta da `file://` in Chrome, Edge, Firefox, Safari (la copia ha già il ripiego su `execCommand`).
+- Verifiche nei browser della fase 5: in Chrome da `file://` tutto disponibile (contesto sicuro, Web Crypto, localStorage, appunti). **Da fare a mano** in Edge, Firefox, Safari e sui telefoni con la lista `docs/verifiche-browser-fase5.md` (compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel); i risultati vanno nella guida all'uso (fase 6).
 - `npm run e2e` in CI: da valutare in fase 7 (serve Chrome nel runner; `CHROME_PATH` già supportato).
-- Peso del file unico: controllo `npm run size` a ogni build (fase 4: 412.781 byte, 39,4%; restano circa 620 KB per le guide e la fase 5).
+- Peso del file unico: controllo `npm run size` a ogni build (fase 5: 481.672 byte, 45,9%; restano circa 555 KB per le due guide). Il peso della guida v0.3 integrata va misurato in fase 6.
+- Salvataggio di Safari: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore; va ripresa nella guida all'uso.
 
 ## Prossima conversazione
-**Titolo:** Fase 5 · Impostazioni, persistenza, export/import, cifratura
-**Modello:** Opus 5.5 · **Impegno:** Alto
+**Titolo:** Fase 6 · Integrazione delle due guide e collegamenti con l'app
+**Modello:** Sonnet 5.5 · **Impegno:** Medio
 
 **Prompt da incollare:**
 
-> Iniziamo la fase 5: impostazioni, persistenza, export/import e cifratura del Calcolatore Subnet.
+> Iniziamo la fase 6: integrazione delle due guide e collegamenti con l'app del Calcolatore Subnet.
 >
-> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md e 02_specifica_tecnica_v1.md (soprattutto le sezioni 2, 5, 6, 7, 8, 9.5, 10.4 e 11). Poi conferma modello e impegno per questa fase.
+> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md (sezione 6) e 02_specifica_tecnica_v1.md (soprattutto le sezioni 2.1, 2.4, 4.1, 9.1, 9.3, 9.4, 9.6, 9.7 e 11), più la guida al subnetting v0.3 (`guida-subnetting.html`) caricata nel progetto. Poi conferma modello e impegno per questa fase.
 >
-> Il codice della fase 4 è [nel repository GitHub `calcolatore-subnet`, collegato alla sessione / nell'archivio calcolatore-subnet-fase4.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
+> Il codice della fase 5 è [nel repository GitHub `calcolatore-subnet`, collegato alla sessione / nell'archivio calcolatore-subnet-fase5.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
 >
-> Obiettivo, secondo la specifica tecnica:
-> - persistenza (sezione 8): adattatore `src/storage/storage.js` su localStorage, interruttore "Memorizza i dati" con salvataggio immediato e ritardato di 300 ms, spegnimento con conferma, avvio con migrazioni, spazio esaurito, più schede, "Cancella tutti i dati"; impostazioni, tema, cronologia e piani salvati solo con l'interruttore acceso;
-> - export v1 (sezione 5): `src/export/` con toRows, appunti, CSV, JSON, Markdown, testo, snippet, stampa, nomi dei file, opzione "Includi i passaggi"; collegamento della barra di export già predisposta in fase 4, anche nel pannello dal basso su telefono; Suddivisione con intervallo di indici oltre 65.536 righe;
-> - sessione JSON (sezione 6): `src/session/` con schema, validazione 6.3, migrazioni, Sostituisci e Unisci, anteprima, rapporto; esporta e importa da Impostazioni → Dati;
-> - busta cifrata (sezione 7): Web Crypto, AES-256-GCM con PBKDF2 e AAD, passphrase con conferma e indicatore di robustezza, avvisi, funzione disattivata con spiegazione se `crypto.subtle` manca;
-> - Piani salvati: "Salva come piano" da Suddivisione con nome, note ed etichette per subnet, al posto del segnaposto;
-> - test della 10.4 (corpus di sessioni, andata e ritorno, inquinamento del prototipo, busta alterata) ed estensione di `npm run e2e`;
-> - verifiche da `file://` di crypto.subtle, localStorage e appunti in Chrome, Edge, Firefox e Safari: quelle che non puoi fare tu preparale come lista di prove per me;
-> - `npm run size` sotto 1 MB.
+> [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`, incollati qui.]
 >
-> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 6.
+> Obiettivo:
+> - guida al subnetting v0.3 dentro l'app in `src/guides/` (rotte `#/guide/subnetting/cap-N`), con indice, glossario e popover, cheat sheet, pulsante "torna su" e stampa; stesso tema dell'app (variabili di `tokens.css`, il tema salvato vale anche per le guide);
+> - difetto n. 6: i widget interni della guida diventano collegamenti "Apri nel calcolatore" che precompilano la funzione vera con il frammento (`did=1`, `metodo=`), e la segnalazione su `analyze()` e la convenzione "1 · ottetto" si chiude;
+> - guida all'uso nuova, breve e orientata ai compiti (rotte `#/guide/uso/<sezione>`), con un paragrafo per ogni pulsante "?" e le sezioni su Memorizza i dati, export, sessione JSON, cifratura e piani salvati, con le note sui browser (file://, Safari, spazio condiviso) ricavate dalle prove;
+> - collegamenti "Capitolo N · titolo" dei passaggi e pulsanti "?" che arrivano al paragrafo giusto, con il focus sul titolo;
+> - test dei collegamenti (ogni ancora usata dall'app esiste nelle guide e viceversa) ed estensione di `npm run e2e` (navigazione nelle guide, popover da tastiera, temi, stampa, axe-core);
+> - `npm run size` sotto 1 MB, con il peso delle guide nella riga "Guide".
+>
+> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 7.
 
 ## Fasi successive
-- Fase 6 · Integrazione delle due guide e collegamenti con l'app · Sonnet 5.5 · Impegno medio
 - Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1 · Opus 5.5 · Impegno medio
 - Fase 8 · Revisione finale di Paolo su applicazione e guide · Opus 5.5 · Impegno medio

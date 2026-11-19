@@ -2,7 +2,7 @@
 
 Calcolatore di subnet IPv4 in un **unico file HTML** autosufficiente, che funziona offline e si apre da disco o da qualunque web server. Serve per il calcolo rapido, la didattica (passaggi con il metodo binario, del numero magico o dei multipli) e il lavoro professionale.
 
-Stato: **fase 4 completata** (interfaccia, navigazione mobile, temi). Impostazioni salvate, export, import e cifratura arrivano con la fase 5, le guide integrate con la fase 6. Specifiche e stato del progetto sono in [`docs/`](docs/).
+Stato: **fase 5 completata** (impostazioni salvate, export, sessione JSON, cifratura, piani salvati). Le guide integrate arrivano con la fase 6. Specifiche e stato del progetto sono in [`docs/`](docs/).
 
 ## Requisiti
 
