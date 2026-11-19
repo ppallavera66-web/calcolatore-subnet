@@ -1137,8 +1137,9 @@ async function main() {
     await go(page, '#/calcola/analisi?ip=192.168.5.77&p=24');
     await hashTo(page, '#/pianifica/inverso?h=50');
     await page.getByRole('button', { name: 'Apri in Analisi' }).click();
-    await page.waitForSelector('.kv-primary');
-    assert((await page.textContent('.kv-primary'))?.includes('192.168.5.64/26'), `analisi: ${await page.textContent('.kv-primary')}`);
+    // si aspetta la vista di Analisi: prima del cambio, .kv-primary è ancora quella del Calcolo inverso
+    await page.waitForFunction(() => location.hash.startsWith('#/calcola/analisi') && document.querySelector('.view-analisi .kv-primary'), null, { timeout: 5000 }).catch(() => {});
+    assert((await page.textContent('.kv-primary'))?.includes('192.168.5.64/26'), `analisi (${await page.evaluate(() => location.hash)}): ${await page.textContent('.kv-primary')}`);
     await ctx.close();
   });
 
