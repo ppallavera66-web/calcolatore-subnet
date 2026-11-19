@@ -760,6 +760,7 @@ export const STRINGS = {
   'ui.plans.close': 'Chiudi il piano',
   'ui.plans.closedByEdit': 'Blocco o prefissi cambiati: il piano è stato chiuso e resta in Piani salvati.',
   'ui.plans.notFound': 'Il piano indicato nel collegamento non esiste (forse è stato eliminato).',
+  'ui.plans.mismatch': 'Blocco e prefissi del collegamento non sono quelli del piano indicato: il piano non è stato aperto. Aprilo da Piani salvati.',
   'ui.plans.labelFor': (p) => `Etichetta della subnet n. ${p.n}`,
   'ui.plans.labelsHint': 'Scrivi le etichette (VLAN, uso) nella colonna a destra: si salvano da sole.',
   'ui.plans.notPersisted': 'I piani restano solo per questa visita: per conservarli accendi "Memorizza i dati" in Impostazioni o esporta la sessione.',

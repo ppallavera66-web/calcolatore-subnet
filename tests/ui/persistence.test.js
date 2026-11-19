@@ -289,6 +289,8 @@ describe('piani nello stato', () => {
     expect(s.plans[1].labels).toEqual({ 3: ' VLAN 40 ' });
     expect(setPlanLabel(s, 'a', 3, ' VLAN 40 ', later)).toBe(s);
     expect(setPlanLabel(s, 'zzz', 3, 'x', later)).toBe(s);
+    // solo le 4 subnet del piano (10.0.0.0/24 → /26, revisione C5)
+    for (const i of [4, 255, -1, 1.5]) expect(setPlanLabel(s, 'a', i, 'x', later)).toBe(s);
     s = setPlanLabel(s, 'a', 2, `x\u0007${'y'.repeat(100)}`, later);
     expect(s.plans[1].labels[2]).toHaveLength(80);
     expect(s.plans[1].labels[2].startsWith('x y')).toBe(true);

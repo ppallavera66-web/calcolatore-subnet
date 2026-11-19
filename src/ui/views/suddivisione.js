@@ -50,10 +50,20 @@ export function createSuddivisione(ctx, route) {
   const live = liveView(ctx, VIEW, route, render);
   const p0 = live.params;
   const commit = () => live.commit();
-  /** Piano aperto, se il collegamento ne indica uno esistente. */
-  const plan = () => {
+  /** Piano indicato dal collegamento, anche se blocco e prefissi non coincidono. */
+  const linkedPlan = () => {
     const id = live.params.piano;
     return id ? ctx.store.get().plans.find((x) => x.id === id) ?? null : null;
+  };
+  /**
+   * Piano aperto: quello del collegamento, solo se blocco, prefisso e nuovo prefisso sono i suoi
+   * (un indirizzo modificato a mano non deve mettere le etichette sulle subnet sbagliate, revisione I3, C5).
+   */
+  const plan = () => {
+    const pl = linkedPlan();
+    if (!pl) return null;
+    const cur = entryFor(VIEW, live.params)?.input;
+    return cur && cur.block === pl.input.block && cur.prefix === pl.input.prefix && cur.newPrefix === pl.input.newPrefix ? pl : null;
   };
   /** Cambiare blocco o prefissi chiude il piano aperto (resta salvato). */
   const closePlan = () => {
@@ -98,7 +108,7 @@ export function createSuddivisione(ctx, route) {
     const id = live.params.piano;
     const pl = plan();
     if (!id) return planBox.replaceChildren();
-    if (!pl) return replace(planBox, notice(t('ui.plans.notFound'), 'warn'));
+    if (!pl) return replace(planBox, notice(t(linkedPlan() ? 'ui.plans.mismatch' : 'ui.plans.notFound'), 'warn'));
     replace(planBox, h('section', { class: 'card plan-current', 'aria-label': `${t('ui.plans.current')}: ${pl.name}` },
       h('p', { class: 'card-title' }, t('ui.plans.current')),
       h('h2', { class: 'plan-name' }, pl.name),
@@ -262,11 +272,11 @@ export function createSuddivisione(ctx, route) {
    */
   function pager(page, pages) {
     const btn = (/** @type {'first' | 'prev' | 'next' | 'last'} */ k, /** @type {number} */ target, /** @type {boolean} */ disabled) =>
-      h('button', { type: 'button', class: 'icon-btn', 'aria-label': t(`ui.pager.${k}`), title: t(`ui.pager.${k}`), disabled, onclick: () => setPage(target) }, icon(k));
-    const input = h('input', { type: 'text', inputmode: 'numeric', class: 'input mono pager-input', value: String(page + 1), 'aria-label': `${t('ui.pager.page')} (1–${pages})` });
+      h('button', { type: 'button', class: 'icon-btn', 'aria-label': t(`ui.pager.${k}`), title: t(`ui.pager.${k}`), disabled, dataset: { pager: k }, onclick: () => setPage(target, k) }, icon(k));
+    const input = h('input', { type: 'text', inputmode: 'numeric', class: 'input mono pager-input', value: String(page + 1), 'aria-label': `${t('ui.pager.page')} (1–${pages})`, dataset: { pager: 'input' } });
     const goTo = () => {
       const n = Number(input.value);
-      if (Number.isInteger(n) && n >= 1 && n <= pages) setPage(n - 1);
+      if (Number.isInteger(n) && n >= 1 && n <= pages) setPage(n - 1, 'input');
       else input.value = String(page + 1);
     };
     input.addEventListener('keydown', (e) => {
@@ -282,11 +292,24 @@ export function createSuddivisione(ctx, route) {
       btn('next', page + 1, page >= pages - 1), btn('last', pages - 1, page >= pages - 1));
   }
 
-  /** @param {number} page */
-  function setPage(page) {
+  /**
+   * Cambio di pagina. La paginazione viene ridisegnata: il focus torna sul controllo equivalente
+   * (o sul numero di pagina se quel pulsante ora è disattivato) e si annuncia la nuova pagina
+   * (WCAG 2.4.3, revisione C3).
+   * @param {number} page
+   * @param {string} [from] controllo usato
+   */
+  function setPage(page, from) {
     live.change({ pg: page === 0 ? undefined : String(page) });
     live.commit();
     tableHost.querySelector('.list-caption')?.scrollIntoView({ block: 'start' });
+    if (from) {
+      const same = /** @type {HTMLButtonElement | HTMLInputElement | null} */ (tableHost.querySelector(`[data-pager="${from}"]`));
+      const target = same && !same.disabled ? same : /** @type {HTMLElement | null} */ (tableHost.querySelector('[data-pager="input"]'));
+      target?.focus({ preventScroll: true });
+    }
+    const caption = tableHost.querySelector('.list-caption')?.textContent;
+    if (caption) ctx.announce(`${caption}.`);
   }
 
   /** "Vai alla subnet che contiene l'IP". */

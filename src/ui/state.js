@@ -235,6 +235,8 @@ export function updatePlan(state, id, changes, now) {
 export function setPlanLabel(state, id, index, text, now) {
   const plan = state.plans.find((p) => p.id === id);
   if (!plan) return state;
+  // solo le subnet del piano (revisione C5)
+  if (!Number.isInteger(index) || index < 0 || index >= 2 ** (plan.input.newPrefix - plan.input.prefix)) return state;
   const key = String(index);
   const clean = [...text.replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029\u202A-\u202E\u2066-\u2069]/g, ' ')].slice(0, LABEL_MAX).join('');
   const labels = { ...plan.labels };
