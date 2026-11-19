@@ -13,12 +13,20 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
 - tenere collegato l'account GitHub in claude.ai, così la fase lavora direttamente sul repository.
 
 ## Repository
-- **GitHub**: <https://github.com/ppallavera66-web/calcolatore-subnet>, ramo `main`, con tutta la storia delle fasi 3–7 (un commit per passo), unita al commit iniziale creato da GitHub. Tag **`v1.0.0`**.
+- **GitHub**: <https://github.com/ppallavera66-web/calcolatore-subnet>, ramo `main`, con tutta la storia delle fasi 3–7 (un commit per passo), unita al commit iniziale creato da GitHub.
+- **Tag `v1.0.0`**: creato nell'archivio della fase 7 sull'ultimo commit di `main`. Il proxy della sessione rifiuta il push dei tag (HTTP 403), quindi **va pubblicato da Paolo**, dal proprio computer:
+  ```
+  git clone https://github.com/ppallavera66-web/calcolatore-subnet.git
+  cd calcolatore-subnet
+  git tag -a v1.0.0 -m "Calcolatore Subnet v1.0.0"
+  git push origin v1.0.0
+  ```
+  Il push del tag avvia il workflow, che crea la Release. Per non creare la Release a mano dalla pagina di GitHub: il workflow la troverebbe già esistente e fallirebbe.
 - **Visibilità**: al momento del push il repository era **privato**. Paolo ha scelto di renderlo pubblico (decisione D4), ma il proxy della sessione non permette di cambiare le impostazioni del repository, quindi va fatto a mano:
   - Settings → General → Danger Zone → Change visibility → **Public**;
   - Settings → Pages → Source: **GitHub Actions**;
   - Actions → ultimo giro "CI" su `main` → **Re-run failed jobs**, per pubblicare su Pages.
-- **Release**: la crea il workflow dal tag `v1.0.0`, con `calcolatore-subnet-v1.0.0.html`, la sua impronta `.sha256` e la nota `docs/note-rilascio/v1.0.0.md`.
+- **Release**: la crea il workflow quando arriva il tag `v1.0.0`, con `calcolatore-subnet-v1.0.0.html`, la sua impronta `.sha256` e la nota `docs/note-rilascio/v1.0.0.md`.
 - **Indirizzo di Pages** (dopo l'attivazione): <https://ppallavera66-web.github.io/calcolatore-subnet/>.
 - **Autore dei commit**: `Paolo Pallavera <paolo.pallavera@users.noreply.github.com>`, come nelle fasi precedenti. Per collegarli al profilo GitHub servirebbe l'indirizzo noreply dell'account (Settings → Emails); si può adottare dalla fase 8.
 
@@ -169,7 +177,8 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
     - oracolo: fixture rigenerati identici; `npm run check` senza errori;
     - `dist/index.html` di 635.192 byte (60,6% del limite di 1 MB): JavaScript 200 KB, CSS 49 KB, font 245 KB, guide 126 KB. Due build dello stesso commit producono lo stesso file;
     - e2e 52/52 in Chrome 153.0.8010.12 (headless, Linux) da `file://`;
-    - actionlint senza segnalazioni.
+    - actionlint senza segnalazioni;
+    - su GitHub Actions (Chrome 157): `test` verde; `e2e` 51/52 al primo giro per un difetto del test (risultato letto prima del cambio di vista), corretto.
 
 ## Decisioni di Paolo
 **Fase 1**
@@ -286,7 +295,10 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
 
 ## Problemi aperti
 - **Visibilità e Pages**: rendere pubblico il repository, attivare Pages con sorgente "GitHub Actions" e rilanciare il job `pages` (vedi Repository). Fino ad allora il job `pages` del primo giro fallisce: è atteso.
-- **Primo giro reale di GitHub Actions**: controllare che `test`, `e2e` e `release` siano verdi e che la Release v1.0.0 contenga il file unico e l'impronta. Il Chrome del runner può essere più recente di quello locale (153): se `e2e` fallisce solo lì, le schermate dell'artefatto `e2e-report` aiutano a capire.
+- **GitHub Actions**:
+  - primo giro reale fatto con il push di `main`: `test` è passato; `e2e` (Chrome 157 del runner) ha superato 51 prove su 52;
+  - la prova fallita aveva un difetto del test, che leggeva il risultato prima del cambio di vista. È corretta e il secondo giro parte con il push della correzione;
+  - Release solo dopo il push del tag da parte di Paolo (vedi Repository).
 - **Da verificare su dispositivo**:
   - **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata);
   - Safari su iPhone e Android con Chrome. Le prove sono state fatte solo in Chrome desktop, con l'emulazione del telefono.
