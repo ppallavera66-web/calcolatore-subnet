@@ -69,7 +69,7 @@ export function createMask(ctx, route) {
     field.setError(null);
     const v = r.value;
     const offending = v.reason ? v.reason.params.index : -1;
-    const table = h('div', { class: 'tbl' }, h('table', {},
+    const table = h('div', { class: 'tbl', tabindex: '0', role: 'region', 'aria-label': t('ui.mask.octets') }, h('table', {},
       h('caption', { class: 'sr-only' }, t('ui.mask.octets')),
       h('thead', {}, h('tr', {}, ['octet', 'value', 'binary', 'check'].map((c) => h('th', { scope: 'col' }, t(`ui.mask.col.${c}`))))),
       h('tbody', {}, v.octets.map((o, i) => h('tr', { class: i === offending ? 'row-bad' : '' },

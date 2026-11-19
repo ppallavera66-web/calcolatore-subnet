@@ -116,11 +116,11 @@ select.input{padding-right:28px}
 .steps{margin:0;padding-left:26px;display:flex;flex-direction:column;gap:var(--sp-3)}
 .step::marker{font-family:var(--font-mono);color:var(--net);font-weight:600}
 .step p{margin:0;max-width:72ch;overflow-wrap:anywhere}
-.bitrows{display:flex;flex-direction:column;gap:2px;margin-top:6px;padding:8px 12px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);overflow-x:auto}
+.bitrows{display:flex;flex-direction:column;gap:4px;margin-top:6px;padding:8px 12px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md)}
 .bitrows-card{margin-top:var(--sp-3)}
-.bitrow{display:flex;align-items:baseline;gap:var(--sp-3);white-space:nowrap}
+.bitrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 var(--sp-3)}
 .bitrow-label{min-width:76px;font-size:13px;color:var(--muted)}
-.bits{font-family:var(--font-mono);font-size:15px;letter-spacing:.04em;background:none;border:0;padding:0}
+.bits{font-family:var(--font-mono);font-size:15px;letter-spacing:.04em;background:none;border:0;padding:0;overflow-wrap:anywhere;min-width:0}
 .b-net{color:var(--net);font-weight:600}
 .b-host{color:var(--host)}
 .b-sep{color:var(--muted)}
@@ -138,11 +138,11 @@ select.input{padding-right:28px}
 .snip-options{display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-4);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3);margin:0}
 .snip-options legend{padding:0 6px;font-size:13px;color:var(--muted)}
 .snip-wildcard{margin:0}
-.snip-blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--sp-3)}
+.snip-blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:var(--sp-3)}
 .snip-blocks > p,.snip-blocks > .notice{grid-column:1/-1}
 .snip-block{margin:0;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg);overflow:hidden}
 .snip-block figcaption{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 4px 4px 12px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
-.code{margin:0;padding:10px 12px;font-size:14px;line-height:1.6;color:var(--strong);overflow-x:auto;white-space:pre}
+.code{margin:0;padding:10px 12px;font-size:14px;line-height:1.6;color:var(--strong);white-space:pre-wrap;overflow-wrap:anywhere}
 
 /* ---------- strumenti di Conversioni ---------- */
 .tool{display:flex;flex-direction:column;gap:var(--sp-3)}
@@ -255,4 +255,26 @@ tr.row-bad td{background:color-mix(in srgb,var(--warn) 10%,transparent)}
   .snip{padding:0}
   .snip-summary{padding:0 var(--sp-5)}
   .snip-body{padding:0 var(--sp-5) var(--sp-5)}
+}
+
+/* ---------- telefono: valori in righe compatte (etichetta a sinistra, valore e copia a destra) ---------- */
+@media (max-width:719.98px){
+  .kv:not(.kv-primary):not(.kv-compact){grid-template-columns:1fr;gap:0;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+  .kv:not(.kv-primary):not(.kv-compact) .kv-item{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+    border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:4px 4px 4px 12px;min-height:48px}
+  .kv:not(.kv-primary):not(.kv-compact) .kv-item:last-child{border-bottom:0}
+  .kv:not(.kv-primary):not(.kv-compact) dt{flex:none;max-width:45%}
+  .kv:not(.kv-primary):not(.kv-compact) dd{margin:0;justify-content:flex-end;text-align:right;flex-wrap:wrap}
+  .kv:not(.kv-primary):not(.kv-compact) .kv-note{text-align:right}
+  .kv:not(.kv-primary):not(.kv-compact) .copy-btn{margin:0}
+}
+
+/* ---------- aree di tocco >= 44 px su telefono e schermi touch (9.7) ---------- */
+@media (max-width:719.98px),(pointer:coarse){
+  .copy-btn{width:var(--touch-min);height:var(--touch-min);margin:-8px -6px -8px auto}
+  .btn-sm,.chip,.subtab{min-height:var(--touch-min)}
+  .segmented-option label,.segmented-sm .segmented-option label{min-height:var(--touch-min)}
+  .license summary,.snip-summary{min-height:var(--touch)}
+  .chapter-link,.steps-chapters a{display:inline-flex;align-items:center;min-height:var(--touch-min)}
+  .chapter-list a{display:inline-flex;align-items:center;min-height:var(--touch-min)}
 }

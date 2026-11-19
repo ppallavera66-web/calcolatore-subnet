@@ -229,7 +229,7 @@ function snippetSection(ctx, didactic) {
   const fArea = textField({ label: t('field.ospfArea'), value: opts.ospfArea, inputmode: 'decimal', width: '14ch', onInput: set('ospfArea') });
   const blocks = h('div', { class: 'snip-blocks' });
   const stepsHost = h('div');
-  const rulesPanel = createStepsPanel(ctx, { fn: 'F10', method: 'rules', onMethod: () => {} });
+  const rulesPanel = createStepsPanel(ctx, { fn: 'F10', method: 'rules', onMethod: () => {}, title: `${t('ui.steps.title')} · ${t('ui.r.wildcard')}` });
   const el = h(
     'details',
     { class: 'card snip' },
