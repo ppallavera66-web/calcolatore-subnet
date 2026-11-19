@@ -282,7 +282,7 @@ describe('strumenti dello schema', () => {
     expect(validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: {}, ospf: { process: 1, area: true } }).ok).toBe(false);
     expect(validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: null, ospf: {} }).ok).toBe(false);
     // F10: area OSPF come testo solo in forma pulita e breve, riportata in forma canonica (revisione I4)
-    const f10i = (/** @type {any} */ area) => validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: { number: 10, name: 'A', action: 'permit' }, ospf: { process: 1, area } });
+    const f10i = (/** @type {any} */ area) => /** @type {any} */ (validateInput('F10', { network: '10.0.0.0', prefix: 8, acl: { number: 10, name: 'A', action: 'permit' }, ospf: { process: 1, area } }));
     for (const bad of ['\t\u000b 0 \n', ' 0', ' '.repeat(4000) + '0', '0.0.0.0\u0000', '1'.repeat(16)]) expect(f10i(bad).ok).toBe(false);
     expect(f10i('0.0.0.1').ok && f10i('0.0.0.1').input.ospf.area).toBe('0.0.0.1');
     expect(f10i('7').ok && f10i('7').input.ospf.area).toBe('7');
