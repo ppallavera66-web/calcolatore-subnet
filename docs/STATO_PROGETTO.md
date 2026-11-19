@@ -178,7 +178,7 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
     - `dist/index.html` di 635.192 byte (60,6% del limite di 1 MB): JavaScript 200 KB, CSS 49 KB, font 245 KB, guide 126 KB. Due build dello stesso commit producono lo stesso file;
     - e2e 52/52 in Chrome 153.0.8010.12 (headless, Linux) da `file://`;
     - actionlint senza segnalazioni;
-    - su GitHub Actions (Chrome 157): `test` verde; `e2e` 51/52 al primo giro per un difetto del test (risultato letto prima del cambio di vista), corretto.
+    - su GitHub Actions (Chrome 157): `test` verde; `e2e` 51/52 al primo giro per un difetto del test (risultato letto prima del cambio di vista), poi 52/52 dopo la correzione.
 
 ## Decisioni di Paolo
 **Fase 1**
@@ -297,7 +297,7 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
 - **Visibilità e Pages**: rendere pubblico il repository, attivare Pages con sorgente "GitHub Actions" e rilanciare il job `pages` (vedi Repository). Fino ad allora il job `pages` del primo giro fallisce: è atteso.
 - **GitHub Actions**:
   - primo giro reale fatto con il push di `main`: `test` è passato; `e2e` (Chrome 157 del runner) ha superato 51 prove su 52;
-  - la prova fallita aveva un difetto del test, che leggeva il risultato prima del cambio di vista. È corretta e il secondo giro parte con il push della correzione;
+  - la prova fallita aveva un difetto del test, che leggeva il risultato prima del cambio di vista. Dopo la correzione, nel secondo giro `test` ed `e2e` sono verdi; `pages` fallisce come previsto ("Ensure GitHub Pages has been enabled") finché il repository è privato e Pages non è attivo;
   - Release solo dopo il push del tag da parte di Paolo (vedi Repository).
 - **Da verificare su dispositivo**:
   - **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata);
