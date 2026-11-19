@@ -8,6 +8,7 @@ import { textField } from '../components/field.js';
 import { prefixField } from '../components/prefix-field.js';
 import { resultCard, notice } from '../components/result-card.js';
 import { segmented, examples, button } from '../components/controls.js';
+import { exportBar } from '../components/export-bar.js';
 import { createStepsPanel } from '../components/steps-panel.js';
 import { liveView, routeError } from './view-kit.js';
 import { entryFor } from '../history-map.js';
@@ -48,9 +49,10 @@ export function createInverso(ctx, route) {
   const sf = textField({ label: t('ui.inv.subnets'), value: live.params.s ?? '', placeholder: '6', inputmode: 'numeric', width: '12ch', onInput: (v) => live.change({ s: v }), onEnter: commit });
   const out = h('div', { class: 'results' });
   const steps = createStepsPanel(ctx, { fn: 'F05', method: 'rules', onMethod: () => {} });
+  const barSlot = h('div');
   const el = h('div', { class: 'view view-inverso' }, picker.el,
     h('form', { class: 'form-row', novalidate: true, onsubmit: (/** @type {Event} */ e) => { e.preventDefault(); commit(); } }, pf.el, hf.el, sf.el),
-    out, steps.el);
+    out, steps.el, barSlot);
 
   function showFields() {
     pf.el.hidden = mode === 'a';
@@ -63,6 +65,7 @@ export function createInverso(ctx, route) {
     const p = live.params;
     showFields();
     steps.el.hidden = true;
+    barSlot.replaceChildren();
     const used = mode === 'a' ? ['h'] : mode === 'b' ? ['p', 's'] : ['p', 'h', 's'];
     const fields = { hosts: hf, subnets: sf, prefix: pf, mask: pf };
     if (used.every((k) => (p[k] ?? '').trim() === '')) {
@@ -135,6 +138,13 @@ export function createInverso(ctx, route) {
     if (live.didactic()) {
       steps.update(v, 'rules');
       steps.el.hidden = false;
+    }
+    if (ctx.store.get().settings.exportBar) {
+      const parts = v.mode === 'hosts' ? [`h${v.hosts}`] : v.mode === 'subnets' ? [`p${v.blockPrefix}`, `s${v.requested}`] : [`p${v.blockPrefix}`, `h${v.hosts}`, `s${v.subnets}`];
+      replace(barSlot, exportBar(ctx, () => ({
+        fn: 'F05', value: v, warnings: r.warnings, input: entryFor(VIEW, live.params)?.input ?? {}, name: 'inverso', parts,
+        steps: live.didactic() ? [{ fn: 'F05', value: v, method: 'rules', warnings: r.warnings }] : [],
+      })));
     }
     ctx.record(entryFor(VIEW, p), opts.commit);
   }

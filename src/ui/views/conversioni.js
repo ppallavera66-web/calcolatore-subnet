@@ -8,6 +8,7 @@ import { textField } from '../components/field.js';
 import { prefixField } from '../components/prefix-field.js';
 import { resultCard } from '../components/result-card.js';
 import { segmented, button } from '../components/controls.js';
+import { exportBar } from '../components/export-bar.js';
 import { createStepsPanel, bitRow } from '../components/steps-panel.js';
 import { liveView, routeError } from './view-kit.js';
 import { entryFor } from '../history-map.js';
@@ -78,6 +79,7 @@ export function createConversioni(ctx, route) {
     const now = opts.initial || opts.commit;
     const didactic = live.didactic();
     const method = live.method('F02');
+    const exportOn = ctx.store.get().settings.exportBar;
 
     // numero
     if ((p.n ?? '').trim() === '') {
@@ -104,6 +106,13 @@ export function createConversioni(ctx, route) {
         }));
         nSteps.el.hidden = !didactic;
         if (didactic) nSteps.update(v, method);
+        if (exportOn) {
+          const text = (p.n ?? '').trim();
+          nOut.append(exportBar(ctx, () => ({
+            fn: 'F02', value: v, input: { kind: 'number', text, base: v.base }, rowsInput: { text }, name: 'conversioni', parts: [text, `b${v.base}`],
+            steps: live.didactic() ? [{ fn: 'F02', value: v, method: live.method('F02') }] : [],
+          })));
+        }
       }
     }
 
@@ -131,6 +140,12 @@ export function createConversioni(ctx, route) {
         }));
         aSteps.el.hidden = !didactic;
         if (didactic) aSteps.update(v, method);
+        if (exportOn) {
+          aOut.append(exportBar(ctx, () => ({
+            fn: 'F02', value: v, input: { kind: 'address', text: v.dotted }, name: 'conversioni', parts: [v.dotted],
+            steps: live.didactic() ? [{ fn: 'F02', value: v, method: live.method('F02') }] : [],
+          })));
+        }
       }
     }
 
@@ -155,6 +170,9 @@ export function createConversioni(ctx, route) {
           ],
           children: [h('div', { class: 'bitrows bitrows-card' }, bitRow({ label: 'mask', value: v.maskBinary, prefix: v.prefix }))],
         }));
+        if (exportOn) {
+          pmOut.append(exportBar(ctx, () => ({ fn: 'F02', value: v, input: { kind: 'prefix', prefix: v.prefix }, name: 'conversioni', parts: [`p${v.prefix}`] })));
+        }
       }
     }
 

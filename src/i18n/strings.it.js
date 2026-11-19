@@ -55,6 +55,14 @@ export const sup = (n) =>
  */
 export const magicLabel = (magic, index) => `${magic} · ${ordShort(index)}`;
 
+/**
+ * Numero con il nome al singolare o al plurale ("1 piano", "2 piani").
+ * @param {number} n
+ * @param {string} one
+ * @param {string} many
+ */
+export const plural = (n, one, many) => `${fmtNumber(n)} ${n === 1 ? one : many}`;
+
 const hostName = (/** @type {string} */ h) => (h === 'a' ? 'A' : h === 'b' ? 'B' : h);
 const yesNo = (/** @type {boolean} */ b) => (b ? 'sì' : 'no');
 
@@ -323,7 +331,6 @@ export const STRINGS = {
   'ui.export.text': 'Testo',
   'ui.export.print': 'Stampa',
   'ui.export.snippet': 'Snippet',
-  'ui.export.pending': 'I formati di export arrivano con la fase 5; la stampa funziona già.',
 
   // ---------------------------------------------------------------- interfaccia: Conversioni (F02)
   'ui.conv.number': 'Numero',
@@ -444,7 +451,6 @@ export const STRINGS = {
 
   // ---------------------------------------------------------------- interfaccia: Piani salvati e Guide (segnaposto)
   'ui.plans.empty': 'Nessun piano salvato.',
-  'ui.plans.pending': 'Il salvataggio di un piano da Suddivisione, con nome, note ed etichette per subnet (VLAN, uso), arriva con la fase 5.',
   'ui.plans.toSubdivide': 'Vai a Suddivisione',
   'ui.guide.pending': 'Le due guide entrano nel calcolatore con la fase 6, con indice, glossario e collegamenti "Apri nel calcolatore".',
   'ui.guide.target': (p) => `Il collegamento porta a: ${p.target}.`,
@@ -467,15 +473,13 @@ export const STRINGS = {
   'ui.set.data': 'Dati',
   'ui.set.persist': 'Memorizza i dati',
   'ui.set.persist.desc': 'Salva impostazioni, cronologia e piani in questo browser.',
-  'ui.set.persist.pending': 'Disponibile con la fase 5. Per ora impostazioni e cronologia restano in memoria fino alla chiusura della pagina.',
   'ui.set.persist.note': 'Il salvataggio vale solo per questo browser e questo dispositivo, il browser può cancellarlo (Safari dopo un periodo di inattività) e non sostituisce l\'export della sessione.',
   'ui.set.exportSession': 'Esporta sessione',
   'ui.set.importSession': 'Importa sessione',
-  'ui.set.session.pending': 'Export e import della sessione, anche cifrati, arrivano con la fase 5.',
   'ui.set.clear': 'Cancella tutti i dati',
-  'ui.set.clear.desc': 'Svuota la cronologia e riporta le impostazioni ai valori predefiniti.',
+  'ui.set.clear.desc': 'Cancella i dati salvati in questo browser, svuota cronologia e piani e riporta le impostazioni ai valori predefiniti.',
   'ui.set.clear.title': 'Cancellare tutti i dati?',
-  'ui.set.clear.body': 'La cronologia della visita viene svuotata e le impostazioni tornano ai valori predefiniti. L\'operazione non si può annullare.',
+  'ui.set.clear.body': 'Vengono cancellati i dati salvati in questo browser, la cronologia e i piani; le impostazioni tornano ai valori predefiniti e "Memorizza i dati" si spegne. L\'operazione non si può annullare.',
   'ui.set.clear.ok': 'Cancella tutto',
   'ui.set.cleared': 'Dati cancellati',
   'ui.set.about': 'Informazioni',
@@ -625,6 +629,132 @@ export const STRINGS = {
   'step.snippet-host': (p) => `Con /32 le ACL usano la parola chiave host: host ${p.network}.`,
   'step.snippet-any': 'Con /0 le ACL usano la parola chiave any (qualunque indirizzo).',
 
+
+  // ---------------------------------------------------------------- impostazioni → dati (fase 5: 6, 7, 8)
+  'ui.set.persist.unavailable':
+    'Questo browser non permette di salvare dati per la pagina aperta così (navigazione privata, cookie bloccati o pagina aperta da disco): impostazioni, cronologia e piani restano in memoria fino alla chiusura.',
+  'ui.set.persist.off.title': 'Smettere di memorizzare i dati?',
+  'ui.set.persist.off.body': 'I dati salvati in questo browser verranno cancellati. Quelli della visita in corso restano finché non chiudi la pagina.',
+  'ui.set.persist.off.ok': 'Smetti e cancella',
+  'ui.set.persist.on': 'Dati memorizzati in questo browser',
+  'ui.set.persist.offDone': 'Dati salvati cancellati da questo browser',
+  'ui.set.persist.saved': (p) => `Ultimo salvataggio: ${p.date} · spazio occupato ${p.kb} KB.`,
+  'ui.set.persist.corrupt': "All'avvio i dati salvati in questo browser non erano leggibili e sono stati ignorati.",
+  'ui.set.persist.newer': "I dati salvati in questo browser vengono da una versione più recente dell'app e sono stati ignorati.",
+  'ui.set.persist.clearStored': 'Cancella i dati salvati',
+  'ui.set.persist.skipped': (p) => `All'avvio ${plural(p.n, 'elemento salvato non era valido ed è stato escluso', 'elementi salvati non erano validi e sono stati esclusi')}.`,
+  'ui.set.persist.trimmed': (p) => `Spazio esaurito: la cronologia salvata è stata ridotta alle 100 voci più recenti (${plural(p.dropped, 'voce tolta', 'voci tolte')}).`,
+  'ui.set.persist.quota': 'Spazio esaurito: i dati non sono stati salvati. Esporta la sessione per non perderli.',
+  'ui.set.persist.writeFailed': 'Il browser ha rifiutato il salvataggio. Esporta la sessione per non perdere i dati.',
+  'ui.set.persist.external.on': "Dati aggiornati da un'altra scheda",
+  'ui.set.persist.external.off': "In un'altra scheda il salvataggio è stato spento: questa scheda non salva più",
+  'ui.set.session': 'Sessione',
+  'ui.set.session.desc':
+    'Impostazioni, cronologia e piani in un file JSON, per conservarli o passarli ad altri, anche cifrato. Funziona anche con "Memorizza i dati" spento: esporta la visita in corso.',
+
+  'ui.sx.title': 'Esporta la sessione',
+  'ui.sx.content': (p) => `Contenuto: impostazioni, ${plural(p.history, 'calcolo', 'calcoli')}, ${plural(p.plans, 'piano', 'piani')}.`,
+  'ui.sx.encrypt': 'Cifra il file',
+  'ui.sx.encrypt.desc': 'Facoltativo. Il file si potrà aprire solo con la passphrase, da comunicare al destinatario per un canale separato.',
+  'ui.sx.pass': 'Passphrase',
+  'ui.sx.pass.hint': 'Almeno 12 caratteri: meglio una frase di più parole.',
+  'ui.sx.confirm': 'Conferma la passphrase',
+  'ui.sx.strength': (p) => `Robustezza: ${p.level}`,
+  'ui.sx.level.0': 'debole',
+  'ui.sx.level.1': 'media',
+  'ui.sx.level.2': 'buona',
+  'ui.sx.level.3': 'ottima',
+  'ui.sx.warning': 'Una passphrase persa non è recuperabile: senza, il file resta illeggibile.',
+  'ui.sx.tooShort': (p) => `Servono almeno 12 caratteri (ora ${p.n}).`,
+  'ui.sx.mismatch': 'Le due passphrase non coincidono.',
+  'ui.sx.export': 'Esporta',
+  'ui.sx.working': 'Cifratura in corso…',
+  'ui.sx.done': 'Sessione esportata',
+  'ui.sx.doneEncrypted': 'Sessione esportata e cifrata',
+  'ui.sx.failed': 'Export non riuscito',
+
+  'ui.si.title': 'Importa la sessione',
+  'ui.si.pass.text': 'Il file è cifrato: scrivi la passphrase ricevuta da chi te lo ha mandato.',
+  'ui.si.decrypt': 'Decifra',
+  'ui.si.working': 'Decifratura in corso…',
+  'ui.si.preview': "Anteprima dell'import",
+  'ui.si.file': (p) => `File esportato il ${p.date}${p.app ? ` da ${p.app}` : ''}.`,
+  'ui.si.counts': (p) => `Contiene ${plural(p.history, 'calcolo', 'calcoli')} e ${plural(p.plans, 'piano', 'piani')}.`,
+  'ui.si.skipped': (p) => `Scartati perché non validi: ${plural(p.history, 'calcolo', 'calcoli')} e ${plural(p.plans, 'piano', 'piani')}.`,
+  'ui.si.settingsIgnored': (p) => `${plural(p.n, 'impostazione non valida ignorata', 'impostazioni non valide ignorate')}.`,
+  'ui.si.unknown': (p) => `${plural(p.n, 'campo sconosciuto ignorato', 'campi sconosciuti ignorati')}.`,
+  'ui.si.applySettings': 'Applica anche le impostazioni del file',
+  'ui.si.applySettings.desc': 'Tema, modalità didattica, metodo predefinito ed Export. "Memorizza i dati" non cambia.',
+  'ui.si.noSettings': 'Il file non contiene impostazioni.',
+  'ui.si.replace': 'Sostituisci',
+  'ui.si.replace.desc': 'Cronologia e piani del file prendono il posto di quelli attuali.',
+  'ui.si.merge': 'Unisci',
+  'ui.si.merge.desc': 'Cronologia e piani del file si aggiungono a quelli attuali; gli elementi già presenti restano.',
+  'ui.si.done': (p) =>
+    `Importate ${plural(p.history, 'voce', 'voci')} e ${plural(p.plans, 'piano', 'piani')}${p.skipped ? `; ${plural(p.skipped, 'voce scartata', 'voci scartate')}` : ''}.${p.settings ? ' Impostazioni applicate.' : ''}`,
+  'ui.si.failed': 'Import non riuscito',
+  'ui.si.reading': 'Lettura del file…',
+
+  'ui.about.env': 'Compatibilità di questo browser',
+  'ui.env.protocol': 'Pagina aperta da',
+  'ui.env.protocol.file': 'disco (file://)',
+  'ui.env.protocol.https': 'HTTPS',
+  'ui.env.protocol.http': 'HTTP',
+  'ui.env.protocol.other': 'altro',
+  'ui.env.secure': 'Contesto sicuro',
+  'ui.env.crypto': 'Cifratura (Web Crypto)',
+  'ui.env.storage': 'Salvataggio nel browser (localStorage)',
+  'ui.env.clipboard': 'Appunti (API asincrona)',
+  'ui.env.clipboard.fallback': 'no, si usa il metodo di riserva',
+  'ui.env.yes': 'sì',
+  'ui.env.no': 'no',
+
+  // ---------------------------------------------------------------- barra di export (5) e piani salvati (9.1)
+  'ui.export.steps': 'Includi i passaggi',
+  'ui.export.what': 'Risultato',
+  'ui.export.downloaded': (p) => `Scaricato ${p.name}`,
+  'ui.export.range.title': 'Quali subnet esportare?',
+  'ui.export.range.page': (p) => `Pagina corrente (subnet da ${p.from} a ${p.to})`,
+  'ui.export.range.all': (p) => `Tutte (${p.count})`,
+  'ui.export.range.custom': 'Intervallo di indici',
+  'ui.export.range.from': 'Dalla subnet n.',
+  'ui.export.range.to': 'Alla subnet n.',
+  'ui.export.range.tooMany': (p) => `Le subnet sono ${p.count}: oltre 65.536 righe si esporta un intervallo di indici alla volta.`,
+  'ui.export.range.go': 'Continua',
+  'ui.export.range.RANGE_FORMAT': (p) => `Scrivi due numeri interi da 1 a ${p.max}.`,
+  'ui.export.range.RANGE_ORDER': 'Il primo numero non può superare il secondo.',
+  'ui.export.range.RANGE_TOO_LARGE': (p) => `Al massimo ${p.max} righe per volta.`,
+
+  'ui.plans.emptyHint': 'Crea un piano da Suddivisione con "Salva come piano": nome, note ed etichette per ogni subnet (VLAN, uso).',
+  'ui.plans.save': 'Salva come piano',
+  'ui.plans.editTitle': 'Nome e note del piano',
+  'ui.plans.name': 'Nome',
+  'ui.plans.name.hint': 'Da 1 a 80 caratteri.',
+  'ui.plans.notes': 'Note',
+  'ui.plans.notes.hint': 'Facoltative, fino a 2.000 caratteri.',
+  'ui.plans.invalid': 'Scrivi un nome da 1 a 80 caratteri e note entro 2.000 caratteri.',
+  'ui.plans.defaultName': (p) => `${p.block} → /${p.np}`,
+  'ui.plans.saved': 'Piano salvato',
+  'ui.plans.saveChanges': 'Salva',
+  'ui.plans.updated': 'Piano aggiornato',
+  'ui.plans.deleted': 'Piano eliminato',
+  'ui.plans.full': 'Ci sono già 100 piani: eliminane uno per salvarne altri.',
+  'ui.plans.open': 'Apri',
+  'ui.plans.edit': 'Nome e note',
+  'ui.plans.delete': 'Elimina',
+  'ui.plans.delete.title': 'Eliminare il piano?',
+  'ui.plans.delete.body': (p) => `Il piano "${p.name}" e le sue etichette vengono eliminati. L'operazione non si può annullare.`,
+  'ui.plans.summary': (p) => `${p.block} → /${p.np} · ${plural(p.count, 'subnet', 'subnet')} · ${plural(p.labels, 'etichetta', 'etichette')}`,
+  'ui.plans.updatedAt': (p) => `Modificato il ${p.date}`,
+  'ui.plans.count': (p) => plural(p.n, 'piano salvato', 'piani salvati'),
+  'ui.plans.current': 'Piano',
+  'ui.plans.close': 'Chiudi il piano',
+  'ui.plans.closedByEdit': 'Blocco o prefissi cambiati: il piano è stato chiuso e resta in Piani salvati.',
+  'ui.plans.notFound': 'Il piano indicato nel collegamento non esiste (forse è stato eliminato).',
+  'ui.plans.labelFor': (p) => `Etichetta della subnet n. ${p.n}`,
+  'ui.plans.labelsHint': 'Scrivi le etichette (VLAN, uso) nella colonna a destra: si salvano da sole.',
+  'ui.plans.notPersisted': 'I piani restano solo per questa visita: per conservarli accendi "Memorizza i dati" in Impostazioni o esporta la sessione.',
+  'ui.sub.col.label': 'Etichetta',
   // ---------------------------------------------------------------- export (5)
   'export.item': 'Voce',
   'export.value': 'Valore',

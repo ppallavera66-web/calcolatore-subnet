@@ -2,13 +2,19 @@
 /**
  * Pianifica · Suddivisione (F06, cap. 11 e 13): riepilogo, elenco a pagine da 256 righe
  * (prima, precedente, pagina n, successiva, ultima) e "Vai alla subnet che contiene l'IP".
+ * "Salva come piano" (9.1) crea un piano con nome e note; con un piano aperto (`piano=<id>`)
+ * l'elenco ha la colonna Etichetta, modificabile, che finisce anche nell'export.
+ * Cambiare blocco o prefissi chiude il piano (che resta salvato).
  */
 import { h, replace } from '../dom.js';
 import { icon } from '../icons.js';
 import { ipField, textField } from '../components/field.js';
 import { prefixField } from '../components/prefix-field.js';
-import { resultCard } from '../components/result-card.js';
-import { examples } from '../components/controls.js';
+import { resultCard, notice } from '../components/result-card.js';
+import { examples, button } from '../components/controls.js';
+import { exportBar } from '../components/export-bar.js';
+import { openPlanDialog } from '../components/plan-dialog.js';
+import { addPlan, updatePlan, setPlanLabel, PLANS_MAX } from '../state.js';
 import { createStepsPanel } from '../components/steps-panel.js';
 import { liveView, routeError } from './view-kit.js';
 import { entryFor } from '../history-map.js';
@@ -44,15 +50,26 @@ export function createSuddivisione(ctx, route) {
   const live = liveView(ctx, VIEW, route, render);
   const p0 = live.params;
   const commit = () => live.commit();
+  /** Piano aperto, se il collegamento ne indica uno esistente. */
+  const plan = () => {
+    const id = live.params.piano;
+    return id ? ctx.store.get().plans.find((x) => x.id === id) ?? null : null;
+  };
+  /** Cambiare blocco o prefissi chiude il piano aperto (resta salvato). */
+  const closePlan = () => {
+    if (!live.params.piano) return {};
+    ctx.toast(t('ui.plans.closedByEdit'));
+    return { piano: undefined };
+  };
   /** Indice da evidenziare dopo la ricerca. */
   /** @type {number | null} */
   let highlight = null;
 
-  const pf = prefixField({ label: t('ui.sub.prefix'), value: p0.p ?? '', placeholder: '/16', onInput: (v) => { highlight = null; live.change({ p: v, pg: undefined }); }, onEnter: commit });
-  const npf = prefixField({ label: t('ui.sub.newPrefix'), value: p0.np ?? '', placeholder: '/19', onInput: (v) => { highlight = null; live.change({ np: v, pg: undefined }); }, onEnter: commit });
+  const pf = prefixField({ label: t('ui.sub.prefix'), value: p0.p ?? '', placeholder: '/16', onInput: (v) => { highlight = null; live.change({ p: v, pg: undefined, ...closePlan() }); }, onEnter: commit });
+  const npf = prefixField({ label: t('ui.sub.newPrefix'), value: p0.np ?? '', placeholder: '/19', onInput: (v) => { highlight = null; live.change({ np: v, pg: undefined, ...closePlan() }); }, onEnter: commit });
   const bf = ipField({
     label: t('ui.sub.block'), value: p0.b ?? '', hint: t('ui.sub.block.hint'), placeholder: '10.0.0.0', width: '20ch',
-    onInput: (v) => { highlight = null; live.change({ b: v, pg: undefined }); }, onEnter: commit,
+    onInput: (v) => { highlight = null; live.change({ b: v, pg: undefined, ...closePlan() }); }, onEnter: commit,
     onSplit: (rest, typed) => {
       pf.setValue(rest);
       live.change({ p: rest });
@@ -68,9 +85,63 @@ export function createSuddivisione(ctx, route) {
   const tableHost = h('div');
   const steps = createStepsPanel(ctx, { fn: 'F06', method: 'magic', onMethod: () => {} });
   const listSection = h('section', { class: 'card list-card' }, findBox, tableHost);
+  const planBox = h('div', { class: 'plan-box' });
+  const saveSlot = h('div');
+  const barSlot = h('div');
   const el = h('div', { class: 'view view-suddivisione' },
     h('form', { class: 'form-row', novalidate: true, onsubmit: (/** @type {Event} */ e) => { e.preventDefault(); commit(); } }, bf.el, pf.el, npf.el),
-    h('div', { class: 'results' }, summary, steps.el, listSection));
+    planBox,
+    h('div', { class: 'results' }, summary, saveSlot, steps.el, listSection, barSlot));
+
+  /** Riquadro del piano aperto: nome, note, comandi. */
+  function renderPlanBox() {
+    const id = live.params.piano;
+    const pl = plan();
+    if (!id) return planBox.replaceChildren();
+    if (!pl) return replace(planBox, notice(t('ui.plans.notFound'), 'warn'));
+    replace(planBox, h('section', { class: 'card plan-current', 'aria-label': `${t('ui.plans.current')}: ${pl.name}` },
+      h('p', { class: 'card-title' }, t('ui.plans.current')),
+      h('h2', { class: 'plan-name' }, pl.name),
+      pl.notes ? h('p', { class: 'plan-notes' }, pl.notes) : null,
+      h('p', { class: 'field-hint' }, t('ui.plans.labelsHint')),
+      ctx.store.get().settings.persist ? null : notice(t('ui.plans.notPersisted')),
+      h('div', { class: 'button-row' },
+        button(t('ui.plans.edit'), () => openPlanDialog({
+          title: t('ui.plans.editTitle'), name: pl.name, notes: pl.notes, confirm: t('ui.plans.saveChanges'),
+          onSave: (name, notes) => {
+            ctx.store.set((st) => updatePlan(st, pl.id, { name, notes }, ctx.now()));
+            ctx.toast(t('ui.plans.updated'));
+          },
+        }), { icon: 'edit' }),
+        button(t('ui.plans.close'), () => ctx.go(VIEW, { b: live.params.b ?? '', p: live.params.p ?? '', np: live.params.np ?? '' }), { icon: 'close' }))));
+  }
+
+  /**
+   * "Salva come piano" (9.1).
+   * @param {any} v valore di subdivide
+   */
+  function saveAsPlan(v) {
+    if (ctx.store.get().plans.length >= PLANS_MAX) {
+      ctx.toast(t('ui.plans.full'));
+      return;
+    }
+    openPlanDialog({
+      title: t('ui.plans.save'),
+      name: t('ui.plans.defaultName', { block: cidr(v.block.network, v.block.prefix), np: v.newPrefix }),
+      notes: '',
+      confirm: t('ui.plans.save'),
+      onSave: (name, notes) => {
+        const now = ctx.now();
+        const id = ctx.newId();
+        ctx.store.set((st) => addPlan(st, {
+          id, type: 'subdivision', name, notes, createdAt: now, updatedAt: now,
+          input: { block: toDotted(v.block.network), prefix: v.block.prefix, newPrefix: v.newPrefix }, labels: {},
+        }));
+        ctx.toast(t('ui.plans.saved'));
+        ctx.go(VIEW, { b: toDotted(v.block.network), p: String(v.block.prefix), np: String(v.newPrefix), piano: id });
+      },
+    });
+  }
 
   /** Esito della prima chiamata (conteggio), usato per i limiti di pagina. */
   function base() {
@@ -83,6 +154,9 @@ export function createSuddivisione(ctx, route) {
     const p = live.params;
     const fields = { block: bf, prefix: pf, mask: pf, newPrefix: npf };
     steps.el.hidden = true;
+    saveSlot.replaceChildren();
+    barSlot.replaceChildren();
+    renderPlanBox();
     if (['b', 'p', 'np'].every((k) => (p[k] ?? '').trim() === '')) {
       routeError(null, fields, 'block', false);
       replace(summary, h('div', { class: 'empty' }, examples(EXAMPLES.map((ex) => ({ label: ex.label, onPick: () => pick(ex.params) })))));
@@ -121,6 +195,20 @@ export function createSuddivisione(ctx, route) {
     }));
     renderTable(v, page);
     listSection.hidden = false;
+    const pl = plan();
+    if (!pl) replace(saveSlot, h('div', { class: 'button-row' }, button(t('ui.plans.save'), () => saveAsPlan(v), { icon: 'save' })));
+    if (ctx.store.get().settings.exportBar) {
+      replace(barSlot, exportBar(ctx, () => {
+        const cur = plan();
+        return {
+          fn: 'F06', value: v, warnings: first.warnings, input: entryFor(VIEW, live.params)?.input ?? {},
+          rowsInput: cur ? { labels: cur.labels, plan: cur.name } : {},
+          name: 'suddivisione', parts: [toDotted(v.block.network), v.block.prefix, v.newPrefix],
+          steps: live.didactic() ? [{ fn: 'F06', value: v, method: 'magic', warnings: first.warnings }] : [],
+          table: { count: v.count, offset: page * PAGE_SIZE, size: PAGE_SIZE },
+        };
+      }));
+    }
     if (live.didactic()) {
       steps.update(v, 'magic');
       steps.el.hidden = false;
@@ -136,7 +224,8 @@ export function createSuddivisione(ctx, route) {
   function renderTable(v, page) {
     const info = pageInfo(page * PAGE_SIZE, PAGE_SIZE, v.count);
     const caption = t('ui.sub.caption', { from: info.from, to: info.to, count: v.count });
-    const cols = ['n', 'network', 'first', 'last', 'broadcast', 'hosts'];
+    const pl = plan();
+    const cols = ['n', 'network', 'first', 'last', 'broadcast', 'hosts', ...(pl ? ['label'] : [])];
     const table = h('div', { class: 'tbl tbl-scroll', tabindex: '0', role: 'region', 'aria-label': caption },
       h('table', { class: 'subnets' },
         h('caption', { class: 'sr-only' }, caption),
@@ -147,8 +236,24 @@ export function createSuddivisione(ctx, route) {
           h('td', { class: 'mono' }, ip(s.firstHost)),
           h('td', { class: 'mono' }, ip(s.lastHost)),
           h('td', { class: 'mono' }, ip(s.broadcast)),
-          h('td', { class: 'num' }, num(s.usableHosts)))))));
+          h('td', { class: 'num' }, num(s.usableHosts)),
+          pl ? h('td', { class: 'label-cell' }, labelInput(pl.id, s.index, pl.labels[String(s.index)] ?? '')) : null)))));
     replace(tableHost, h('p', { class: 'list-caption' }, caption), table, info.pages > 1 ? pager(info.page, info.pages) : null);
+  }
+
+  /**
+   * Campo dell'etichetta di una subnet del piano aperto: si salva mentre si scrive.
+   * @param {string} id
+   * @param {number} index
+   * @param {string} value
+   */
+  function labelInput(id, index, value) {
+    const input = h('input', {
+      type: 'text', class: 'input label-input', value, maxlength: '80', autocomplete: 'off', spellcheck: 'false',
+      'aria-label': t('ui.plans.labelFor', { n: index + 1 }),
+    });
+    input.addEventListener('input', () => ctx.store.set((st) => setPlanLabel(st, id, index, input.value, ctx.now())));
+    return input;
   }
 
   /**
@@ -227,6 +332,14 @@ export function createSuddivisione(ctx, route) {
   // un collegamento con ip= apre direttamente la pagina della subnet che lo contiene
   if ((p0.ip ?? '').trim() !== '' && base().ok) go();
 
+  // nome e note del piano cambiati altrove (Piani salvati, import, altra scheda): si aggiorna il riquadro
+  const unsubscribe = ctx.store.subscribe((st, prev) => {
+    if (!live.params.piano || st.plans === prev.plans) return;
+    const a = st.plans.find((x) => x.id === live.params.piano);
+    const b = prev.plans.find((x) => x.id === live.params.piano);
+    if (!a || !b || a.name !== b.name || a.notes !== b.notes) renderPlanBox();
+  });
+
   return {
     el,
     update(r) {
@@ -237,8 +350,11 @@ export function createSuddivisione(ctx, route) {
       find.setValue(r.params.ip ?? '');
       render({ initial: true, commit: false });
     },
-    destroy: () => live.cancel(),
-    printInputs: () => [`${t('ui.sub.block')}: ${bf.value}${pf.value ? ` ${pf.value}` : ''}`, npf.value && `${t('ui.sub.newPrefix')}: ${npf.value}`].filter(Boolean),
+    destroy: () => {
+      live.cancel();
+      unsubscribe();
+    },
+    printInputs: () => [plan() ? `${t('ui.plans.current')}: ${plan()?.name}` : '', `${t('ui.sub.block')}: ${bf.value}${pf.value ? ` ${pf.value}` : ''}`, npf.value && `${t('ui.sub.newPrefix')}: ${npf.value}`].filter(Boolean),
   };
 }
 

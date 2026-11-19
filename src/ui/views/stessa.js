@@ -9,11 +9,12 @@ import { prefixField } from '../components/prefix-field.js';
 import { resultCard, yesNo } from '../components/result-card.js';
 import { icon } from '../icons.js';
 import { examples } from '../components/controls.js';
+import { exportBar } from '../components/export-bar.js';
 import { createStepsPanel } from '../components/steps-panel.js';
 import { liveView, routeError } from './view-kit.js';
 import { entryFor } from '../history-map.js';
 import { ip, cidr } from '../format.js';
-import { sameSubnetText } from '../../engine/index.js';
+import { sameSubnetText, toDotted } from '../../engine/index.js';
 import { t } from '../../i18n/strings.it.js';
 
 const VIEW = 'calcola/stessa';
@@ -55,17 +56,19 @@ export function createStessa(ctx, route) {
   const out = h('div', { class: 'results' });
   const steps = createStepsPanel(ctx, { fn: 'F07', method: live.method('F07'), onMethod: (m) => live.setMethod('F07', m) });
   const fields = { a, prefixA: pa, b, prefixB: pb, gateway: gw };
+  const barSlot = h('div');
   const el = h('div', { class: 'view view-stessa' },
     h('form', { class: 'form-grid', novalidate: true, onsubmit: (/** @type {Event} */ e) => { e.preventDefault(); commit(); } },
       h('div', { class: 'form-row' }, a.el, pa.el),
       h('div', { class: 'form-row' }, b.el, pb.el),
       h('div', { class: 'form-row' }, gw.el)),
-    out, steps.el);
+    out, steps.el, barSlot);
 
   /** @param {{ initial: boolean, commit: boolean }} opts */
   function render(opts) {
     const p = live.params;
     steps.el.hidden = true;
+    barSlot.replaceChildren();
     if (!['a', 'pa', 'b', 'pb', 'gw'].some((k) => (p[k] ?? '').trim() !== '')) {
       routeError(null, fields, 'a', false);
       replace(out, h('div', { class: 'empty' }, examples(EXAMPLES.map((ex) => ({ label: ex.label, onPick: () => pick(ex.params) })))));
@@ -111,6 +114,12 @@ export function createStessa(ctx, route) {
     if (live.didactic()) {
       steps.update(v, live.method('F07'));
       steps.el.hidden = false;
+    }
+    if (ctx.store.get().settings.exportBar) {
+      replace(barSlot, exportBar(ctx, () => ({
+        fn: 'F07', value: v, warnings: r.warnings, input: entryFor(VIEW, live.params)?.input ?? {}, name: 'stessa', parts: [toDotted(v.a), toDotted(v.b)],
+        steps: live.didactic() ? [{ fn: 'F07', value: v, method: live.method('F07'), warnings: r.warnings }] : [],
+      })));
     }
     ctx.announce(t('ui.announce.same', { verdict }));
     ctx.record(entryFor(VIEW, p), opts.commit);

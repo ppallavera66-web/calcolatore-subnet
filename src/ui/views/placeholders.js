@@ -1,26 +1,11 @@
 // @ts-check
 /**
- * Segnaposto: Pianifica · Piani salvati (fase 5) e Guide (fase 6).
+ * Segnaposto: Guide (fase 6).
  * Le rotte esistono già, così i collegamenti "Capitolo N" e "?" funzionano e indicano dove porteranno.
  */
 import { h } from '../dom.js';
 import { notice } from '../components/result-card.js';
-import { button } from '../components/controls.js';
 import { t } from '../../i18n/strings.it.js';
-
-/**
- * @param {import('../types.js').Ctx} ctx
- * @returns {import('../types.js').View}
- */
-export function createPiani(ctx) {
-  return {
-    el: h('div', { class: 'view view-piani' },
-      h('section', { class: 'card empty-card' },
-        h('p', { class: 'empty-title' }, t('ui.plans.empty')),
-        h('p', {}, t('ui.plans.pending')),
-        h('p', {}, button(t('ui.plans.toSubdivide'), () => ctx.go('pianifica/suddivisione'), { icon: 'pianifica' })))),
-  };
-}
 
 const CHAPTERS = Array.from({ length: 19 }, (_, i) => `cap-${i + 1}`);
 

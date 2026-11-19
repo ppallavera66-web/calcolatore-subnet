@@ -4,7 +4,7 @@
  * numeri senza separatori e indirizzi in forma puntata. È un formato diverso dalla sessione (6).
  * Con "Includi i passaggi" aggiunge `steps`: i passaggi come dati strutturati (metodo, capitolo, valori).
  */
-import { toDotted, explain } from '../engine/index.js';
+import { toDotted, explain, iterateSubnets } from '../engine/index.js';
 
 export const RESULT_FORMAT = 'subnetcalc-result';
 export const RESULT_VERSION = 1;
@@ -47,4 +47,20 @@ export function toResultJson(o) {
   if (o.warnings?.length) doc.warnings = o.warnings;
   if (o.steps?.length) doc.steps = o.steps.map((s) => withDotted(explain(s.fn, s.value, s.method, s.warnings ?? [])));
   return `${JSON.stringify(doc, null, 2)}\n`;
+}
+
+/**
+ * Uscita di F06 per un intervallo di subnet [start, end): il riepilogo del motore senza la pagina,
+ * più le subnet dell'intervallo (con l'etichetta del piano, se c'è).
+ * @param {any} v valore di `subdivide`
+ * @param {[number, number]} range
+ * @param {Record<string, string> | null} [labels]
+ */
+export function subdivideOutput(v, range, labels = null) {
+  const { page: _page, hasMore: _more, ...summary } = v;
+  const items = [];
+  for (const s of iterateSubnets(v.block.network, v.block.prefix, v.newPrefix, range[0], range[1])) {
+    items.push(labels && labels[String(s.index)] !== undefined ? { ...s, label: labels[String(s.index)] } : s);
+  }
+  return { ...summary, range: { from: range[0] + 1, to: range[1] }, items };
 }

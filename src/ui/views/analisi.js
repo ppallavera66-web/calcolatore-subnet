@@ -121,7 +121,7 @@ export function createAnalisi(ctx, route) {
     }
     routeError(null, { ip: ipf, prefix, mask: prefix }, 'ip', false);
     const didactic = live.didactic();
-    const bar = ctx.store.get().settings.exportBar ? exportBar(ctx, { snippet: out.kind === 'analysis' }) : null;
+    const exportOn = ctx.store.get().settings.exportBar;
 
     if (out.kind === 'classify') {
       const c = out.value;
@@ -138,6 +138,12 @@ export function createAnalisi(ctx, route) {
         children: [notice(t('ui.r.noPrefix'))],
       });
       if (didactic) classSteps.update(c, 'rules');
+      const bar = exportOn
+        ? exportBar(ctx, () => ({
+            fn: 'F04', value: c, input: { ip: toDotted(c.ip) }, name: 'tipo', parts: [toDotted(c.ip)],
+            steps: live.didactic() ? [{ fn: 'F04', value: c, method: 'rules' }] : [],
+          }))
+        : null;
       layout({ card, classSteps: didactic, bar });
       ctx.announce(t('ui.announce.classify', { scope: type.scope.toLowerCase(), cls: c.historicalClass.letter }));
     } else {
@@ -169,6 +175,13 @@ export function createAnalisi(ctx, route) {
       });
       snip.update(v.network, v.prefix);
       if (didactic) steps.update(v, live.method('F01'));
+      const bar = exportOn
+        ? exportBar(ctx, () => ({
+            fn: 'F01', value: v, warnings: r.warnings, input: { ip: toDotted(v.ip), prefix: v.prefix }, name: 'analisi', parts: [toDotted(v.network), v.prefix],
+            steps: live.didactic() ? [{ fn: 'F01', value: v, method: live.method('F01'), warnings: r.warnings }] : [],
+            snippet: () => snip.text(),
+          }), { snippet: true })
+        : null;
       layout({ card, snip: true, steps: didactic, bar });
       ctx.announce(t('ui.announce.analisi', { network: cidr(v.network, v.prefix), broadcast: ip(v.broadcast), hosts: num(v.usableHosts) }));
     }
@@ -240,6 +253,10 @@ function snippetSection(ctx, didactic) {
       stepsHost),
   );
 
+  /** Ultimo snippet valido, per l'export (F10). */
+  /** @type {string | null} */
+  let lastText = null;
+
   /** @param {boolean} now */
   function refresh(now) {
     if (!target) return;
@@ -250,11 +267,13 @@ function snippetSection(ctx, didactic) {
     const fields = { aclNumber: fNumber, aclName: fName, ospfProcess: fProcess, ospfArea: fArea };
     routeError(r.ok ? null : r.error, fields, 'aclNumber', now);
     if (!r.ok) {
+      lastText = null;
       blocks.replaceChildren();
       stepsHost.replaceChildren();
       return;
     }
     const v = r.value;
+    lastText = `${['aclStandard', 'aclNamed', 'ospf'].map((k) => `! ${t(`ui.snip.${k}`)}\n${/** @type {any} */ (v.lines)[k].join('\n')}`).join('\n\n')}\n`;
     const code = (/** @type {'aclStandard' | 'aclNamed' | 'ospf'} */ key) => {
       const text = v.lines[key].join('\n');
       return h('figure', { class: 'snip-block' },
@@ -280,5 +299,6 @@ function snippetSection(ctx, didactic) {
       target = { network, prefix };
       refresh(false);
     },
+    text: () => lastText,
   };
 }

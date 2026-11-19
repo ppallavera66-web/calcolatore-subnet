@@ -28,7 +28,7 @@ export const VIEW_PARAMS = Object.freeze({
   'calcola/mask': ['m'],
   'calcola/stessa': ['a', 'pa', 'b', 'pb', 'gw'],
   'pianifica/inverso': ['caso', 'p', 'h', 's'],
-  'pianifica/suddivisione': ['b', 'p', 'np', 'pg', 'ip'],
+  'pianifica/suddivisione': ['b', 'p', 'np', 'pg', 'ip', 'piano'],
   'pianifica/piani': [],
   'guide/uso': [],
   'guide/subnetting': [],

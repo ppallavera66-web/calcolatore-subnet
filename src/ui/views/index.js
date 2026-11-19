@@ -8,7 +8,8 @@ import { createMask } from './mask.js';
 import { createStessa } from './stessa.js';
 import { createInverso } from './inverso.js';
 import { createSuddivisione } from './suddivisione.js';
-import { createPiani, createGuide } from './placeholders.js';
+import { createGuide } from './placeholders.js';
+import { createPiani } from './piani.js';
 import { createImpostazioni } from './impostazioni.js';
 
 /** @type {Record<string, (ctx: import('../types.js').Ctx, route: import('../types.js').Route) => import('../types.js').View>} */

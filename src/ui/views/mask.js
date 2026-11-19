@@ -8,6 +8,7 @@ import { h, replace } from '../dom.js';
 import { textField } from '../components/field.js';
 import { resultCard, notice, warningsBox, yesNo } from '../components/result-card.js';
 import { examples } from '../components/controls.js';
+import { exportBar } from '../components/export-bar.js';
 import { createStepsPanel } from '../components/steps-panel.js';
 import { liveView } from './view-kit.js';
 import { entryFor } from '../history-map.js';
@@ -39,7 +40,8 @@ export function createMask(ctx, route) {
   });
   const out = h('div', { class: 'results' });
   const steps = createStepsPanel(ctx, { fn: 'F03', method: 'binary', onMethod: () => {} });
-  const el = h('div', { class: 'view view-mask' }, h('form', { class: 'form-row', novalidate: true, onsubmit: (/** @type {Event} */ e) => { e.preventDefault(); live.commit(); } }, field.el), out, steps.el);
+  const barSlot = h('div');
+  const el = h('div', { class: 'view view-mask' }, h('form', { class: 'form-row', novalidate: true, onsubmit: (/** @type {Event} */ e) => { e.preventDefault(); live.commit(); } }, field.el), out, steps.el, barSlot);
 
   /** @param {string} m */
   function use(m) {
@@ -53,6 +55,7 @@ export function createMask(ctx, route) {
   function render(opts) {
     const m = live.params.m ?? '';
     steps.el.hidden = true;
+    barSlot.replaceChildren();
     if (m.trim() === '') {
       field.setError(null);
       replace(out, h('div', { class: 'empty' }, examples(EXAMPLES.map((ex) => ({ label: ex, onPick: () => use(ex) })))));
@@ -95,6 +98,12 @@ export function createMask(ctx, route) {
     if (live.didactic()) {
       steps.update(v, 'binary', r.warnings);
       steps.el.hidden = false;
+    }
+    if (ctx.store.get().settings.exportBar) {
+      replace(barSlot, exportBar(ctx, () => ({
+        fn: 'F03', value: v, warnings: r.warnings, input: { mask: toDotted(v.mask) }, name: 'mask', parts: [toDotted(v.mask)],
+        steps: live.didactic() ? [{ fn: 'F03', value: v, method: 'binary', warnings: r.warnings }] : [],
+      })));
     }
     ctx.announce(v.valid ? t('ui.mask.valid', { prefix: v.prefix }) : `${t('ui.mask.invalid')}. ${v.reason ? message(v.reason) : ''}`);
     ctx.record(entryFor(VIEW, live.params), opts.commit);
