@@ -187,6 +187,7 @@ async function main() {
     suddivisione: '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=19&did=1',
     impostazioni: '#/impostazioni',
     guide: '#/guide/subnetting/cap-9',
+    uso: '#/guide/uso/export',
   };
   for (const theme of ['light', 'dark', 'contrast']) {
     await check(`tema ${theme}: variabili e axe su ${Object.keys(SCREENS).length} schermate`, async () => {
@@ -204,6 +205,7 @@ async function main() {
         const bg = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
         assert(hex(bg) === /** @type {any} */ (BG)[theme], `${name}: --bg = ${bg}`);
         if (name === 'analisi') await page.click('.snip-summary');
+        if (name === 'guide') await page.focus('#cap-9 .gl-term >> nth=0');
         const v = await axe(page);
         if (v.length) problems.push(`${name}: ${v.join('; ')}`);
         await shot(page, `tema-${theme}-${name}`);
@@ -461,6 +463,218 @@ async function main() {
     await page.click('.help-link');
     await page.waitForSelector('.view-guide');
     assert((await page.evaluate(() => location.hash)) === '#/guide/uso/analisi', 'pulsante "?" non porta alla guida all\'uso');
+    await ctx.close();
+  });
+
+
+  // ------------------------------------------------------------ fase 6: guide integrate
+  console.log('\nGuide (fase 6)');
+  /** Testo e tag dell'elemento con il focus. */
+  const focused = (/** @type {import('playwright-core').Page} */ page) => page.evaluate(() => ({
+    tag: document.activeElement?.tagName.toLowerCase() ?? '',
+    text: (document.activeElement?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+    top: Math.round(document.activeElement?.getBoundingClientRect().top ?? -1),
+  }));
+
+  await check('guida al subnetting: arrivo su cap-9 con il focus sul titolo, voce attiva dell\'indice, collegamenti interni', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/guide/subnetting/cap-9');
+    await page.waitForTimeout(300);
+    const f = await focused(page);
+    assert(f.tag === 'h3' && f.text.includes('Il numero magico'), `focus: ${f.tag} ${f.text}`);
+    assert(f.top >= 0 && f.top < 120, `titolo non in alto: ${f.top}px`);
+    const active = await page.textContent('.guide-toc a[aria-current]');
+    assert(active?.includes('Il numero magico'), `voce attiva: ${active}`);
+    assert((await page.locator('.gl-term').count()) > 100, 'termini del glossario non evidenziati');
+    // ogni collegamento interno delle guide arriva a un elemento esistente
+    const missing = await page.evaluate(() => [...document.querySelectorAll('.guide-body a[href^="#/guide/subnetting/"]')]
+      .map((a) => decodeURIComponent(/** @type {string} */ (a.getAttribute('href')).split('/').pop() ?? ''))
+      .filter((id) => !document.getElementById(id)));
+    assert(missing.length === 0, `ancore mancanti: ${missing.join(', ')}`);
+    // dall'indice al cap. 15, poi indietro al cap. 9
+    await page.click('.guide-toc a[data-id="cap-15"]');
+    await page.waitForTimeout(250);
+    assert((await focused(page)).text.includes('Stessa subnet o no?'), 'indice → cap. 15');
+    await page.goBack();
+    await page.waitForTimeout(250);
+    assert((await focused(page)).text.includes('Il numero magico'), 'indietro → cap. 9');
+    // stessa ancora già nel frammento: si torna comunque al paragrafo
+    await page.mouse.wheel(0, 3000);
+    await page.waitForTimeout(200);
+    await page.click('.guide-toc a[data-id="cap-9"]');
+    await page.waitForTimeout(250);
+    const again = await focused(page);
+    assert(again.text.includes('Il numero magico') && again.top >= 0 && again.top < 120, `stessa ancora: ${again.top}px`);
+    // cheat sheet e glossario dai collegamenti rapidi
+    await page.click('.guide-toc .guide-quick a >> text=Glossario');
+    await page.waitForTimeout(250);
+    assert((await focused(page)).text.startsWith('B'), 'collegamento rapido al glossario');
+    // ancora inesistente: avviso, nessun errore
+    await hashTo(page, '#/guide/subnetting/cap-99');
+    assert((await page.textContent('.guide-status'))?.includes('cap-99'), 'avviso per un\'ancora inesistente');
+    await shot(page, 'guida-subnetting-1280', false);
+    await ctx.close();
+  });
+
+  await check('guida a 390 px: indice in alto richiudibile, nessuno scorrimento orizzontale, aree di tocco', async () => {
+    const { ctx, page } = await open(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    for (const hash of ['#/guide/subnetting', '#/guide/uso']) {
+      await go(page, hash);
+      const st = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+        side: getComputedStyle(/** @type {Element} */ (document.querySelector('.guide-toc'))).display,
+        top: getComputedStyle(/** @type {Element} */ (document.querySelector('.guide-toc-mobile'))).display,
+      }));
+      assert(!st.overflow, `${hash}: la pagina scorre in orizzontale`);
+      assert(st.side === 'none' && st.top !== 'none', `${hash}: indice ${JSON.stringify(st)}`);
+    }
+    await go(page, '#/guide/subnetting');
+    await page.click('.guide-toc-mobile > summary');
+    await page.click('.guide-toc-mobile a[data-id="cap-13"]');
+    await page.waitForTimeout(300);
+    const f = await focused(page);
+    assert(f.text.includes('Broadcast e host in un lampo') && f.top > 40 && f.top < 160, `focus dopo l'indice: ${f.text} ${f.top}px`);
+    assert(!(await page.evaluate(() => /** @type {HTMLDetailsElement} */ (document.querySelector('.guide-toc-mobile')).open)), 'l\'indice resta aperto');
+    const small = await page.evaluate(() => [...document.querySelectorAll('.guide-toc-mobile summary, .guide-body .open-calc a, .guide-body details.sol summary')]
+      .filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height < 44; }).length);
+    assert(small === 0, `${small} aree di tocco sotto 44 px`);
+    await shot(page, 'guida-390', false);
+    await ctx.close();
+  });
+
+  await check('"Capitolo N" dai passaggi e "?" (anche in Impostazioni): paragrafo giusto con il focus; indietro torna alla schermata', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/analisi?ip=172.16.45.200&p=20&did=1&metodo=magic');
+    await page.click('.results > .steps-panel:not([hidden]) .chapter-link >> nth=0');
+    await page.waitForSelector('.view-guide');
+    await page.waitForTimeout(250);
+    assert((await focused(page)).text.includes('Il numero magico'), 'Capitolo 9 dai passaggi');
+    await page.goBack();
+    await page.waitForSelector('.view-analisi');
+    assert((await page.inputValue('.view-analisi input >> nth=0')) === '172.16.45.200', 'input perso tornando indietro');
+    for (const [hash, title] of [
+      ['#/calcola/conversioni', 'Conversioni'], ['#/calcola/mask', 'Validazione mask'], ['#/calcola/stessa', 'Stessa subnet?'],
+      ['#/pianifica/inverso', 'Calcolo inverso'], ['#/pianifica/suddivisione', 'Suddivisione di un blocco'], ['#/pianifica/piani', 'Piani salvati'],
+      ['#/impostazioni', 'Impostazioni'],
+    ]) {
+      await hashTo(page, hash);
+      await page.click('.help-link');
+      await page.waitForSelector('.view-guide');
+      await page.waitForTimeout(200);
+      const f = await focused(page);
+      assert(f.tag === 'h3' && f.text === title, `"?" da ${hash}: ${f.tag} ${f.text}`);
+    }
+    await ctx.close();
+  });
+
+  await check('"Apri nel calcolatore": funzione precompilata con passaggi e metodo, impostazioni invariate', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/guide/subnetting/cap-7');
+    await page.click('.guide-body a[href="#/calcola/analisi?ip=172.16.45.200&p=20&did=1&metodo=binary"]');
+    await page.waitForSelector('.view-analisi');
+    await page.waitForTimeout(300);
+    assert((await page.textContent('.kv-primary'))?.includes('172.16.32.0/20'), 'risultato assente');
+    assert(await page.isVisible('.results > .steps-panel:not([hidden])'), 'passaggi assenti');
+    const method = await page.evaluate(() => /** @type {HTMLInputElement | null} */ (document.querySelector('.steps-panel input[type=radio]:checked'))?.value);
+    assert(method === 'binary', `metodo: ${method}`);
+    await page.goBack();
+    await page.waitForSelector('.view-guide');
+    await page.click('.guide-body a[href^="#/calcola/stessa?a=192.168.1.10&pa=24&b=192.168.1.200"]');
+    await page.waitForSelector('.view-stessa');
+    await page.waitForTimeout(300);
+    assert((await page.textContent('.view-stessa'))?.includes('192.168.1.128'), 'Stessa subnet non calcolata');
+    await hashTo(page, '#/impostazioni');
+    const didactic = await page.getByRole('switch', { name: 'Modalità didattica' }).getAttribute('aria-checked');
+    assert(didactic === 'false', 'il collegamento ha cambiato l\'impostazione della modalità didattica');
+    await ctx.close();
+  });
+
+  await check('glossario da tastiera: Tab apre il riquadro, Tab nei suoi collegamenti, Esc chiude e torna al termine', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/guide/subnetting/cap-7');
+    await page.waitForTimeout(200);
+    // dal titolo del capitolo, Tab fino al primo termine
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('Tab');
+      if (await page.evaluate(() => document.activeElement?.classList.contains('gl-term'))) break;
+    }
+    const term = await page.evaluate(() => ({ cls: document.activeElement?.className ?? '', text: document.activeElement?.textContent ?? '', desc: document.activeElement?.getAttribute('aria-describedby') ?? '' }));
+    assert(term.cls.includes('gl-term'), `focus non su un termine: ${term.cls}`);
+    assert(await page.isVisible('.gl-pop'), 'riquadro non aperto con il focus');
+    assert(await page.evaluate((id) => !!document.getElementById(id), term.desc), 'aria-describedby senza definizione');
+    await page.keyboard.press('Tab');
+    assert(await page.evaluate(() => !!document.activeElement?.closest('.gl-pop')), 'Tab non entra nel riquadro');
+    await page.keyboard.press('Escape');
+    const back = await page.evaluate(() => ({ cls: document.activeElement?.className ?? '', text: document.activeElement?.textContent ?? '' }));
+    assert(back.cls.includes('gl-term') && back.text === term.text, 'Esc non riporta al termine');
+    assert(!(await page.isVisible('.gl-pop')), 'Esc non chiude il riquadro');
+    // Invio riapre; il collegamento "Glossario" evidenzia la voce
+    await page.keyboard.press('Enter');
+    await page.click('.gl-pop a >> text=Glossario');
+    await page.waitForTimeout(250);
+    const row = await page.evaluate(() => ({ tag: document.activeElement?.tagName ?? '', target: document.activeElement?.classList.contains('is-target') }));
+    assert(row.tag === 'TR' && row.target, `voce del glossario: ${JSON.stringify(row)}`);
+    // mouse: il riquadro compare al passaggio
+    await go(page, '#/guide/subnetting/cap-9');
+    await page.hover('#cap-9 .gl-term >> nth=0');
+    await page.waitForTimeout(100);
+    assert(await page.isVisible('.gl-pop'), 'riquadro non aperto al passaggio del mouse');
+    await ctx.close();
+  });
+
+  await check('tema dall\'indice della guida: vale per tutta l\'app e si salva con "Memorizza i dati"', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Memorizza i dati' }).click();
+    await hashTo(page, '#/guide/uso');
+    await page.selectOption('.guide-toc select', 'contrast');
+    assert((await page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === 'contrast', 'tema non applicato');
+    await page.waitForTimeout(450);
+    await page.reload();
+    await page.waitForSelector('.view-guide');
+    const st = await page.evaluate(() => ({ attr: document.documentElement.getAttribute('data-theme'), sel: /** @type {HTMLSelectElement} */ (document.querySelector('.guide-toc select')).value }));
+    assert(st.attr === 'contrast' && st.sel === 'contrast', `dopo il ricaricamento: ${JSON.stringify(st)}`);
+    await hashTo(page, '#/impostazioni');
+    assert(await page.getByRole('radio', { name: 'Alto contrasto', exact: true }).isChecked(), 'Impostazioni non allineate');
+    await ctx.close();
+  });
+
+  await check('stampa della guida: fondo chiaro, indice e collegamenti all\'app nascosti, soluzioni aperte, PDF', async () => {
+    const { ctx, page } = await open(browser, { colorScheme: 'dark' });
+    await go(page, '#/guide/subnetting/cap-8');
+    await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+    await page.emulateMedia({ media: 'print' });
+    const st = await page.evaluate(() => {
+      const disp = (/** @type {string} */ s) => { const e = document.querySelector(s); return e ? getComputedStyle(e).display : 'assente'; };
+      return {
+        bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),
+        toc: disp('.guide-toc'), tocTop: disp('.guide-toc-mobile'), calc: disp('.guide-body .open-calc'), head: disp('.print-head'), sidebar: disp('.sidebar'),
+        closed: document.querySelectorAll('details.sol:not([open])').length,
+        label: getComputedStyle(/** @type {Element} */ (document.querySelector('details.sol .body')), '::before').content,
+      };
+    });
+    assert(hex(st.bg) === '#ffffff', `--bg in stampa: ${st.bg}`);
+    for (const k of ['toc', 'tocTop', 'calc', 'head', 'sidebar']) assert(/** @type {any} */ (st)[k] === 'none', `${k} visibile in stampa`);
+    assert(st.closed === 0, 'soluzioni chiuse in stampa');
+    assert(st.label.includes('Soluzione'), `etichetta delle soluzioni: ${st.label}`);
+    const pdf = await page.pdf({ format: 'A4', printBackground: true });
+    writeFileSync(resolve(OUT, 'stampa-guida-subnetting.pdf'), pdf);
+    await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+    assert((await page.evaluate(() => document.querySelectorAll('details.sol[open]').length)) === 0, 'soluzioni non richiuse dopo la stampa');
+    await ctx.close();
+  });
+
+  await check('axe sulle guide: 390 px, tema scuro, riquadro del glossario aperto e indice in alto aperto', async () => {
+    const { ctx, page } = await open(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, colorScheme: 'dark' });
+    const problems = [];
+    for (const hash of ['#/guide/subnetting/cap-11', '#/guide/uso/sessione']) {
+      await go(page, hash);
+      await page.click('.guide-toc-mobile > summary');
+      if (hash.includes('subnetting')) await page.focus('#cap-11 .gl-term >> nth=0');
+      const v = await axe(page);
+      if (v.length) problems.push(`${hash}: ${v.join('; ')}`);
+    }
+    assert(problems.length === 0, problems.join('\n'));
     await ctx.close();
   });
 
