@@ -61,8 +61,10 @@
 /* ---------- torna su e messaggi brevi ---------- */
 .to-top{position:fixed;right:var(--sp-4);bottom:calc(var(--bottom-bar-h) + var(--sp-4) + env(safe-area-inset-bottom));z-index:var(--z-top);
   width:48px;height:48px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--net);
-  display:grid;place-items:center;box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s}
-.to-top.show{opacity:1;pointer-events:auto;transform:none}
+  display:grid;place-items:center;box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translateY(8px);
+  visibility:hidden;transition:opacity .2s,transform .2s,visibility 0s .2s}
+/* nascosto anche per la tastiera e i lettori di schermo finché non serve (WCAG 2.4.7, revisione C2) */
+.to-top.show{opacity:1;pointer-events:auto;transform:none;visibility:visible;transition:opacity .2s,transform .2s,visibility 0s}
 .to-top:hover{border-color:var(--net)}
 .toast{position:fixed;left:50%;bottom:calc(var(--bottom-bar-h) + var(--sp-5) + env(safe-area-inset-bottom));z-index:var(--z-toast);
   transform:translate(-50%,12px);max-width:min(92vw,520px);padding:10px 16px;border-radius:var(--r-lg);background:var(--strong);color:var(--bg);

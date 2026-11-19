@@ -17,7 +17,8 @@
 .input{min-height:var(--touch-min);padding:8px 12px;font-size:16px;background:var(--bg);color:var(--strong);
   border:1px solid var(--line-strong);border-radius:var(--r-md);max-width:100%}
 .input.mono{font-family:var(--font-mono);letter-spacing:.01em}
-.input::placeholder{color:var(--muted);opacity:.75}
+/* segnaposto con il contrasto del testo secondario, 4,5:1 (revisione C10) */
+.input::placeholder{color:var(--muted);opacity:1}
 .input:focus-visible{outline:2px solid var(--net);outline-offset:1px;border-color:var(--net)}
 .input[aria-invalid="true"]{border-color:var(--warn);box-shadow:inset 3px 0 0 var(--warn)}
 select.input{padding-right:28px}

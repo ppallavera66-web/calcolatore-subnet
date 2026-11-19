@@ -999,6 +999,14 @@ async function main() {
     await page.reload();
     await page.waitForSelector('.plan-current');
     assert((await page.getByLabel('Etichetta della subnet n. 11', { exact: true }).inputValue()) === 'VLAN 10 · Uffici', 'etichetta persa al ricaricamento');
+    // collegamento modificato a mano: stesso piano, altro blocco → il piano non si apre (revisione I3, C5)
+    const planHash = await page.evaluate(() => location.hash);
+    const pid = new URLSearchParams(planHash.split('?')[1]).get('piano');
+    await hashTo(page, `#/pianifica/suddivisione?b=172.16.0.0&p=16&np=24&piano=${pid}`);
+    assert(!(await page.isVisible('.plan-current')) && !(await page.$('.label-input')), 'piano aperto su un altro blocco');
+    assert((await page.textContent('.view'))?.includes('non sono quelli del piano'), 'avviso assente');
+    await hashTo(page, planHash);
+    await page.waitForSelector('.plan-current');
     // cambiare i prefissi chiude il piano
     await page.getByLabel('Nuovo prefisso').fill('/25');
     await page.waitForTimeout(300);
@@ -1049,6 +1057,91 @@ async function main() {
   });
 
   // ------------------------------------------------------------ stampa
+  console.log('\nRevisione della fase 7');
+  await check('telefono 390 px: con Tab il controllo con il focus non finisce sotto le barre (C1); "torna su" nascosto non si raggiunge (C2)', async () => {
+    // movimento ridotto: lo scorrimento è immediato e la posizione si misura subito
+    const { ctx, page } = await open(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    for (const hash of ['#/impostazioni', '#/calcola/analisi?ip=172.16.45.200&p=20&did=1']) {
+      await go(page, hash);
+      await page.waitForTimeout(300);
+      const hidden = await page.evaluate(() => {
+        const el = /** @type {HTMLElement} */ (document.querySelector('.to-top'));
+        el.focus();
+        return { vis: getComputedStyle(el).visibility, focused: document.activeElement === el, shown: el.classList.contains('show') };
+      });
+      assert(hidden.shown || (hidden.vis === 'hidden' && !hidden.focused), `torna su nascosto ma raggiungibile: ${JSON.stringify(hidden)}`);
+      await page.evaluate(() => /** @type {HTMLElement} */ (document.querySelector('.view-title')).focus());
+      /** @type {string[]} */
+      const covered = [];
+      for (let i = 0; i < 70; i++) {
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(30);
+        const c = await page.evaluate(() => {
+          const a = document.activeElement;
+          if (!a || a === document.body || a.closest('.bottom-bar, .topbar, .skip-link, dialog')) return null;
+          const r = a.getBoundingClientRect();
+          const bottom = document.querySelector('.bottom-bar')?.getBoundingClientRect().top ?? innerHeight;
+          const top = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0;
+          return r.bottom > bottom + 1 || r.top < top - 1 ? `${a.tagName.toLowerCase()} "${(a.getAttribute('aria-label') ?? a.textContent ?? '').trim().slice(0, 30)}"` : null;
+        });
+        if (c) covered.push(c);
+      }
+      assert(covered.length === 0, `${hash}: coperti dalle barre: ${[...new Set(covered)].join(', ')}`);
+    }
+    await ctx.close();
+  });
+
+  await check('focus conservato: pagina successiva di Suddivisione, esempio dello stato vuoto, eliminazione di un piano (C3)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=30');
+    await page.focus('[data-pager="next"]');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    assert(await page.evaluate(() => document.activeElement?.getAttribute('data-pager') === 'next'), 'focus perso dopo "Pagina successiva"');
+    assert((await page.inputValue('[data-pager="input"]')) === '2', 'pagina non cambiata');
+    await page.focus('[data-pager="last"]');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    assert(await page.evaluate(() => document.activeElement?.getAttribute('data-pager') === 'input'), 'focus perso dopo "Ultima pagina"');
+    await page.waitForTimeout(900);
+    assert((await page.textContent('[aria-live="polite"].sr-only'))?.includes('Subnet da'), 'pagina nuova non annunciata');
+    for (const hash of ['#/calcola/analisi', '#/calcola/stessa', '#/pianifica/inverso', '#/pianifica/suddivisione']) {
+      await go(page, hash);
+      await page.focus('.examples .chip');
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(300);
+      const tag = await page.evaluate(() => (document.activeElement === document.body ? 'body' : document.activeElement?.tagName.toLowerCase()));
+      assert(tag === 'input', `${hash}: dopo l'esempio il focus è su ${tag}`);
+    }
+    await page.getByRole('button', { name: 'Salva come piano' }).click();
+    await page.getByLabel('Nome', { exact: true }).press('Enter');
+    await page.waitForSelector('.plan-current');
+    await page.waitForTimeout(200);
+    assert(await page.evaluate(() => document.activeElement !== document.body), 'focus perso dopo "Salva come piano"');
+    await hashTo(page, '#/pianifica/piani');
+    await page.getByRole('button', { name: 'Elimina' }).focus();
+    await page.keyboard.press('Enter');
+    await page.getByRole('dialog').getByRole('button', { name: 'Elimina' }).click();
+    await page.waitForSelector('.empty-card');
+    await page.waitForTimeout(200);
+    assert(await page.evaluate(() => document.activeElement?.classList.contains('view-title')), 'focus perso dopo l\'eliminazione del piano');
+    await ctx.close();
+  });
+
+  await check('Conversioni annuncia il risultato (C4); "Apri in Analisi" conserva l\'IP (C6)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/conversioni');
+    await page.getByLabel('Numero', { exact: true }).fill('203');
+    await page.waitForTimeout(1200);
+    assert((await page.textContent('[aria-live="polite"].sr-only'))?.includes('11001011'), `annuncio: ${await page.textContent('[aria-live="polite"].sr-only')}`);
+    await go(page, '#/calcola/analisi?ip=192.168.5.77&p=24');
+    await hashTo(page, '#/pianifica/inverso?h=50');
+    await page.getByRole('button', { name: 'Apri in Analisi' }).click();
+    await page.waitForSelector('.kv-primary');
+    assert((await page.textContent('.kv-primary'))?.includes('192.168.5.64/26'), `analisi: ${await page.textContent('.kv-primary')}`);
+    await ctx.close();
+  });
+
   console.log('\nStampa (9.9)');
   await check('stampa: fondo chiaro, navigazione nascosta, intestazione, F10 aperto, PDF', async () => {
     const { ctx, page } = await open(browser, { colorScheme: 'dark' });

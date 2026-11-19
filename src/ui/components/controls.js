@@ -105,7 +105,18 @@ export function examples(items) {
     'div',
     { class: 'examples' },
     h('span', { class: 'examples-label' }, t('ui.empty.try')),
-    items.map((it) => h('button', { type: 'button', class: 'chip mono', onclick: it.onPick }, it.label)),
+    items.map((it) => h('button', {
+      type: 'button',
+      class: 'chip mono',
+      onclick: (/** @type {MouseEvent} */ e) => {
+        // l'esempio scelto riempie i campi e la vista toglie gli esempi: il focus va al primo campo
+        // invece di perdersi sul body (WCAG 2.4.3, revisione C3)
+        const btn = /** @type {HTMLElement} */ (e.currentTarget);
+        const view = btn.closest('.view');
+        it.onPick();
+        if (!btn.isConnected) /** @type {HTMLElement | null | undefined} */ (view?.querySelector('input:not([type=hidden]):not([type=file]):not([disabled])'))?.focus();
+      },
+    }, it.label)),
   );
 }
 

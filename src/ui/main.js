@@ -137,6 +137,23 @@ toTop.addEventListener('click', () => {
   shell.title.focus({ preventScroll: true });
 });
 const updateToTop = () => toTop.classList.toggle('show', window.scrollY > 400);
+
+// Focus mai perso: se il controllo con il focus sparisce perché la vista si ridisegna (eliminare una
+// voce, salvare un piano, scegliere un esempio), il focus va al primo controllo della finestra aperta
+// o al titolo della schermata, invece di finire sul body (WCAG 2.4.3, revisione C3).
+/** @type {Element | null} */
+let lastFocus = null;
+document.addEventListener('focusin', (e) => { lastFocus = /** @type {Element} */ (e.target); });
+new MutationObserver(() => {
+  if (!lastFocus || lastFocus.isConnected) return;
+  lastFocus = null;
+  if (document.activeElement && document.activeElement !== document.body) return;
+  const dlg = document.querySelector('dialog[open]');
+  const target = dlg
+    ? /** @type {HTMLElement} */ (dlg.querySelector('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? dlg)
+    : shell.title;
+  target.focus({ preventScroll: true });
+}).observe(document.body, { childList: true, subtree: true });
 window.addEventListener('scroll', updateToTop, { passive: true });
 
 // i template delle guide (tools/guides.js) restano nella pagina: la vista delle guide li clona

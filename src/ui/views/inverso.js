@@ -96,7 +96,11 @@ export function createInverso(ctx, route) {
         warnings: r.warnings,
         children: [
           ...v.alternatives.map((/** @type {any} */ a) => notice(t('step.hosts-alt', { altPrefix: typeof a === 'number' ? a : a.prefix }))),
-          h('p', {}, button(t('ui.inv.openAnalysis'), () => ctx.go('calcola/analisi', { p: `/${v.prefix}` }), { icon: 'link' })),
+          // l'IP già scritto in Analisi resta: cambia solo il prefisso (revisione C6)
+          h('p', {}, button(t('ui.inv.openAnalysis'), () => {
+            const { ip: prevIp } = ctx.store.get().inputs['calcola/analisi'] ?? {};
+            ctx.go('calcola/analisi', prevIp ? { ip: prevIp, p: `/${v.prefix}` } : { p: `/${v.prefix}` });
+          }, { icon: 'link' })),
         ],
       });
       ctx.announce(t('ui.announce.inverse', { prefix: v.prefix }));

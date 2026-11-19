@@ -80,6 +80,9 @@ export function createConversioni(ctx, route) {
     const didactic = live.didactic();
     const method = live.method('F02');
     const exportOn = ctx.store.get().settings.exportBar;
+    /** Annuncio per i lettori di schermo del riquadro che si sta modificando (9.7, revisione C4). */
+    /** @type {Record<string, string>} */
+    const said = {};
 
     // numero
     if ((p.n ?? '').trim() === '') {
@@ -104,6 +107,7 @@ export function createConversioni(ctx, route) {
             { label: t('ui.conv.weights'), value: `${v.weights.length ? v.weights.map(num).join(' + ') : '0'} = ${num(v.value)}`, copy: false, wide: true },
           ],
         }));
+        said.number = t('ui.announce.convNumber', { dec: num(v.value), bin: v.bin, hex: v.hex });
         nSteps.el.hidden = !didactic;
         if (didactic) nSteps.update(v, method);
         if (exportOn) {
@@ -138,6 +142,7 @@ export function createConversioni(ctx, route) {
             { label: t('ui.conv.uint32'), value: num(v.uint32), copy: String(v.uint32) },
           ],
         }));
+        said.address = t('ui.announce.convAddress', { hex: v.hex32, n: num(v.uint32) });
         aSteps.el.hidden = !didactic;
         if (didactic) aSteps.update(v, method);
         if (exportOn) {
@@ -162,6 +167,7 @@ export function createConversioni(ctx, route) {
       } else {
         pmField.setError(null);
         const v = prefixToMask(r.value.prefix);
+        said.pm = t('ui.announce.convPm', { prefix: v.prefix, mask: v.maskDotted, wildcard: toDotted(v.wildcard) });
         replace(pmOut, resultCard(ctx, {
           items: [
             { label: t('ui.conv.prefix'), value: `/${v.prefix}` },
@@ -176,6 +182,7 @@ export function createConversioni(ctx, route) {
       }
     }
 
+    if (said[lastPart]) ctx.announce(said[lastPart]);
     if (lastPart !== 'pm') ctx.record(entryFor(VIEW, p, lastPart), opts.commit);
     else ctx.record(null);
   }
