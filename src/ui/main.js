@@ -15,7 +15,7 @@ import { icon } from './icons.js';
 import { createStore, initialState, setInputs, addHistory, newId } from './state.js';
 import { createRouter, routeTo, buildHash } from './router.js';
 import { applyTheme } from './theme.js';
-import { copyText } from './clipboard.js';
+import { copyText } from '../export/clipboard.js';
 import { createShell } from './shell.js';
 import { openHistoryPanel } from './components/history-panel.js';
 import { dateTime } from './format.js';

@@ -2,7 +2,7 @@
 /**
  * Copia negli appunti (specifica tecnica, 5.2): `navigator.clipboard.writeText`, con ripiego su
  * un'area di testo nascosta ed `execCommand("copy")` (utile con la pagina aperta da disco in alcuni browser).
- * La verifica nei vari browser da file:// è prevista in fase 5.
+ * Verifica nei vari browser da file://: docs/verifiche-browser-fase5.md.
  */
 
 /**

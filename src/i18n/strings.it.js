@@ -624,6 +624,50 @@ export const STRINGS = {
   'step.wildcard-magic': (p) => `In pratica: nell'ottetto interessante (il ${ord(p.index)}) vale M − 1 = ${p.wildcardOctet}, 0 a sinistra e 255 a destra.`,
   'step.snippet-host': (p) => `Con /32 le ACL usano la parola chiave host: host ${p.network}.`,
   'step.snippet-any': 'Con /0 le ACL usano la parola chiave any (qualunque indirizzo).',
+
+  // ---------------------------------------------------------------- export (5)
+  'export.item': 'Voce',
+  'export.value': 'Valore',
+  'export.prefix': 'Prefisso',
+  'export.yes': 'sì',
+  'export.no': 'no',
+  'export.result': 'Esito',
+  'export.reason': 'Motivo',
+  'export.defaultMask': 'Mask di default',
+  'export.alternative': 'Alternativa',
+  'export.label': 'Etichetta',
+  'export.plan': 'Piano',
+  'export.rows': 'Righe esportate',
+  'export.warnings': 'Avvisi',
+  'export.method': 'metodo',
+  'export.bitsLegend': 'a sinistra della barra i bit di rete, a destra quelli di host',
+  'export.chapters': 'Nella guida',
+  'export.same.aSeesB': 'A vede B come locale',
+  'export.same.bSeesA': 'B vede A come locale',
+  'export.same.netA': 'Rete di A (mask di A)',
+  'export.same.bWithA': 'Rete di B con la mask di A',
+  'export.same.netB': 'Rete di B (mask di B)',
+  'export.same.aWithB': 'Rete di A con la mask di B',
+  'export.same.gwA': 'Gateway nella subnet di A',
+  'export.same.gwB': 'Gateway nella subnet di B',
+
+  // ---------------------------------------------------------------- import della sessione (6.3, 7.3)
+  IMPORT_TOO_LARGE: (p) => `Il file pesa ${fmtNumber(Math.ceil(p.size / 1024))} KB e supera il limite di 5 MB.`,
+  IMPORT_NOT_JSON: 'Il file non è in formato JSON: forse non è una sessione esportata da questa app.',
+  IMPORT_UNKNOWN_FORMAT: (p) =>
+    p.format ? `Il file è nel formato "${p.format}": non è una sessione del Calcolatore Subnet.` : 'Il file non è una sessione del Calcolatore Subnet.',
+  IMPORT_NEWER_VERSION: (p) => `Il file usa la versione ${p.version} del formato, questa app legge fino alla ${p.supported}: aggiorna l'app per importarlo.`,
+  IMPORT_BAD_FIELD: (p) => `Il campo "${p.field}" del file non è valido.`,
+  IMPORT_BAD_ENVELOPE: (p) => `Il file cifrato è danneggiato o incompleto (campo "${p.field}").`,
+  IMPORT_DECRYPT_FAILED: 'Passphrase errata o file danneggiato.',
+  IMPORT_NESTED_ENVELOPE: 'Il contenuto decifrato è a sua volta un file cifrato: non viene importato.',
+  IMPORT_CRYPTO_UNAVAILABLE:
+    'Con la pagina aperta così il browser non mette a disposizione la cifratura (Web Crypto). Apri l\'app da un indirizzo HTTPS (per esempio GitHub Pages) o da localhost.',
+  IMPORT_W_MIGRATED: (p) => `Il file era nella versione ${p.from} del formato ed è stato aggiornato alla ${p.to}.`,
+  IMPORT_W_HISTORY_TRUNCATED: (p) => `Cronologia oltre le ${p.max} voci: tenute le più recenti, ${fmtNumber(p.dropped)} escluse.`,
+  IMPORT_W_PLANS_TRUNCATED: (p) => `Più di ${p.max} piani: tenuti quelli modificati più di recente, ${fmtNumber(p.dropped)} esclusi.`,
+  IMPORT_W_LABELS_DROPPED: (p) => `Piano "${p.plan}": ${fmtNumber(p.count)} etichette non valide escluse.`,
+  IMPORT_W_DUPLICATE_ID: (p) => `${fmtNumber(p.count)} elementi con identificativo ripetuto nel file: tenuto il primo.`,
 };
 
 /**
