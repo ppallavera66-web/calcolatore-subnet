@@ -21,7 +21,9 @@ const EOL = '\r\n';
  */
 export function csvField(v, user = false) {
   let s = v === null || v === undefined ? '' : String(v);
-  if (user && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  // protezione dalle formule: anche dopo spazi iniziali (alcuni programmi li tolgono all'apertura)
+  // e con le forme a larghezza piena dei simboli (revisione I2)
+  if (user && /^[\s\u3000\uFEFF]*[=+\-@\uFF1D\uFF0B\uFF0D\uFF20]|^[\t\r]/.test(s)) s = `'${s}`;
   return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

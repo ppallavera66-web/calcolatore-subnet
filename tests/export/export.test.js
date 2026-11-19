@@ -150,6 +150,9 @@ describe('CSV (5.2, m13)', () => {
 
   test('protezione dalle formule solo sui testi dell\'utente', () => {
     for (const s of ['=1+1', '+1', '-1', '@SUM(A1)', '\t=1', '\r=1']) expect(csvField(s, true).startsWith("'") || csvField(s, true).startsWith('"\'')).toBe(true);
+    // anche dopo spazi iniziali e con i simboli a larghezza piena (revisione I2)
+    for (const s of [' =1+1', '   +1', '\u3000=1', '\uFF1D1+1', ' \uFF20SUM(A1)']) expect(csvField(s, true).startsWith("'")).toBe(true);
+    expect(csvField(' VLAN 10', true)).toBe(' VLAN 10');
     expect(csvField('-1')).toBe('-1');
     expect(csvField('VLAN 10', true)).toBe('VLAN 10');
     expect(csvField('a\nb', true)).toBe('"a\nb"');
