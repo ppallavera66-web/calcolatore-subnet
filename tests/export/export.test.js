@@ -12,7 +12,7 @@ import { toRows, subdivideRange, subdivideColumns, rangeFor, EXPORT_MAX_ROWS } f
 import { toCsv, csvField, BOM } from '../../src/export/csv.js';
 import { toText, cellText, stepsText } from '../../src/export/text.js';
 import { toMarkdown, mdEscape } from '../../src/export/markdown.js';
-import { toResultJson, withDotted, RESULT_FORMAT } from '../../src/export/json.js';
+import { toResultJson, withDotted, subdivideOutput, RESULT_FORMAT } from '../../src/export/json.js';
 import { stepsBlock, splitBits } from '../../src/export/steps.js';
 import { resultFileName, sessionFileName, stamp, safePart } from '../../src/export/filename.js';
 import { copyText } from '../../src/export/clipboard.js';
@@ -247,6 +247,20 @@ describe('JSON di un risultato (5.2)', () => {
     const json = JSON.parse(toResultJson({ fn: 'F01', input: {}, output: val(r), now: 'x', warnings: r.ok ? r.warnings : [] }));
     expect(json.output.broadcast).toBeNull();
     expect(json.warnings).toEqual([{ code: 'W_SINGLE', params: { prefix: 32 } }]);
+  });
+});
+
+describe('JSON di F06 per un intervallo', () => {
+  test('riepilogo senza la pagina, subnet dell\'intervallo, etichette del piano', () => {
+    const v = val(subdivideText('10.0.0.0/16', '', '19', { limit: 1 }));
+    const out = subdivideOutput(v, [6, 8], { 6: 'VLAN 70' });
+    expect(out.page).toBeUndefined();
+    expect(out.hasMore).toBeUndefined();
+    expect(out.range).toEqual({ from: 7, to: 8 });
+    expect(out.items.map((/** @type {any} */ x) => [x.index, x.label])).toEqual([[6, 'VLAN 70'], [7, undefined]]);
+    const json = JSON.parse(toResultJson({ fn: 'F06', input: {}, output: out, now: 'x' }));
+    expect(json.output.items[1].network).toBe('10.0.224.0');
+    expect(subdivideOutput(v, [0, 1]).items[0].label).toBeUndefined();
   });
 });
 

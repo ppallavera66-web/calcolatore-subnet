@@ -9,7 +9,11 @@
  * - accessibilità con axe-core (WCAG 2.2 A e AA) nelle schermate principali, in tutti i temi;
  * - uso da tastiera: salta al contenuto, campi, Invio, focus visibile, controllo segmentato, dialog;
  * - navigazione con frammento, tasto indietro, collegamenti con errori, divisione di IP/n;
- * - cronologia, ricerca dell'IP in Suddivisione, stampa (intestazione, navigazione nascosta, PDF).
+ * - cronologia, ricerca dell'IP in Suddivisione, stampa (intestazione, navigazione nascosta, PDF);
+ * - fase 5: persistenza (interruttore, ritardo, ricaricamento, spegnimento con conferma, più schede,
+ *   dati illeggibili, storage rifiutato), export in tutti i formati e intervalli di F06, sessione JSON
+ *   (Sostituisci, Unisci, impostazioni su scelta, errori), busta cifrata (passphrase, robustezza,
+ *   passphrase errata, manomissione, Web Crypto assente), piani con etichette, telefono a 390 px.
  * Schermate e PDF in e2e-report/ (ignorata da git).
  *
  * Il browser: variabile CHROME_PATH, altrimenti i percorsi usuali di Chrome/Chromium, altrimenti
@@ -104,6 +108,32 @@ const hex = (/** @type {string} */ c) => {
 
 const shot = (/** @type {import('playwright-core').Page} */ page, /** @type {string} */ name, full = true) =>
   page.screenshot({ path: resolve(OUT, `${name}.png`), fullPage: full });
+
+/**
+ * Cambio di vista nello stesso documento (lo stato in memoria resta).
+ * @param {import('playwright-core').Page} page
+ * @param {string} hash
+ */
+async function hashTo(page, hash) {
+  await page.evaluate((x) => { location.hash = x; }, hash);
+  await page.waitForTimeout(250);
+}
+
+/** Chiavi dell'app nel localStorage. */
+const appKeys = (/** @type {import('playwright-core').Page} */ page) => page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('subnetcalc:')));
+
+/**
+ * Clic che produce un download: nome suggerito e testo del file.
+ * @param {import('playwright-core').Page} page
+ * @param {string} selector
+ * @param {() => Promise<void>} [before]
+ */
+async function download(page, selector, before) {
+  if (before) await before();
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click(selector)]);
+  const path = await dl.path();
+  return { name: dl.suggestedFilename(), text: readFileSync(/** @type {string} */ (path), 'utf8') };
+}
 
 async function main() {
   if (!existsSync(FILE)) {
@@ -431,6 +461,361 @@ async function main() {
     await page.click('.help-link');
     await page.waitForSelector('.view-guide');
     assert((await page.evaluate(() => location.hash)) === '#/guide/uso/analisi', 'pulsante "?" non porta alla guida all\'uso');
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ fase 5: persistenza, export, sessione, cifratura, piani
+  console.log('\nPersistenza (8.3)');
+  await check('"Memorizza i dati": spento nessuna chiave; acceso salva subito; tema e cronologia dopo il ricaricamento', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/analisi?ip=10.20.30.140&p=27');
+    await page.locator('.view-analisi input').first().press('Enter');
+    await hashTo(page, '#/impostazioni');
+    assert((await appKeys(page)).length === 0, 'chiavi salvate con l\'interruttore spento');
+    await page.getByRole('radio', { name: 'Scuro', exact: true }).check();
+    await page.getByRole('switch', { name: 'Memorizza i dati' }).click();
+    await page.waitForTimeout(150);
+    assert((await appKeys(page)).sort().join() === 'subnetcalc:v1:history,subnetcalc:v1:meta,subnetcalc:v1:plans,subnetcalc:v1:settings', `chiavi: ${await appKeys(page)}`);
+    assert((await page.textContent('.persist-info'))?.includes('Ultimo salvataggio'), 'data dell\'ultimo salvataggio assente');
+    // modifica ritardata di 300 ms
+    await page.getByRole('switch', { name: 'Modalità didattica' }).click();
+    await page.waitForTimeout(450);
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('subnetcalc:v1:settings') ?? '{}'));
+    assert(saved.didactic === true && saved.theme === 'dark' && saved.persist === true, `impostazioni salvate: ${JSON.stringify(saved)}`);
+    // ricaricamento: il tema c'è già al primo disegno
+    await page.reload();
+    await page.waitForSelector('.view');
+    assert((await page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === 'dark', 'tema non ripristinato');
+    assert((await page.getByRole('switch', { name: 'Memorizza i dati' }).getAttribute('aria-checked')) === 'true', 'interruttore spento dopo il ricaricamento');
+    await hashTo(page, '#/calcola/analisi');
+    await page.click('.history-btn');
+    assert((await page.textContent('.history-list'))?.includes('10.20.30.140/27'), 'cronologia non ripristinata');
+    await page.keyboard.press('Escape');
+    await ctx.close();
+  });
+  await check('spegnimento con conferma: Annulla lascia tutto, Conferma cancella le chiavi e tiene i dati della visita', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/impostazioni');
+    const sw = page.getByRole('switch', { name: 'Memorizza i dati' });
+    await sw.click();
+    await page.waitForTimeout(100);
+    await sw.click();
+    assert(await page.isVisible('dialog[open]'), 'nessuna conferma allo spegnimento');
+    assert((await page.textContent('dialog[open]'))?.includes('Quelli della visita in corso restano'), 'testo della conferma');
+    await page.getByRole('button', { name: 'Annulla', exact: true }).click();
+    await page.waitForTimeout(150);
+    assert((await sw.getAttribute('aria-checked')) === 'true', 'Annulla ha spento l\'interruttore');
+    assert((await appKeys(page)).length === 4, `Annulla ha cancellato le chiavi: ${await appKeys(page)}`);
+    await sw.click();
+    await page.getByRole('button', { name: 'Smetti e cancella' }).click();
+    await page.waitForTimeout(150);
+    assert((await sw.getAttribute('aria-checked')) === 'false' && (await appKeys(page)).length === 0, 'chiavi non cancellate');
+    await ctx.close();
+  });
+  await check('più schede: l\'evento storage aggiorna l\'altra scheda; spegnimento altrove', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Memorizza i dati' }).click();
+    const other = await ctx.newPage();
+    other.on('pageerror', (e) => jsErrors.push(`pageerror: ${e.message}`));
+    await other.goto(`${URL0}#/impostazioni`);
+    await other.waitForSelector('.view');
+    await page.getByRole('radio', { name: 'Alto contrasto', exact: true }).check();
+    await other.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'contrast', null, { timeout: 3000 });
+    await page.getByRole('switch', { name: 'Memorizza i dati' }).click();
+    await page.getByRole('button', { name: 'Smetti e cancella' }).click();
+    await other.waitForFunction(() => document.querySelector('[role=switch][aria-checked]:not([aria-checked="true"])') && [...document.querySelectorAll('[role=switch]')].some((s) => s.getAttribute('aria-labelledby') && document.getElementById(/** @type {string} */ (s.getAttribute('aria-labelledby')))?.textContent === 'Memorizza i dati' && s.getAttribute('aria-checked') === 'false'), null, { timeout: 3000 });
+    assert((await other.evaluate(() => document.documentElement.getAttribute('data-theme'))) === 'contrast', 'la seconda scheda ha perso il tema in memoria');
+    await ctx.close();
+  });
+  await check('avvio con dati illeggibili: avviso e "Cancella i dati salvati"', async () => {
+    const { ctx, page } = await open(browser);
+    await page.addInitScript(() => {
+      if (location.protocol !== 'file:' || window.name === 'seeded') return;
+      localStorage.setItem('subnetcalc:v1:meta', JSON.stringify({ schema: 1, savedAt: '2026-11-19T10:00:00.000Z' }));
+      localStorage.setItem('subnetcalc:v1:history', '{non è json');
+      window.name = 'seeded';
+    });
+    await go(page, '#/impostazioni');
+    assert((await page.textContent('.persist-info'))?.includes('non erano leggibili'), 'avviso assente');
+    await page.getByRole('button', { name: 'Cancella i dati salvati' }).click();
+    await page.waitForTimeout(150);
+    assert((await appKeys(page)).length === 0, 'dati illeggibili non cancellati');
+    await ctx.close();
+  });
+  await check('localStorage rifiutato: interruttore disattivato con spiegazione, app funzionante', async () => {
+    const { ctx, page } = await open(browser);
+    await page.addInitScript(() => {
+      Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('negato', 'SecurityError'); } });
+    });
+    await go(page, '#/impostazioni');
+    assert(await page.getByRole('switch', { name: 'Memorizza i dati' }).isDisabled(), 'interruttore attivo');
+    assert((await page.textContent('.view-impostazioni'))?.includes('Questo browser non permette di salvare'), 'spiegazione assente');
+    await go(page, '#/calcola/analisi?ip=10.0.0.1&p=24');
+    assert((await page.textContent('.kv-primary'))?.includes('10.0.0.0/24'), 'calcolo non riuscito');
+    await ctx.close();
+  });
+
+  console.log('\nExport (5)');
+  await check('barra di export: Copia, CSV, JSON, Markdown, Testo, Snippet, con "Includi i passaggi"', async () => {
+    const { ctx, page } = await open(browser, { acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'] });
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Export' }).click();
+    await page.evaluate(() => { location.hash = '#/calcola/analisi?ip=172.16.45.200&p=20&did=1'; });
+    await page.waitForSelector('.export-toolbar');
+    await page.getByLabel('Includi i passaggi').check();
+    await page.click('.export-toolbar [data-format=copy]');
+    await page.waitForTimeout(200);
+    const clip = await page.evaluate(() => navigator.clipboard.readText());
+    assert(clip.startsWith('Analisi subnet · 172.16.45.200/20') && clip.includes('Passaggi · metodo binario'), `appunti: ${clip.slice(0, 80)}`);
+    const csv = await download(page, '.export-toolbar [data-format=csv]');
+    assert(/^subnet-analisi-172\.16\.32\.0-20-\d{8}-\d{4}\.csv$/.test(csv.name), `nome: ${csv.name}`);
+    assert(csv.text.startsWith('\uFEFFVoce;Valore\r\n') && csv.text.includes('Host utilizzabili;4094\r\n'), 'CSV');
+    const json = JSON.parse((await download(page, '.export-toolbar [data-format=json]')).text);
+    assert(json.format === 'subnetcalc-result' && json.output.network === '172.16.32.0' && json.steps?.[0]?.method === 'binary', 'JSON');
+    const md = await download(page, '.export-toolbar [data-format=md]');
+    assert(md.text.includes('| Rete | `172.16.32.0` |') && md.text.includes('## Passaggi'), 'Markdown');
+    const txt = await download(page, '.export-toolbar [data-format=text]');
+    assert(txt.name.endsWith('.txt') && /\nHost utilizzabili +4\.094\n/.test(txt.text), 'Testo');
+    const snip = await download(page, '.export-toolbar [data-format=snippet]');
+    assert(snip.name.startsWith('subnet-snippet-172.16.32.0-20-') && snip.text.includes('network 172.16.32.0 0.0.15.255 area 0'), 'Snippet');
+    // le altre viste hanno la barra
+    for (const hash of ['#/calcola/conversioni?n=203', '#/calcola/mask?m=255.255.250.0', '#/calcola/stessa?a=10.1.63.5&pa=19&b=10.1.64.5', '#/pianifica/inverso?h=50']) {
+      await page.evaluate((x) => { location.hash = x; }, hash);
+      await page.waitForTimeout(250);
+      const f = await download(page, '.export-toolbar [data-format=csv]');
+      assert(f.text.startsWith('\uFEFFVoce;Valore'), `${hash}: CSV`);
+    }
+    await ctx.close();
+  });
+  await check('Suddivisione: pagina corrente, tutte, intervallo obbligatorio oltre 65.536 righe', async () => {
+    const { ctx, page } = await open(browser, { acceptDownloads: true });
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Export' }).click();
+    await page.evaluate(() => { location.hash = '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=24'; });
+    await page.waitForSelector('.export-toolbar');
+    await page.click('.export-toolbar [data-format=csv]');
+    const all = await download(page, 'dialog[open] .btn-primary', async () => { await page.check('dialog[open] input[value=all]'); });
+    assert(all.text.split('\r\n').length === 258, `righe di "tutte": ${all.text.split('\r\n').length}`);
+    await page.evaluate(() => { location.hash = '#/pianifica/suddivisione?b=10.0.0.0&p=8&np=30'; });
+    await page.waitForTimeout(300);
+    await page.click('.export-toolbar [data-format=csv]');
+    assert(await page.isDisabled('dialog[open] input[value=all]'), '"Tutte" attivo oltre 65.536 righe');
+    await page.check('dialog[open] input[value=custom]');
+    await page.fill('dialog[open] .range-fields input >> nth=0', '1');
+    await page.fill('dialog[open] .range-fields input >> nth=1', '70000');
+    await page.click('dialog[open] .btn-primary');
+    assert((await page.textContent('dialog[open] .form-error'))?.includes('65.536'), 'limite non segnalato');
+    const v = await axe(page);
+    assert(v.length === 0, v.join('\n'));
+    await page.fill('dialog[open] .range-fields input >> nth=0', '4194301');
+    await page.fill('dialog[open] .range-fields input >> nth=1', '4194304');
+    const r = await download(page, 'dialog[open] .btn-primary');
+    const lines = r.text.trim().split('\r\n');
+    assert(lines.length === 5 && lines[4].startsWith('4194304;10.255.255.252;30'), `intervallo: ${lines.slice(-1)}`);
+    assert(r.name.includes('-n4194301-4194304-'), `nome: ${r.name}`);
+    await ctx.close();
+  });
+
+  console.log('\nSessione JSON e busta cifrata (6, 7)');
+  await check('esporta in chiaro → importa in un altro browser con Sostituisci; "Applica le impostazioni" solo su scelta', async () => {
+    const a = await open(browser, { acceptDownloads: true });
+    await go(a.page, '#/calcola/analisi?ip=192.168.10.75&p=26');
+    await a.page.locator('.view-analisi input').first().press('Enter');
+    await hashTo(a.page, '#/impostazioni');
+    await a.page.getByRole('radio', { name: 'Scuro', exact: true }).check();
+    await a.page.getByRole('button', { name: 'Esporta sessione' }).click();
+    assert((await a.page.textContent('dialog[open]'))?.includes('1 calcolo, 0 piani'), 'riepilogo');
+    assert(!(await a.page.getByLabel('Cifra il file').isChecked()), '"Cifra il file" acceso all\'apertura');
+    const file = await download(a.page, 'dialog[open] button[type=submit]');
+    assert(/^subnetcalc-sessione-\d{8}-\d{4}\.json$/.test(file.name), `nome: ${file.name}`);
+    const s = JSON.parse(file.text);
+    assert(s.format === 'subnetcalc-session' && s.history[0].input.ip === '192.168.10.75' && !('persist' in s.settings), 'contenuto');
+    await a.ctx.close();
+    const b = await open(browser);
+    await go(b.page, '#/impostazioni');
+    await b.page.setInputFiles('input[type=file]', { name: file.name, mimeType: 'application/json', buffer: Buffer.from(file.text) });
+    await b.page.waitForSelector('dialog[open]');
+    const prev = await b.page.textContent('dialog[open]');
+    assert(prev?.includes('Contiene 1 calcolo e 0 piani'), `anteprima: ${prev}`);
+    const v = await axe(b.page);
+    assert(v.length === 0, v.join('\n'));
+    await b.page.getByRole('button', { name: 'Sostituisci' }).click();
+    await b.page.waitForTimeout(150);
+    assert((await b.page.textContent('.toast'))?.startsWith('Importate 1 voce e 0 piani'), `riepilogo: ${await b.page.textContent('.toast')}`);
+    assert((await b.page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === null, 'impostazioni applicate senza la casella');
+    await b.page.setInputFiles('input[type=file]', { name: file.name, mimeType: 'application/json', buffer: Buffer.from(file.text) });
+    await b.page.getByLabel('Applica anche le impostazioni del file').check();
+    await b.page.getByRole('button', { name: 'Unisci' }).click();
+    await b.page.waitForTimeout(150);
+    assert((await b.page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === 'dark', 'impostazioni non applicate');
+    assert((await b.page.getByRole('radio', { name: 'Scuro', exact: true }).isChecked()), 'Impostazioni non aggiornate');
+    await hashTo(b.page, '#/calcola/analisi');
+    await b.page.click('.history-btn');
+    assert((await b.page.locator('.history-item').count()) === 1, 'Unisci ha duplicato la voce');
+    await b.ctx.close();
+  });
+  await check('busta cifrata: passphrase con conferma e robustezza, passphrase errata, andata e ritorno', async () => {
+    const a = await open(browser, { acceptDownloads: true });
+    await go(a.page, '#/pianifica/suddivisione?b=10.40.0.0&p=16&np=24');
+    await a.page.getByRole('button', { name: 'Salva come piano' }).click();
+    await a.page.getByLabel('Nome', { exact: true }).fill('Sede · è ü');
+    await a.page.click('dialog[open] .btn-primary');
+    await a.page.waitForSelector('.plan-current');
+    await hashTo(a.page, '#/impostazioni');
+    await a.page.getByRole('button', { name: 'Esporta sessione' }).click();
+    await a.page.getByLabel('Cifra il file').check();
+    const v1 = await axe(a.page);
+    assert(v1.length === 0, v1.join('\n'));
+    await a.page.getByLabel('Passphrase', { exact: true }).fill('corta');
+    assert((await a.page.textContent('.meter-label')) === 'Robustezza: debole', 'indicatore');
+    await a.page.click('dialog[open] button[type=submit]');
+    assert((await a.page.textContent('dialog[open] .field-error'))?.includes('almeno 12'), 'minimo di 12 caratteri non controllato');
+    await a.page.getByLabel('Passphrase', { exact: true }).fill('cavallo batteria graffetta');
+    await a.page.getByLabel('Conferma la passphrase').fill('cavallo batteria graffett');
+    await a.page.click('dialog[open] button[type=submit]');
+    assert((await a.page.textContent('dialog[open]'))?.includes('non coincidono'), 'conferma non controllata');
+    await a.page.getByLabel('Conferma la passphrase').fill('cavallo batteria graffetta');
+    assert((await a.page.textContent('.meter-label')) === 'Robustezza: ottima', 'indicatore ottima');
+    const file = await download(a.page, 'dialog[open] button[type=submit]');
+    assert(file.name.endsWith('-cifrato.json'), `nome: ${file.name}`);
+    const env = JSON.parse(file.text);
+    assert(env.format === 'subnetcalc-encrypted' && env.kdf.iterations === 600000 && !file.text.includes('Sede'), 'busta');
+    // riapertura: la casella torna spenta e i campi vuoti
+    await a.page.getByRole('button', { name: 'Esporta sessione' }).click();
+    assert(!(await a.page.getByLabel('Cifra il file').isChecked()), 'casella ricordata');
+    await a.page.keyboard.press('Escape');
+    await a.ctx.close();
+    const b = await open(browser);
+    await go(b.page, '#/impostazioni');
+    await b.page.setInputFiles('input[type=file]', { name: file.name, mimeType: 'application/json', buffer: Buffer.from(file.text) });
+    await b.page.getByLabel('Passphrase', { exact: true }).fill('passphrase sbagliata');
+    await b.page.click('dialog[open] button[type=submit]');
+    await b.page.waitForFunction(() => document.querySelector('dialog[open] .form-error')?.textContent);
+    assert((await b.page.textContent('dialog[open] .form-error')) === 'Passphrase errata o file danneggiato.', 'errore');
+    await b.page.getByLabel('Passphrase', { exact: true }).fill('cavallo batteria graffetta');
+    await b.page.click('dialog[open] button[type=submit]');
+    await b.page.waitForFunction(() => document.querySelector('dialog[open]')?.textContent?.includes('Contiene'));
+    await b.page.getByRole('button', { name: 'Unisci' }).click();
+    await hashTo(b.page, '#/pianifica/piani');
+    assert((await b.page.textContent('.plan-list'))?.includes('Sede · è ü'), 'piano non importato');
+    // file manomesso
+    const bad = { ...env, kdf: { ...env.kdf, iterations: env.kdf.iterations + 1 } };
+    await hashTo(b.page, '#/impostazioni');
+    await b.page.setInputFiles('input[type=file]', { name: 'x.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(bad)) });
+    await b.page.getByLabel('Passphrase', { exact: true }).fill('cavallo batteria graffetta');
+    await b.page.click('dialog[open] button[type=submit]');
+    await b.page.waitForFunction(() => document.querySelector('dialog[open] .form-error')?.textContent);
+    assert((await b.page.textContent('dialog[open] .form-error')) === 'Passphrase errata o file danneggiato.', 'manomissione non rilevata');
+    await b.ctx.close();
+  });
+  await check('import: file non JSON, formato sconosciuto, versione successiva, oltre 5 MB', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/impostazioni');
+    const cases = [
+      ['a.json', '{ rotto', 'non è in formato JSON'],
+      ['b.json', '{"format":"altro"}', 'nel formato "altro"'],
+      ['c.json', '{"format":"subnetcalc-session","version":7,"exportedAt":"2026-11-19T10:00:00.000Z"}', 'aggiorna l\'app'],
+      ['d.json', `{"format":"subnetcalc-session","pad":"${'x'.repeat(5242880)}"}`, 'supera il limite di 5 MB'],
+    ];
+    for (const [name, text, expected] of cases) {
+      await page.setInputFiles('input[type=file]', { name, mimeType: 'application/json', buffer: Buffer.from(text) });
+      await page.waitForSelector('dialog[open]');
+      const msg = await page.textContent('dialog[open]');
+      assert(msg?.includes(expected), `${name}: ${msg}`);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+    }
+    await ctx.close();
+  });
+  await check('Web Crypto assente: "Cifra il file" disattivata con spiegazione; file cifrato rifiutato', async () => {
+    const { ctx, page } = await open(browser);
+    await page.addInitScript(() => {
+      Object.defineProperty(Crypto.prototype, 'subtle', { get: () => undefined });
+    });
+    await go(page, '#/impostazioni');
+    await page.getByRole('button', { name: 'Esporta sessione' }).click();
+    assert(await page.getByLabel('Cifra il file').isDisabled(), 'casella attiva');
+    assert((await page.textContent('dialog[open]'))?.includes('HTTPS'), 'spiegazione assente');
+    await page.keyboard.press('Escape');
+    const env = { format: 'subnetcalc-encrypted', version: 1, kdf: { name: 'PBKDF2-SHA-256', iterations: 600000, salt: 'AAAAAAAAAAAAAAAAAAAAAA==' }, cipher: { name: 'AES-256-GCM', iv: 'AAAAAAAAAAAAAAAA' }, data: 'AAAAAAAAAAAAAAAAAAAAAA==' };
+    await page.setInputFiles('input[type=file]', { name: 'c.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(env)) });
+    await page.waitForSelector('dialog[open]');
+    assert((await page.textContent('dialog[open]'))?.includes('Web Crypto'), 'messaggio assente');
+    await ctx.close();
+  });
+
+  console.log('\nPiani salvati (9.1)');
+  await check('Salva come piano, etichette nella colonna, export con etichette, ricaricamento, eliminazione', async () => {
+    const { ctx, page } = await open(browser, { acceptDownloads: true });
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Memorizza i dati' }).click();
+    await page.getByRole('switch', { name: 'Export' }).click();
+    await page.evaluate(() => { location.hash = '#/pianifica/suddivisione?b=10.40.0.0&p=16&np=24'; });
+    await page.getByRole('button', { name: 'Salva come piano' }).click();
+    assert((await page.getByLabel('Nome', { exact: true }).inputValue()) === '10.40.0.0/16 → /24', 'nome proposto');
+    await page.getByLabel('Nome', { exact: true }).fill('Sede via Celoria');
+    await page.getByLabel('Note').fill('Primo piano\nseconda riga');
+    await page.click('dialog[open] .btn-primary');
+    await page.waitForSelector('.plan-current');
+    assert((await page.evaluate(() => location.hash)).includes('&piano='), 'frammento senza piano');
+    await page.getByLabel('Etichetta della subnet n. 11', { exact: true }).fill('VLAN 10 · Uffici');
+    await page.getByLabel('Etichetta della subnet n. 21', { exact: true }).fill('=CMD()');
+    const v = await axe(page);
+    assert(v.length === 0, v.join('\n'));
+    await page.click('.export-toolbar [data-format=csv]');
+    const csv = await download(page, 'dialog[open] .btn-primary');
+    assert(csv.text.includes(';VLAN 10 · Uffici\r\n') && csv.text.includes(";'=CMD()\r\n") && csv.text.split('\r\n')[0].endsWith(';Etichetta'), 'etichette nel CSV');
+    await page.waitForTimeout(400);
+    await page.reload();
+    await page.waitForSelector('.plan-current');
+    assert((await page.getByLabel('Etichetta della subnet n. 11', { exact: true }).inputValue()) === 'VLAN 10 · Uffici', 'etichetta persa al ricaricamento');
+    // cambiare i prefissi chiude il piano
+    await page.getByLabel('Nuovo prefisso').fill('/25');
+    await page.waitForTimeout(300);
+    assert(!(await page.isVisible('.plan-current')), 'piano ancora aperto');
+    await page.click('.side-tab[href^="#/pianifica/piani"]');
+    await page.waitForSelector('.plan-card');
+    const card = await page.textContent('.plan-card');
+    assert(card?.includes('Sede via Celoria') && card.includes('10.40.0.0/16 → /24 · 256 subnet · 2 etichette') && card.includes('seconda riga'), `scheda: ${card}`);
+    const v2 = await axe(page);
+    assert(v2.length === 0, v2.join('\n'));
+    await page.getByRole('button', { name: 'Elimina' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Elimina' }).click();
+    await page.waitForSelector('.empty-card');
+    await page.waitForTimeout(450);
+    assert((await page.evaluate(() => JSON.parse(localStorage.getItem('subnetcalc:v1:plans') ?? '[1]').length)) === 0, 'piano ancora salvato');
+    await ctx.close();
+  });
+  await check('telefono 390 px: Impostazioni, Piani e pannello Esporta con "Includi i passaggi"; aree di tocco', async () => {
+    const { ctx, page } = await open(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Export' }).click();
+    await page.getByRole('switch', { name: 'Modalità didattica' }).click();
+    const small = async () => page.evaluate(() => {
+      const sel = 'button, input:not([type=range]):not([type=radio]):not([type=checkbox]):not([type=file]), select, .segmented-option label, .check-label, summary, a.icon-btn';
+      return [...document.querySelectorAll(sel)].filter((e) => {
+        const r = e.getBoundingClientRect();
+        const st = getComputedStyle(e);
+        return r.width > 0 && st.visibility !== 'hidden' && !e.closest('[hidden]') && st.display !== 'none' && r.height < 44;
+      }).map((e) => `${e.tagName.toLowerCase()}.${[...e.classList].join('.')} ${Math.round(e.getBoundingClientRect().height)}px`);
+    });
+    let s = await small();
+    assert(s.length === 0, `Impostazioni: ${s.join(', ')}`);
+    await page.evaluate(() => { location.hash = '#/pianifica/suddivisione?b=10.0.0.0&p=24&np=26'; });
+    await page.getByRole('button', { name: 'Salva come piano' }).click();
+    await page.click('dialog[open] .btn-primary');
+    await page.waitForSelector('.plan-current');
+    s = await small();
+    assert(s.length === 0, `Suddivisione con piano: ${s.join(', ')}`);
+    assert(!(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)), 'scorrimento orizzontale');
+    await page.click('.export-sheet-btn');
+    assert(await page.isVisible('dialog[open] .export-steps'), '"Includi i passaggi" assente nel pannello');
+    s = await small();
+    assert(s.length === 0, `pannello Esporta: ${s.join(', ')}`);
+    const v = await axe(page);
+    assert(v.length === 0, v.join('\n'));
+    await shot(page, 'telefono-export-piano', false);
     await ctx.close();
   });
 

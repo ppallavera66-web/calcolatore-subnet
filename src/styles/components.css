@@ -34,7 +34,7 @@ select.input{padding-right:28px}
   font-size:15px;font-weight:600;line-height:1.2;text-decoration:none}
 .btn:hover:not(:disabled):not([aria-disabled="true"]){border-color:var(--net);color:var(--strong)}
 .btn-primary{background:var(--net);border-color:var(--net);color:var(--on-net)}
-.btn-primary:hover:not(:disabled){filter:brightness(1.08);color:var(--on-net)}
+.btn-primary:hover:not(:disabled):not([aria-disabled="true"]){filter:brightness(1.08);color:var(--on-net)}
 .btn-danger{border-color:var(--warn);color:var(--warn)}
 .btn-danger:hover:not(:disabled){background:var(--warn);color:var(--bg) !important}
 .btn-sm{min-height:36px;padding:6px 12px;font-size:14px}
@@ -329,4 +329,4 @@ tr.row-bad td{background:color-mix(in srgb,var(--warn) 10%,transparent)}
 .plan-current{display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--host)}
 .plan-current .card-title{margin:0}
 .label-cell{padding-top:4px;padding-bottom:4px}
-.label-input{min-height:36px;width:min(26ch,60vw);padding:4px 8px;font-size:15px}
+.label-input{min-height:var(--touch-min);width:min(26ch,60vw);padding:4px 8px;font-size:15px}
