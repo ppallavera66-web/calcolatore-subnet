@@ -13,6 +13,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readGuide, injectGuides, GUIDE_NAMES } from '../../tools/guides.js';
+import { measure, LIMIT } from '../../tools/size-check.js';
 import { parseHash, SECTIONS, VIEW_PARAMS, COMMON_PARAMS } from '../../src/ui/router.js';
 import { entryFor } from '../../src/ui/history-map.js';
 import { anchorId, anchorOf, guideOf, helpAnchors } from '../../src/ui/guide-anchors.js';
@@ -70,6 +71,13 @@ describe('template delle guide nella pagina', () => {
   test('una guida con </template> o una pagina senza </body> vengono rifiutate', () => {
     expect(() => injectGuides('<body></body>', { uso: '</template>' })).toThrow();
     expect(() => injectGuides('<p></p>', { uso: '' })).toThrow();
+  });
+  test('npm run size conta il contenuto dei template nella riga "Guide", entro il limite', () => {
+    const page = injectGuides('<html><body><script>x</script></body></html>', GUIDES);
+    const m = measure(page);
+    const content = Object.values(GUIDES).reduce((a, g) => a + Buffer.byteLength(`\n${g}\n`, 'utf8'), 0);
+    expect(m.guides).toBe(content);
+    expect(m.guides).toBeLessThan(LIMIT / 4);
   });
   test('le guide sono quelle delle sottoschede di Guide', () => {
     expect([...GUIDE_NAMES]).toEqual([...SECTIONS.guide]);
