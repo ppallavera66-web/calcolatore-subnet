@@ -68,6 +68,31 @@ describe('busta cifrata: formato (7.1, 7.2)', () => {
   });
 });
 
+describe('busta cifrata: AAD usata davvero in cifratura e decifratura (revisione I5)', () => {
+  /** Chiave derivata in modo indipendente dal modulo. */
+  const keyFor = async (/** @type {Record<string, any>} */ e, /** @type {KeyUsage} */ usage) => {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(PASS), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: /** @type {BufferSource} */ (fromBase64(e.kdf.salt)), iterations: e.kdf.iterations }, base, { name: 'AES-GCM', length: 256 }, false, [usage]);
+  };
+
+  test('il file si decifra con l\'AAD della 7.2 e non senza (la cifratura la usa)', async () => {
+    const key = await keyFor(env, 'decrypt');
+    const iv = /** @type {BufferSource} */ (fromBase64(env.cipher.iv));
+    const data = /** @type {BufferSource} */ (fromBase64(env.data));
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv, additionalData: /** @type {BufferSource} */ (aadOf(/** @type {any} */ (env))), tagLength: 128 }, key, data);
+    expect(new TextDecoder().decode(plain)).toBe(JSON.stringify(SESSION));
+    await expect(crypto.subtle.decrypt({ name: 'AES-GCM', iv, tagLength: 128 }, key, data)).rejects.toThrow();
+  });
+
+  test('un file cifrato senza AAD viene rifiutato (la decifratura la usa)', async () => {
+    const key = await keyFor(env, 'encrypt');
+    const iv = /** @type {BufferSource} */ (fromBase64(env.cipher.iv));
+    const forged = { ...structuredClone(env), data: toBase64(new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, tagLength: 128 }, key, new TextEncoder().encode(JSON.stringify(SESSION))))) };
+    const r = await decryptEnvelope(forged, PASS);
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe('busta cifrata: decifratura (7.3)', () => {
   test('andata e ritorno: la sessione torna identica e passa la 6.3', async () => {
     const r = await decryptEnvelope(env, PASS);
