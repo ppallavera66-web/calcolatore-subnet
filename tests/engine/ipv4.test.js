@@ -119,6 +119,10 @@ describe('parsePrefix, parseMask, parsePrefixOrMask', () => {
     expect(val(parseCount(' 50 ', 'hosts'))).toBe(50);
     expect(val(parseCount(7, 'hosts'))).toBe(7);
     expect(errCode(parseCount('5a', 'hosts'))).toBe('NUMBER_FORMAT');
+    // separatore delle migliaia solo a gruppi di tre cifre (revisione A2)
+    expect(val(parseCount('1 000 000', 'hosts'))).toBe(1000000);
+    expect(val(parseCount('65.534', 'hosts'))).toBe(65534);
+    for (const bad of ['100.0', '2.5', '1.00', '1 0', '1.0000', '.500', '500.', '1..000', '12345678901234567']) expect(errCode(parseCount(bad, 'hosts'))).toBe('NUMBER_FORMAT');
     expect(errCode(parseCount(1.5, 'hosts'))).toBe('NUMBER_FORMAT');
     expect(errCode(parseCount('', 'hosts'))).toBe('NUMBER_FORMAT');
     expect(errCode(parseCount(null, 'hosts'))).toBe('NUMBER_FORMAT');

@@ -229,7 +229,11 @@ export function parseCount(text, field) {
   if (typeof text === 'number') {
     return Number.isSafeInteger(text) ? ok(text) : fail(ERR.NUMBER_FORMAT, field, { text: String(text), base: 10 });
   }
-  const raw = asText(text).trim().replace(/[.\s]/g, '');
-  if (!/^[0-9]{1,16}$/.test(raw)) return fail(ERR.NUMBER_FORMAT, field, { text: asText(text).trim(), base: 10 });
+  // separatore delle migliaia (punto o spazio) ammesso solo a gruppi di tre cifre:
+  // "1.000" e "1 000 000" sì, "100.0" o "2.5" no (sarebbero letti come 1000 e 25, revisione A2)
+  const trimmed = asText(text).trim();
+  if (!/^(?:[0-9]+|[0-9]{1,3}(?:[.\s][0-9]{3})+)$/.test(trimmed)) return fail(ERR.NUMBER_FORMAT, field, { text: trimmed, base: 10 });
+  const raw = trimmed.replace(/[.\s]/g, '');
+  if (raw.length > 16) return fail(ERR.NUMBER_FORMAT, field, { text: trimmed, base: 10 });
   return ok(Number(raw));
 }
