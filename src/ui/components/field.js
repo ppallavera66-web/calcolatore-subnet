@@ -19,6 +19,8 @@ export const ERROR_DELAY = 400;
  * @property {boolean} [mono] carattere a spaziatura fissa (indirizzi, numeri)
  * @property {string} [width] larghezza CSS del campo (es. `16ch`)
  * @property {boolean} [optional]
+ * @property {'text' | 'password'} [type] `password` per la passphrase (7.4)
+ * @property {string} [autocomplete] per default `off`; `new-password` per la passphrase di export
  * @property {(value: string) => void} [onInput]
  * @property {() => void} [onEnter]
  * @property {(e: InputEvent, input: HTMLInputElement) => boolean | void} [beforeInput] restituisce true se ha gestito l'input
@@ -33,12 +35,12 @@ export function textField(o) {
   const errId = `${id}-err`;
   const input = h('input', {
     id,
-    type: 'text',
+    type: o.type ?? 'text',
     class: `input${o.mono === false ? '' : ' mono'}`,
     value: o.value ?? '',
     placeholder: o.placeholder,
     inputmode: o.inputmode ?? 'text',
-    autocomplete: 'off',
+    autocomplete: o.autocomplete ?? 'off',
     autocapitalize: 'off',
     autocorrect: 'off',
     spellcheck: 'false',

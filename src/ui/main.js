@@ -1,7 +1,7 @@
 // @ts-check
 /**
- * Avvio dell'interfaccia (fase 4): stili, stato, router, tema, guscio, viste, cronologia,
- * annunci per i lettori di schermo, stampa. Sostituisce il guscio di collaudo della fase 3.
+ * Avvio dell'interfaccia: stili, stato, persistenza (8.3, letta prima del primo disegno così il tema
+ * salvato non lampeggia), router, tema, guscio, viste, cronologia, annunci per i lettori di schermo, stampa.
  */
 import '../styles/fonts.css';
 import '../styles/tokens.css';
@@ -13,9 +13,12 @@ import '../styles/print.css';
 import { h, replace, debounce, reducedMotion } from './dom.js';
 import { icon } from './icons.js';
 import { createStore, initialState, setInputs, addHistory, newId } from './state.js';
+import { createPersistence } from './persistence.js';
+import { createStorage } from '../storage/storage.js';
 import { createRouter, routeTo, buildHash } from './router.js';
 import { applyTheme } from './theme.js';
 import { copyText } from '../export/clipboard.js';
+import { printPage } from '../export/print.js';
 import { createShell } from './shell.js';
 import { openHistoryPanel } from './components/history-panel.js';
 import { dateTime } from './format.js';
@@ -23,6 +26,7 @@ import { VIEWS } from './views/index.js';
 import { t } from '../i18n/strings.it.js';
 
 const store = createStore(initialState());
+
 
 // ---------------------------------------------------------------- annunci e messaggi brevi (9.4, 9.7)
 const live = h('div', { class: 'sr-only', 'aria-live': 'polite', 'aria-atomic': 'true' });
@@ -43,12 +47,36 @@ function toast(/** @type {string} */ text) {
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
 }
 
+// ---------------------------------------------------------------- persistenza (8.3)
+/** @type {Set<(e: import('./persistence.js').PersistEvent) => void>} */
+const persistListeners = new Set();
+const persistence = createPersistence({
+  store,
+  storage: createStorage(),
+  now: () => new Date().toISOString(),
+  win: window,
+  onEvent: (e) => {
+    if (e.type === 'quota-trimmed') toast(t('ui.set.persist.trimmed', { dropped: e.dropped }));
+    else if (e.type === 'quota-failed') toast(t('ui.set.persist.quota'));
+    else if (e.type === 'write-failed') toast(t('ui.set.persist.writeFailed'));
+    else if (e.type === 'external') toast(t(e.persist ? 'ui.set.persist.external.on' : 'ui.set.persist.external.off'));
+    for (const fn of [...persistListeners]) fn(e);
+  },
+});
+const loadStatus = await persistence.start();
+
 // ---------------------------------------------------------------- cronologia: si registra dopo 2 s di calma, o subito con Invio
 /** @param {{ fn: string, input: Record<string, any> }} entry */
 function commitHistory(entry) {
   store.set((s) => addHistory(s, entry, { id: newId(crypto.getRandomValues(new Uint8Array(12))), now: new Date().toISOString() }));
 }
 const recordLater = debounce(commitHistory, 2000);
+
+// prima di lasciare la pagina: la voce di cronologia in attesa e il salvataggio ritardato
+window.addEventListener('pagehide', () => {
+  recordLater.flush();
+  void persistence.flushNow();
+});
 
 /** @type {import('./types.js').View | null} */
 let view = null;
@@ -83,8 +111,17 @@ const ctx = {
   },
   openHistory: () => openHistoryPanel(ctx),
   print() {
-    window.print();
+    printPage();
   },
+  persistence,
+  onPersistEvent(fn) {
+    persistListeners.add(fn);
+    return () => {
+      persistListeners.delete(fn);
+    };
+  },
+  newId: () => newId(crypto.getRandomValues(new Uint8Array(12))),
+  now: () => new Date().toISOString(),
 };
 
 // ---------------------------------------------------------------- guscio
@@ -163,3 +200,5 @@ function onRoute(route, info) {
 
 const router = createRouter(window, onRoute);
 router.start();
+
+if (loadStatus === 'corrupt' || loadStatus === 'newer') toast(t(loadStatus === 'corrupt' ? 'ui.set.persist.corrupt' : 'ui.set.persist.newer'));

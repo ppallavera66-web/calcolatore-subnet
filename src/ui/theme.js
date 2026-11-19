@@ -2,7 +2,7 @@
 /**
  * Tema (specifica tecnica, 9.6): attributo `data-theme` su <html>.
  * Automatico = nessun attributo: le variabili seguono prefers-color-scheme e prefers-contrast (tokens.css).
- * In fase 4 il tema vive solo in memoria; con "Memorizza i dati" verrà salvato (fase 5).
+ * Il tema si salva solo con "Memorizza i dati" (persistence.js).
  */
 import { THEMES } from './state.js';
 

@@ -18,6 +18,10 @@
  * @property {(entry: { fn: string, input: Record<string, any> } | null, now?: boolean) => void} record registra in cronologia (dopo una pausa, o subito)
  * @property {() => void} openHistory apre il pannello della cronologia
  * @property {() => void} print stampa la vista
+ * @property {ReturnType<typeof import('./persistence.js').createPersistence>} persistence salvataggio nel browser (8.3)
+ * @property {(fn: (e: import('./persistence.js').PersistEvent) => void) => () => void} onPersistEvent avvisi della persistenza; restituisce la funzione per smettere
+ * @property {() => string} newId identificativo casuale di 12 caratteri (6.1)
+ * @property {() => string} now data e ora ISO
  *
  * @typedef {object} View
  * @property {HTMLElement} el
