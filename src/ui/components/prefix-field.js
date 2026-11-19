@@ -20,7 +20,7 @@ export function prefixField(o) {
   const field = textField({
     label: o.label,
     value: o.value,
-    hint: o.hint ?? t('ui.field.prefix.hint'),
+    hint: o.hint,
     placeholder: o.placeholder ?? '/24',
     inputmode: 'decimal',
     width: '17ch',

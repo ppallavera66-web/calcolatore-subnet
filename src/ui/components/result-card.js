@@ -61,8 +61,16 @@ export function copyButton(ctx, text, what) {
 }
 
 /**
+ * Sì o no con icona e testo (mai il solo colore).
+ * @param {boolean} value
+ */
+export function yesNo(value) {
+  return h('span', { class: `yesno ${value ? 'ok-c' : 'w-c'}` }, icon(value ? 'check' : 'close', { size: 16 }), t(value ? 'ui.yes' : 'ui.no'));
+}
+
+/**
  * @param {import('../types.js').Ctx} ctx
- * @param {{ title?: string, badge?: { text: string, kind: string, title?: string } | null, primary?: Item[], items?: Item[],
+ * @param {{ title?: string, lead?: Node | null, badge?: { text: string, kind: string, title?: string } | null, primary?: Item[], items?: Item[],
  *   warnings?: { code: string, params: Record<string, any> }[], children?: (Node | null)[] }} o
  */
 export function resultCard(ctx, o) {
@@ -76,6 +84,7 @@ export function resultCard(ctx, o) {
       h('h2', { id, class: 'card-title' }, o.title ?? t('ui.result')),
       o.badge ? h('span', { class: `badge badge-${o.badge.kind}`, title: o.badge.title }, o.badge.text) : null,
     ),
+    o.lead ?? null,
     o.primary?.length ? h('dl', { class: 'kv kv-primary' }, o.primary.map((i) => kvItem(ctx, i))) : null,
     o.items?.length ? h('dl', { class: 'kv' }, o.items.map((i) => kvItem(ctx, i))) : null,
     o.warnings?.length ? warningsBox(o.warnings) : null,

@@ -27,7 +27,7 @@ export const VIEW_PARAMS = Object.freeze({
   'calcola/conversioni': ['n', 'b', 'w', 'a', 'pm'],
   'calcola/mask': ['m'],
   'calcola/stessa': ['a', 'pa', 'b', 'pb', 'gw'],
-  'pianifica/inverso': ['caso', 'h', 'p', 's'],
+  'pianifica/inverso': ['caso', 'p', 'h', 's'],
   'pianifica/suddivisione': ['b', 'p', 'np', 'pg', 'ip'],
   'pianifica/piani': [],
   'guide/uso': [],

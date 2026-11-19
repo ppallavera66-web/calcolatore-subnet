@@ -60,7 +60,7 @@ describe('lettura e scrittura del frammento (9.3)', () => {
     ['#/calcola/stessa?a=10.1.63.5&pa=19&b=10.1.64.5&pb=19', 'calcola/stessa', { a: '10.1.63.5', pa: '19', b: '10.1.64.5', pb: '19' }],
     ['#/pianifica/inverso?h=50', 'pianifica/inverso', { h: '50' }],
     ['#/pianifica/inverso?p=16&s=6', 'pianifica/inverso', { p: '16', s: '6' }],
-    ['#/pianifica/inverso?h=20&p=24&s=8', 'pianifica/inverso', { p: '24', h: '20', s: '8' }],
+    ['#/pianifica/inverso?p=24&h=20&s=8', 'pianifica/inverso', { p: '24', h: '20', s: '8' }],
     ['#/pianifica/suddivisione?b=10.0.0.0&p=16&np=19&pg=0', 'pianifica/suddivisione', { b: '10.0.0.0', p: '16', np: '19', pg: '0' }],
     ['#/pianifica/piani', 'pianifica/piani', {}],
     ['#/impostazioni', 'impostazioni', {}],

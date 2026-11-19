@@ -6,7 +6,8 @@
 import { h, replace } from '../dom.js';
 import { ipField } from '../components/field.js';
 import { prefixField } from '../components/prefix-field.js';
-import { resultCard } from '../components/result-card.js';
+import { resultCard, yesNo } from '../components/result-card.js';
+import { icon } from '../icons.js';
 import { examples } from '../components/controls.js';
 import { createStepsPanel } from '../components/steps-panel.js';
 import { liveView, routeError } from './view-kit.js';
@@ -94,12 +95,11 @@ export function createStessa(ctx, route) {
         h('dl', { class: 'kv kv-compact' },
           kv(t('ui.same.own'), cidr(s.network, s.prefix)),
           kv(t('ui.same.other', { other }), cidr(s.otherNetwork, s.prefix)),
-          kv(t('ui.same.local', { other }), s.otherIsLocal ? `✓ ${t('ui.yes')}` : `✗ ${t('ui.no')}`, s.otherIsLocal ? 'ok-c' : 'w-c'),
-          v.gateway !== null ? kv(t('ui.same.gwIn'), v.gatewayInSubnet?.[side] ? `✓ ${t('ui.yes')}` : `✗ ${t('ui.no')}`, v.gatewayInSubnet?.[side] ? 'ok-c' : 'w-c') : null));
+          kv(t('ui.same.local', { other }), yesNo(s.otherIsLocal)),
+          v.gateway !== null ? kv(t('ui.same.gwIn'), yesNo(Boolean(v.gatewayInSubnet?.[side]))) : null));
     };
     replace(out, resultCard(ctx, {
-      title: verdict,
-      badge: { text: v.verdict === 'same' ? t('ui.yes') : v.verdict === 'different' ? t('ui.no') : '≠', kind },
+      lead: h('p', { class: `verdict verdict-${kind}` }, icon(v.verdict === 'same' ? 'check' : v.verdict === 'different' ? 'close' : 'warn', { size: 26 }), verdict),
       items: [
         { label: t('ui.same.a'), value: `${ip(v.a)}/${v.prefixA}` },
         { label: t('ui.same.b'), value: `${ip(v.b)}/${v.prefixB}` },
@@ -151,9 +151,8 @@ export function createStessa(ctx, route) {
 
 /**
  * @param {string} label
- * @param {string} value
- * @param {string} [cls]
+ * @param {string | Node} value
  */
-function kv(label, value, cls) {
-  return h('div', { class: 'kv-item' }, h('dt', {}, label), h('dd', {}, h('span', { class: `kv-value mono ${cls ?? ''}` }, value)));
+function kv(label, value) {
+  return h('div', { class: 'kv-item' }, h('dt', {}, label), h('dd', {}, typeof value === 'string' ? h('span', { class: 'kv-value mono' }, value) : value));
 }

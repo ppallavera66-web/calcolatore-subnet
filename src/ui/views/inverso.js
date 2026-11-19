@@ -14,6 +14,7 @@ import { entryFor } from '../history-map.js';
 import { inverseCase } from '../router.js';
 import { num, ip, message } from '../format.js';
 import { prefixForHostsText, prefixForSubnetsText, prefixForBothText, maskOf } from '../../engine/index.js';
+import { icon } from '../icons.js';
 import { t } from '../../i18n/strings.it.js';
 
 const VIEW = 'pianifica/inverso';
@@ -110,8 +111,7 @@ export function createInverso(ctx, route) {
       ctx.announce(t('ui.announce.inverse', { prefix: v.newPrefix }));
     } else if (v.feasible) {
       card = resultCard(ctx, {
-        title: t('ui.inv.feasible'),
-        badge: { text: '✓', kind: 'ok' },
+        lead: h('p', { class: 'verdict verdict-ok' }, icon('check', { size: 26 }), t('ui.inv.feasible')),
         primary: [
           { label: t('ui.inv.result.recommended'), value: `/${v.recommended}`, note: t('ui.inv.result.recommendedNote', { subnets: v.subnetsAtRecommended, hosts: v.usableHostsAtRecommended }) },
           { label: t('ui.inv.result.mask'), value: ip(maskOf(v.recommended)) },
@@ -125,8 +125,7 @@ export function createInverso(ctx, route) {
       ctx.announce(t('ui.announce.inverse', { prefix: v.recommended }));
     } else {
       card = resultCard(ctx, {
-        title: t('ui.inv.infeasible'),
-        badge: { text: '✗', kind: 'warn' },
+        lead: h('p', { class: 'verdict verdict-warn' }, icon('close', { size: 26 }), t('ui.inv.infeasible')),
         children: [notice(message(v.reason), 'error'), notice(t('ui.inv.vlsm'))],
         warnings: r.warnings,
       });

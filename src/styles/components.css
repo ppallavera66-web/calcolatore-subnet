@@ -178,6 +178,10 @@ tr.row-bad td{background:color-mix(in srgb,var(--warn) 10%,transparent)}
 .suggestions-title{margin:0 4px 0 0;font-size:14px;color:var(--muted)}
 
 /* ---------- F07: i due punti di vista ---------- */
+.verdict{display:flex;align-items:center;gap:10px;margin:0 0 var(--sp-3);font-family:var(--font-display);font-size:24px;font-weight:700;line-height:1.2}
+.verdict-ok{color:var(--ok)}
+.verdict-warn{color:var(--warn)}
+.yesno{display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--sp-3);margin-top:var(--sp-3)}
 .side{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3);background:var(--bg)}
 .side-title{font-size:15px;margin-bottom:4px}
@@ -227,7 +231,7 @@ tr.row-bad td{background:color-mix(in srgb,var(--warn) 10%,transparent)}
 .setting + .setting,.setting-block + .setting,.setting + .setting-block{border-top:1px solid var(--line);padding-top:var(--sp-3)}
 .setting-label{display:block;margin:0;font-weight:600;color:var(--strong)}
 .setting-desc{margin:2px 0 0;font-size:14px;color:var(--muted);max-width:60ch}
-.setting-note{margin:4px 0 0;font-size:13.5px;color:var(--warn);max-width:60ch}
+.setting-note{margin:4px 0 0;font-size:13.5px;color:var(--muted);font-style:italic;max-width:60ch}
 .is-disabled .setting-label,.is-disabled .segmented-legend{color:var(--muted)}
 .setting-danger{border-top:1px solid var(--line);padding-top:var(--sp-3);flex-wrap:wrap}
 .switch{flex:none;display:inline-grid;place-items:center;width:var(--touch);height:var(--touch-min);padding:0;border:0;background:transparent}

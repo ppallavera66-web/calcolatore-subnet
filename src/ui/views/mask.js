@@ -6,7 +6,7 @@
  */
 import { h, replace } from '../dom.js';
 import { textField } from '../components/field.js';
-import { resultCard, notice, warningsBox } from '../components/result-card.js';
+import { resultCard, notice, warningsBox, yesNo } from '../components/result-card.js';
 import { examples } from '../components/controls.js';
 import { createStepsPanel } from '../components/steps-panel.js';
 import { liveView } from './view-kit.js';
@@ -76,10 +76,10 @@ export function createMask(ctx, route) {
         h('td', {}, ordShort(i)),
         h('td', { class: 'mono' }, String(o.value)),
         h('td', {}, maskBits(o.binary)),
-        h('td', { class: o.allowed ? 'ok-c' : 'w-c' }, o.allowed ? `✓ ${t('ui.yes')}` : `✗ ${t('ui.no')}`))))));
+        h('td', {}, yesNo(o.allowed)))))));
     const card = resultCard(ctx, {
       title: v.valid ? t('ui.mask.valid', { prefix: v.prefix }) : t('ui.mask.invalid'),
-      badge: v.valid ? { text: `/${v.prefix}`, kind: 'ok' } : { text: t('ui.mask.invalid'), kind: 'warn' },
+      badge: v.valid ? { text: t('ui.yes'), kind: 'ok' } : { text: t('ui.no'), kind: 'warn' },
       items: v.valid ? [{ label: t('ui.conv.prefix'), value: `/${v.prefix}` }, { label: t('ui.r.mask'), value: toDotted(v.mask) }] : [],
       children: [
         table,

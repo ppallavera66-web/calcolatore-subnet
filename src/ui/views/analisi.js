@@ -51,6 +51,7 @@ export function createAnalisi(ctx, route) {
   const prefix = prefixField({
     label: t('ui.field.prefix'),
     value: p0.p ?? '',
+    hint: t('ui.field.prefix.hint'),
     onInput: (v) => live.change({ p: v }),
     onEnter: () => live.commit(),
   });
