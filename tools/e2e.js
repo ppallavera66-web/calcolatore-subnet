@@ -344,6 +344,96 @@ async function main() {
     await ctx.close();
   });
 
+  // ------------------------------------------------------------ calcolo dal vivo e interazioni
+  console.log('\nCalcolo dal vivo e interazioni');
+  await check('calcolo dal vivo senza Invio; errore solo dopo la pausa di 400 ms', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/analisi');
+    const ip = page.locator('.view-analisi input').first();
+    await ip.click();
+    await page.keyboard.type('192.168.1.256', { delay: 20 });
+    await page.waitForTimeout(150);
+    assert(((await page.textContent('.field-error')) ?? '') === '', "l'errore compare mentre si scrive");
+    await page.waitForTimeout(450);
+    assert(((await page.textContent('.field-error')) ?? '').includes('256'), 'errore assente dopo la pausa');
+    await ip.fill('');
+    await page.keyboard.type('192.168.1.200', { delay: 10 });
+    await page.locator('.field-prefix input[type=text]').fill('/28');
+    await page.waitForTimeout(300);
+    const res = await page.textContent('.kv-primary');
+    assert(res?.includes('192.168.1.192/28') && res.includes('192.168.1.207'), `risultato: ${res}`);
+    await ctx.close();
+  });
+  await check('incolla "IP mask" nel campo IP: i due valori si dividono', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/analisi');
+    await page.evaluate(() => {
+      const el = /** @type {HTMLInputElement} */ (document.querySelector('.view-analisi input'));
+      const dt = new DataTransfer();
+      dt.setData('text', '10.0.0.1 255.255.255.0');
+      el.focus();
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+    });
+    await page.waitForTimeout(300);
+    const ipv = await page.inputValue('.view-analisi input');
+    const pv = await page.inputValue('.field-prefix input[type=text]');
+    assert(ipv === '10.0.0.1' && pv === '255.255.255.0', `campi: "${ipv}" e "${pv}"`);
+    assert((await page.textContent('.prefix-other')) === '= /24', 'altra forma del prefisso assente');
+    assert((await page.textContent('.kv-primary'))?.includes('10.0.0.0/24'), 'risultato assente');
+    await ctx.close();
+  });
+  await check('Calcolo inverso: cambio di caso (B) e frammento come nella 9.3', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/inverso');
+    await page.getByRole('radio', { name: 'Numero di subnet' }).check();
+    await page.getByLabel('Prefisso del blocco').fill('16');
+    await page.getByLabel('Subnet richieste').fill('6');
+    await page.waitForTimeout(300);
+    const res = await page.textContent('.kv-primary');
+    assert(res?.includes('/19') && res.includes('255.255.224.0'), `risultato: ${res}`);
+    const hash = await page.evaluate(() => location.hash);
+    assert(hash === '#/pianifica/inverso?p=16&s=6', `frammento: ${hash}`);
+    await ctx.close();
+  });
+  await check('Conversioni: binario → decimale ed esadecimale', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/conversioni');
+    await page.getByRole('radio', { name: 'Binario', exact: true }).check();
+    await page.getByLabel('Numero', { exact: true }).fill('1100 1011');
+    await page.waitForTimeout(300);
+    const res = await page.textContent('.tool .result-card');
+    assert(res?.includes('203') && res.includes('0xCB'), `risultato: ${res}`);
+    await ctx.close();
+  });
+  await check('cronologia: una voce riapre la sua vista con gli input', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/mask');
+    await page.getByLabel('Subnet mask').fill('255.255.255.224');
+    await page.keyboard.press('Enter');
+    await page.click('.side-tab[href^="#/pianifica/suddivisione"]');
+    await page.waitForSelector('.view-suddivisione');
+    await page.click('.history-btn');
+    await page.click('.history-open');
+    await page.waitForSelector('.view-mask');
+    assert((await page.inputValue('.view-mask input')) === '255.255.255.224', 'input non ripristinato');
+    assert((await page.textContent('.result-card'))?.includes('/27'), 'risultato assente');
+    await ctx.close();
+  });
+  await check('collegamento "Capitolo N" dei passaggi e pulsante "?": rotte delle guide', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/analisi?ip=10.1.77.33&p=19&did=1&metodo=multiples');
+    await page.click('.results > .steps-panel:not([hidden]) .chapter-link >> nth=0');
+    await page.waitForSelector('.view-guide');
+    assert((await page.evaluate(() => location.hash)) === '#/guide/subnetting/cap-12', `frammento: ${await page.evaluate(() => location.hash)}`);
+    assert((await page.textContent('.view-guide'))?.includes('Il metodo dei multipli'), 'titolo del capitolo assente');
+    await page.goBack();
+    await page.waitForSelector('.view-analisi');
+    await page.click('.help-link');
+    await page.waitForSelector('.view-guide');
+    assert((await page.evaluate(() => location.hash)) === '#/guide/uso/analisi', 'pulsante "?" non porta alla guida all\'uso');
+    await ctx.close();
+  });
+
   // ------------------------------------------------------------ stampa
   console.log('\nStampa (9.9)');
   await check('stampa: fondo chiaro, navigazione nascosta, intestazione, F10 aperto, PDF', async () => {
