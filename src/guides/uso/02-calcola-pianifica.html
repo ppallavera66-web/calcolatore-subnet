@@ -1,0 +1,84 @@
+
+<div class="part" id="uso-parte-calcola">
+  <h2>Calcola</h2>
+</div>
+
+<section class="chap prose" id="uso-analisi">
+<h3>Analisi subnet</h3>
+<p>Rete, broadcast, primo e ultimo host, host utilizzabili, mask, wildcard e numero magico di un indirizzo.</p>
+<ol class="steps-list">
+<li>In <span class="ui">Indirizzo IP</span> scrivi l'indirizzo, per esempio <code>172.16.45.200</code>. Puoi scrivere o incollare anche <code>172.16.45.200/20</code>.</li>
+<li>In <span class="ui">Prefisso o mask</span> scrivi <code>/20</code>, <code>20</code> oppure <code>255.255.240.0</code>, o usa il cursore e i pulsanti − e +. Accanto compare l'altra forma.</li>
+<li>Il risultato si aggiorna mentre scrivi. Ogni valore ha il pulsante per copiarlo.</li>
+</ol>
+<p>La scheda del risultato mostra anche il <strong>tipo di indirizzo</strong> (privato, pubblico o speciale, con la classe storica), la posizione dell'IP nel blocco e le reti adiacenti. Un riquadro di avvisi segnala i casi particolari: indirizzo di rete o di broadcast, /31 e /32.</p>
+<p>Se scrivi solo l'indirizzo, senza prefisso, Analisi mostra il <strong>tipo di indirizzo</strong> e ti invita ad aggiungere il prefisso.</p>
+<p>La sezione richiudibile <span class="ui">Wildcard e configurazione (ACL, OSPF)</span> produce le righe pronte per un router Cisco: ACL standard numerata e con nome, rete OSPF. In <span class="ui">Opzioni</span> scegli numero e nome dell'ACL, azione, processo e area OSPF.</p>
+<p>Teoria: <a href="#/guide/subnetting/cap-7">metodo binario</a>, <a href="#/guide/subnetting/cap-9">numero magico</a>, <a href="#/guide/subnetting/cap-14">wildcard</a>.</p>
+</section>
+
+<section class="chap prose" id="uso-conversioni">
+<h3>Conversioni</h3>
+<p>Tre riquadri indipendenti:</p>
+<dl class="facts">
+<dt>Numero</dt><dd>da 0 a 4.294.967.295, in decimale, binario o esadecimale, convertito nelle altre due basi con la somma dei pesi. In binario puoi separare i gruppi con spazi o punti; <code>0b</code> e <code>0x</code> sono accettati. La larghezza (automatica, 8 o 32 bit) decide quante cifre binarie mostrare.</dd>
+<dt>Indirizzo</dt><dd>un indirizzo puntato in binario, in esadecimale per ottetto e a 32 bit, e come intero.</dd>
+<dt>Prefisso e mask</dt><dd>da <code>/20</code> alla mask decimale e binaria, o al contrario. Il collegamento <span class="ui">Vai alla validazione della mask</span> apre la scheda Mask.</dd>
+</dl>
+<p>Con la modalità didattica i passaggi mostrano la sottrazione dei pesi o le divisioni successive (<a href="#/guide/subnetting/cap-3">capitolo 3</a>).</p>
+</section>
+
+<section class="chap prose" id="uso-mask">
+<h3>Validazione mask</h3>
+<p>Scrivi una mask in forma puntata, per esempio <code>255.255.250.0</code>. Se è valida, il calcolatore indica il prefisso; se non lo è, mostra gli ottetti in binario, quello sbagliato e il motivo (un valore che non è tra i nove ammessi, oppure un 1 dopo uno 0), più le due mask valide più vicine: un tocco le prova.</p>
+<p>Se hai scritto una wildcard al posto di una mask (per esempio <code>0.0.0.255</code>), un avviso lo dice e indica la mask corrispondente. Teoria nel <a href="#/guide/subnetting/cap-6">capitolo 6</a>.</p>
+</section>
+
+<section class="chap prose" id="uso-stessa">
+<h3>Stessa subnet?</h3>
+<p>Scrivi <span class="ui">Host A</span> con il suo prefisso e <span class="ui">Host B</span>. Il prefisso di B è facoltativo: se lo lasci vuoto vale quello di A. Il calcolatore applica <strong>a ciascun host la propria mask</strong> e dà uno di tre esiti:</p>
+<ul>
+<li><strong>stessa subnet</strong>: ognuno vede l'altro come locale;</li>
+<li><strong>subnet diverse</strong>: nessuno dei due vede l'altro come locale;</li>
+<li><strong>asimmetrico</strong>: con mask diverse uno vede l'altro locale e l'altro no, il caso dei guasti "a volte funziona".</li>
+</ul>
+<p>Il campo facoltativo <span class="ui">Gateway</span> viene verificato rispetto alla subnet di ciascun host: un avviso segnala un gateway fuori dalla subnet o uguale a rete, broadcast o all'host stesso. Teoria nel <a href="#/guide/subnetting/cap-15">capitolo 15</a>.</p>
+</section>
+
+<div class="part" id="uso-parte-pianifica">
+  <h2>Pianifica</h2>
+</div>
+
+<section class="chap prose" id="uso-inverso">
+<h3>Calcolo inverso</h3>
+<p>Dal requisito al prefisso. In <span class="ui">Che cosa ti serve?</span> scegli:</p>
+<dl class="facts">
+<dt>Host per subnet</dt><dd>quanti host deve contenere ogni subnet: il calcolatore dà il prefisso più lungo che li contiene, la mask e gli indirizzi di scorta. Conta anche gateway, stampanti, interfacce di gestione e un margine di crescita.</dd>
+<dt>Numero di subnet</dt><dd>prefisso del blocco e subnet richieste: dà il nuovo prefisso, i bit presi in prestito e le subnet di scorta.</dd>
+<dt>Entrambi</dt><dd>blocco, host e subnet: dice se si può fare con subnet tutte uguali, con il prefisso consigliato e l'alternativa con subnet più grandi. Se non si può, servirà il pianificatore VLSM (versione 2).</dd>
+</dl>
+<p><span class="ui">Apri in Analisi</span> porta il risultato nella scheda Analisi. Teoria nel <a href="#/guide/subnetting/cap-11">capitolo 11</a>.</p>
+</section>
+
+<section class="chap prose" id="uso-suddivisione">
+<h3>Suddivisione di un blocco</h3>
+<ol class="steps-list">
+<li>In <span class="ui">Blocco</span> scrivi la rete, anche nella forma <code>10.0.0.0/16</code>. Se l'indirizzo ha bit di host a 1 viene riportato alla sua rete, con un avviso.</li>
+<li>Scegli <span class="ui">Nuovo prefisso</span>: compaiono il riepilogo (numero di subnet, bit presi in prestito, host per subnet, passo) e l'elenco.</li>
+<li>L'elenco è a pagine di 256 righe, con i pulsanti per la prima, la precedente, la successiva e l'ultima pagina e il campo per andare a una pagina.</li>
+<li><span class="ui">Vai alla subnet che contiene l'IP</span> trova la subnet di un indirizzo e apre la sua pagina, anche in un blocco con milioni di subnet.</li>
+</ol>
+<p>Con <span class="ui">Salva come piano</span> la suddivisione diventa un piano con nome, note ed etichette (<a href="#/guide/uso/piani">Piani salvati</a>). Per esportare l'elenco vedi <a href="#/guide/uso/export">Export</a>. Teoria nei capitoli <a href="#/guide/subnetting/cap-11">11</a> e <a href="#/guide/subnetting/cap-13">13</a>.</p>
+</section>
+
+<section class="chap prose" id="uso-piani">
+<h3>Piani salvati</h3>
+<p>Un piano è una suddivisione con un nome, delle note e un'<strong>etichetta per ogni subnet</strong> (per esempio la VLAN o l'uso).</p>
+<ol class="steps-list">
+<li>In <a href="#/pianifica/suddivisione">Suddivisione</a> prepara blocco e nuovo prefisso e premi <span class="ui">Salva come piano</span>: scegli il nome (da 1 a 80 caratteri) e le note (fino a 2.000).</li>
+<li>Con il piano aperto, nell'elenco compare la colonna delle etichette: scrivi e l'etichetta si salva da sola (fino a 80 caratteri).</li>
+<li>Se cambi blocco o prefissi il piano si chiude e resta tra i piani salvati.</li>
+</ol>
+<p>Nella scheda <span class="ui">Piani salvati</span> ogni piano si apre, si rinomina con le note (<span class="ui">Nome e note</span>) o si elimina, con conferma. Le etichette entrano negli export della suddivisione.</p>
+<p>I piani restano solo per la visita, a meno di accendere <a href="#/guide/uso/memorizza">Memorizza i dati</a> o di esportare la <a href="#/guide/uso/sessione">sessione</a>. Al massimo 100 piani.</p>
+</section>

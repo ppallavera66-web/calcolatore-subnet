@@ -1,0 +1,51 @@
+<header class="hero">
+  <p class="eyebrow">GUIDA ALL'USO · CALCOLATORE SUBNET</p>
+  <h2 class="hero-title">Come si usa il calcolatore</h2>
+  <p class="lead">Una pagina per ogni compito: analizzare un indirizzo, scegliere un prefisso, dividere un blocco, esportare i risultati, salvare o spostare il lavoro. Il pulsante <span class="ui">?</span> accanto al titolo di ogni schermata porta qui, al paragrafo giusto. Per la teoria c'è la <a href="#/guide/subnetting">guida al subnetting</a>.</p>
+</header>
+
+<div class="part" id="uso-parte-inizio">
+  <h2>Per cominciare</h2>
+</div>
+
+<section class="chap prose" id="uso-avvio">
+<h3>Aprire il calcolatore</h3>
+<p>Il calcolatore è <strong>un unico file HTML</strong>: niente installazione, nessun collegamento a Internet, nessun dato inviato altrove. Si usa in due modi:</p>
+<ul>
+<li><strong>da disco</strong>: salva il file in una cartella e aprilo con un doppio clic (o trascinandolo nel browser). Funziona anche senza rete;</li>
+<li><strong>da un indirizzo HTTPS</strong>, per esempio la pubblicazione su GitHub Pages: è il modo consigliato sul telefono e quello in cui tutte le funzioni sono sicuramente disponibili (vedi <a href="#/guide/uso/browser">Browser e apertura da disco</a>).</li>
+</ul>
+<p>Ogni schermata ha un indirizzo proprio, che contiene anche i dati scritti: puoi salvarlo nei preferiti o mandarlo a un collega, e il tasto <span class="ui">Indietro</span> del browser torna alla schermata precedente. Per esempio <a href="#/calcola/analisi?ip=172.16.45.200&amp;p=20">questo collegamento</a> apre l'analisi di <code>172.16.45.200/20</code>.</p>
+</section>
+
+<section class="chap prose" id="uso-schermate">
+<h3>Le schermate</h3>
+<dl class="facts">
+<dt>Calcola</dt><dd><a href="#/guide/uso/analisi">Analisi</a>, <a href="#/guide/uso/conversioni">Conversioni</a>, <a href="#/guide/uso/mask">Mask</a> e <a href="#/guide/uso/stessa">Stessa subnet</a>: le domande su un indirizzo.</dd>
+<dt>Pianifica</dt><dd><a href="#/guide/uso/inverso">Calcolo inverso</a>, <a href="#/guide/uso/suddivisione">Suddivisione</a> e <a href="#/guide/uso/piani">Piani salvati</a>: dal requisito al piano di indirizzamento.</dd>
+<dt>Guide</dt><dd>questa guida e la guida al subnetting.</dd>
+<dt>Impostazioni</dt><dd>modalità d'uso, tema, dati e informazioni (<a href="#/guide/uso/impostazioni">dettagli</a>).</dd>
+</dl>
+<p>Sul telefono le quattro sezioni sono nella barra in basso e le schede di ogni sezione scorrono in alto; sugli schermi medi le sezioni sono in alto, su quelli larghi nella barra a sinistra. Nelle pagine lunghe il pulsante con la freccia in basso a destra riporta all'inizio.</p>
+</section>
+
+<section class="chap prose" id="uso-modalita">
+<h3>Tre modi di lavorare</h3>
+<p>Il calcolatore parte nel modo più essenziale, il <strong>calcolo rapido</strong>: scrivi e leggi il risultato. Due interruttori in <a href="#/impostazioni">Impostazioni</a>, indipendenti tra loro, aggiungono il resto:</p>
+<ul>
+<li><strong>Modalità didattica</strong>: sotto ogni risultato compaiono i passaggi, con il metodo scelto e il rimando al capitolo della guida (<a href="#/guide/uso/didattica">dettagli</a>);</li>
+<li><strong>Export</strong>: sui risultati compare la barra per copiare, scaricare e stampare (<a href="#/guide/uso/export">dettagli</a>).</li>
+</ul>
+<p>Un terzo interruttore, <strong>Memorizza i dati</strong>, decide se il lavoro resta nel browser dopo la chiusura della pagina (<a href="#/guide/uso/memorizza">dettagli</a>). Tutti e tre sono spenti all'inizio.</p>
+</section>
+
+<section class="chap prose" id="uso-tastiera">
+<h3>Tastiera, telefono e accessibilità</h3>
+<ul>
+<li>Il calcolo parte da solo mentre scrivi; <kbd>Invio</kbd> lo forza e registra subito il calcolo nella cronologia.</li>
+<li>Nei campi degli indirizzi la <strong>virgola vale come punto</strong>: sul telefono basta la tastiera numerica. Puoi incollare <code>10.0.0.1/24</code> o <code>10.0.0.1 255.255.255.0</code> nel campo dell'indirizzo: i due valori si dividono da soli.</li>
+<li>Il primo collegamento della pagina, <span class="ui">Salta al contenuto</span>, porta direttamente al titolo della schermata.</li>
+<li>Nel selettore del metodo dei passaggi si cambia scelta con le frecce; <kbd>Esc</kbd> chiude finestre e riquadri.</li>
+<li>Rete e host non sono indicati solo dal colore: le righe binarie hanno anche le etichette. Il tema <a href="#/guide/uso/temi">Alto contrasto</a> aumenta la leggibilità.</li>
+</ul>
+</section>

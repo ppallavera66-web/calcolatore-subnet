@@ -1,0 +1,114 @@
+
+<div class="part" id="uso-parte-risultati">
+  <h2>Risultati</h2>
+</div>
+
+<section class="chap prose" id="uso-didattica">
+<h3>Modalità didattica e passaggi</h3>
+<p>Con <span class="ui">Modalità didattica</span> accesa in Impostazioni, sotto ogni risultato compare il pannello <span class="ui">Passaggi</span>: lo stesso calcolo fatto a mano, passo per passo, con il metodo scelto.</p>
+<dl class="facts">
+<dt>Analisi</dt><dd>binario (i 6 passi del capitolo 7), numero magico (le 5 domande), multipli (divisione e resto).</dd>
+<dt>Conversioni</dt><dd>sottrazione dei pesi o divisioni successive.</dd>
+<dt>Stessa subnet</dt><dd>numero magico o AND con la propria mask.</dd>
+<dt>Le altre schede</dt><dd>un solo metodo, con le regole del capitolo corrispondente.</dd>
+</dl>
+<p>In Impostazioni scegli il <span class="ui">Metodo predefinito dei passaggi</span>; nel pannello lo puoi cambiare per la funzione, e la scelta vale per la visita. Nelle righe binarie i bit di rete sono in ambra e quelli di host in verde acqua, con le etichette. In fondo al pannello il collegamento <span class="ui">Capitolo N</span> apre il capitolo della guida da cui viene il metodo.</p>
+<p>I collegamenti "Apri nel calcolatore" della guida al subnetting accendono i passaggi solo per la schermata che aprono, con il metodo del capitolo, senza cambiare le impostazioni.</p>
+</section>
+
+<section class="chap prose" id="uso-cronologia">
+<h3>Cronologia</h3>
+<p>Il pulsante <span class="ui">Cronologia</span>, in alto nelle schermate di Calcola e Pianifica, apre l'elenco degli ultimi calcoli: un tocco li riapre con gli stessi dati. Un calcolo entra in cronologia dopo 2 secondi senza modifiche, o subito con <kbd>Invio</kbd>; lo stesso calcolo rifatto torna in cima. Ogni voce si può eliminare, e c'è il pulsante per svuotare tutto.</p>
+<p>La cronologia tiene le 200 voci più recenti e vale per la visita; con <a href="#/guide/uso/memorizza">Memorizza i dati</a> acceso resta anche dopo la chiusura della pagina. Si salvano solo gli input: i risultati si ricalcolano.</p>
+</section>
+
+<section class="chap prose" id="uso-export">
+<h3>Export, copia e stampa</h3>
+<p>Accendi <span class="ui">Export</span> in Impostazioni: sotto i risultati compare la barra <span class="ui">Copia · CSV · JSON · Markdown · Testo · Stampa</span>, più <span class="ui">Snippet</span> in Analisi. Sul telefono la barra diventa il pulsante <span class="ui">Esporta</span>, che apre un pannello dal basso.</p>
+<dl class="facts">
+<dt>Copia</dt><dd>il riepilogo in colonne allineate, pronto da incollare in un messaggio o in un ticket.</dd>
+<dt>CSV</dt><dd>separatore punto e virgola, accenti corretti, numeri senza separatori delle migliaia: si apre direttamente in Excel. In LibreOffice scegli il punto e virgola come separatore. Le etichette che iniziano con <code>=</code>, <code>+</code>, <code>-</code> o <code>@</code> vengono precedute da un apostrofo, così il foglio non le esegue come formule.</dd>
+<dt>JSON</dt><dd>input e risultato in forma strutturata, per script e altri programmi.</dd>
+<dt>Markdown e Testo</dt><dd>tabella Markdown oppure testo a colonne.</dd>
+<dt>Stampa</dt><dd>la stampa del browser, da cui si salva anche in PDF: fondo chiaro, intestazione con input e data, senza barre di navigazione.</dd>
+<dt>Snippet</dt><dd>le righe ACL e OSPF di Analisi in un file di testo.</dd>
+</dl>
+<p>Con la modalità didattica accesa compare la casella <span class="ui">Includi i passaggi</span>: aggiunge i passaggi ai formati testuali e al JSON.</p>
+<p>In <strong>Suddivisione</strong> scegli quali subnet esportare: la pagina corrente, tutte (fino a 65.536 righe) oppure un intervallo di indici, obbligatorio oltre quel limite. Se è aperto un piano, il file contiene anche le etichette.</p>
+<p>I file prendono il nome dall'input e dalla data, per esempio <code>subnet-analisi-172.16.32.0-20-20261119-1030.csv</code>.</p>
+</section>
+
+<div class="part" id="uso-parte-dati">
+  <h2>Dati e impostazioni</h2>
+</div>
+
+<section class="chap prose" id="uso-impostazioni">
+<h3>Impostazioni</h3>
+<dl class="facts">
+<dt>Modalità d'uso</dt><dd><a href="#/guide/uso/didattica">Modalità didattica</a> con il metodo predefinito, <a href="#/guide/uso/export">Export</a>.</dd>
+<dt>Tema</dt><dd>Automatico, Chiaro, Scuro, Alto contrasto (<a href="#/guide/uso/temi">dettagli</a>).</dd>
+<dt>Dati</dt><dd><a href="#/guide/uso/memorizza">Memorizza i dati</a>, <a href="#/guide/uso/sessione">Esporta sessione e Importa sessione</a>, Cancella tutti i dati.</dd>
+<dt>Informazioni</dt><dd>versione, data di build, licenze (codice MIT, caratteri IBM Plex con licenza OFL) e la riga <span class="ui">Compatibilità di questo browser</span>, che dice da dove è aperta la pagina e se cifratura, salvataggio e appunti sono disponibili.</dd>
+</dl>
+<p><span class="ui">Cancella tutti i dati</span>, dopo una conferma, cancella i dati salvati nel browser, svuota cronologia e piani, riporta le impostazioni ai valori iniziali e spegne Memorizza i dati. Non si può annullare: se servono, esporta prima la sessione.</p>
+</section>
+
+<section class="chap prose" id="uso-memorizza">
+<h3>Memorizza i dati</h3>
+<p>Spento all'inizio: il calcolatore non scrive nulla nel browser, e cronologia e piani spariscono alla chiusura della pagina. Acceso, salva subito <strong>impostazioni, tema, cronologia e piani</strong> e poi ogni modifica. Sotto l'interruttore compare la data dell'ultimo salvataggio.</p>
+<ul>
+<li>Il salvataggio vale <strong>solo per questo browser e questo dispositivo</strong>. Per spostare il lavoro su un altro browser o passarlo a un collega usa la <a href="#/guide/uso/sessione">sessione</a>.</li>
+<li><strong>Spegnerlo</strong> chiede conferma (<span class="ui">Smetti e cancella</span>): i dati salvati nel browser vengono cancellati, quelli della visita restano finché non chiudi la pagina.</li>
+<li>Con il calcolatore aperto in <strong>più schede</strong>, le modifiche di una compaiono nelle altre; se in una scheda il salvataggio viene spento, anche le altre smettono di salvare.</li>
+<li>Se lo spazio finisce, la cronologia salvata scende alle 100 voci più recenti; se non basta, un avviso invita a esportare la sessione.</li>
+<li>Se il browser non permette il salvataggio (per esempio in alcune finestre private), l'interruttore è disattivato con la spiegazione e il calcolatore funziona comunque.</li>
+<li>Il browser può cancellare i dati salvati: Safari lo fa dopo un periodo di inattività. Il salvataggio non sostituisce l'export della sessione.</li>
+</ul>
+</section>
+
+<section class="chap prose" id="uso-sessione">
+<h3>Sessione: esportare e importare il lavoro</h3>
+<p>La sessione è un file JSON con impostazioni, cronologia e piani. Serve a fare una copia di sicurezza, a spostare il lavoro su un altro browser o dispositivo, a passarlo a un collega. Funziona anche con Memorizza i dati spento: esporta il lavoro della visita.</p>
+<ol class="steps-list">
+<li><strong>Esportare</strong>: Impostazioni → <span class="ui">Esporta sessione</span>. La finestra riassume il contenuto; con <span class="ui">Esporta</span> scarichi <code>subnetcalc-sessione-AAAAMMGG-hhmm.json</code>. Per proteggerlo con una passphrase vedi <a href="#/guide/uso/cifratura">Cifratura</a>.</li>
+<li><strong>Importare</strong>: Impostazioni → <span class="ui">Importa sessione</span> e scegli il file (al massimo 5 MB). Il calcolatore riconosce da solo un file cifrato e solo in quel caso chiede la passphrase.</li>
+<li>L'<strong>anteprima</strong> mostra la data del file, la versione dell'app che l'ha scritto, quanti calcoli e piani contiene ed eventuali voci scartate perché non valide.</li>
+<li>Scegli <span class="ui">Sostituisci</span> (cronologia e piani attuali vengono rimpiazzati) oppure <span class="ui">Unisci</span> (si aggiungono, togliendo i doppioni). Le impostazioni del file si applicano solo se spunti <span class="ui">Applica anche le impostazioni del file</span>.</li>
+</ol>
+<p>Un import non cambia mai Memorizza i dati. Un file scritto da una versione più recente del calcolatore viene rifiutato con l'invito ad aggiornare l'app; quelli delle versioni precedenti vengono convertiti.</p>
+</section>
+
+<section class="chap prose" id="uso-cifratura">
+<h3>Cifratura della sessione</h3>
+<p>Nella finestra <span class="ui">Esporta sessione</span> la casella <span class="ui">Cifra il file</span> protegge il file con una passphrase (AES-256-GCM, chiave derivata con PBKDF2). È facoltativa, va scelta a ogni export e non viene ricordata: l'export normale resta sempre in chiaro.</p>
+<ol class="steps-list">
+<li>Spunta <span class="ui">Cifra il file</span> e scrivi la passphrase due volte: almeno 12 caratteri. L'indicatore di robustezza va da debole a ottima; una frase di più parole, come <code>cavallo batteria graffetta</code>, è robusta e facile da ricordare.</li>
+<li>Premi <span class="ui">Esporta</span>: la cifratura richiede fino a circa un secondo sui telefoni. Il file si chiama <code>…-cifrato.json</code>.</li>
+<li>Comunica la passphrase al destinatario per un <strong>canale separato</strong> (non nello stesso messaggio del file).</li>
+</ol>
+<div class="box warn"><span class="lbl">Attenzione</span>
+<p>Una passphrase persa <strong>non è recuperabile</strong>: nessuno può aprire il file senza. All'import una passphrase sbagliata e un file danneggiato danno lo stesso messaggio, "Passphrase errata o file danneggiato", e puoi riprovare.</p></div>
+<p>La passphrase non viene salvata né inviata, e i campi si svuotano alla fine. La cifratura usa le funzioni del browser (Web Crypto), che alcuni browser concedono solo alle pagine aperte da HTTPS o da localhost: se la casella è disattivata, leggi <a href="#/guide/uso/browser">Browser e apertura da disco</a>.</p>
+</section>
+
+<section class="chap prose" id="uso-temi">
+<h3>Temi</h3>
+<p>In Impostazioni, o nell'indice di ogni guida, scegli tra <strong>Automatico</strong> (segue il sistema, compresa la richiesta di contrasto elevato), <strong>Chiaro</strong>, <strong>Scuro</strong> e <strong>Alto contrasto</strong>. Il tema vale per tutto il calcolatore, guide comprese, e si salva con Memorizza i dati. La stampa è sempre su fondo chiaro.</p>
+</section>
+
+<section class="chap prose" id="uso-browser">
+<h3>Browser e apertura da disco</h3>
+<p>Il calcolatore funziona nelle ultime versioni di Chrome, Edge, Firefox e Safari, su computer e telefono. Quando la pagina è aperta <strong>da disco</strong> (indirizzo che inizia con <code>file://</code>), alcuni browser limitano tre funzioni: la cifratura della sessione, il salvataggio nel browser e la copia negli appunti. Il calcolo, le guide, il download dei file e la stampa funzionano sempre.</p>
+<p>Per sapere com'è il tuo browser apri Impostazioni → Informazioni → <span class="ui">Compatibilità di questo browser</span>.</p>
+<dl class="facts">
+<dt>Chrome (computer)</dt><dd>provato da disco: cifratura, salvataggio, appunti e download disponibili.</dd>
+<dt>Edge, Firefox, Safari</dt><dd>prove da disco in corso; da HTTPS tutte le funzioni sono disponibili.</dd>
+<dt>Telefoni</dt><dd>conviene aprire il calcolatore da HTTPS: aprire un file da disco sul telefono è scomodo e alcune funzioni possono mancare.</dd>
+</dl>
+<ul>
+<li><strong>Cifratura non disponibile</strong>: la casella <span class="ui">Cifra il file</span> è disattivata con la spiegazione, e un file cifrato non si può importare. Apri il calcolatore da HTTPS (per esempio da GitHub Pages) o da localhost.</li>
+<li><strong>Spazio di salvataggio</strong>: alcuni browser danno un unico spazio a tutti i file aperti da disco, altri uno per file o per cartella. Se sposti o copi il file in un'altra cartella, i dati salvati potrebbero non seguirlo: per portarli con te usa l'export della sessione. Le chiavi del calcolatore iniziano con <code>subnetcalc:</code>, così non si confondono con quelle di altre pagine.</li>
+<li><strong>Safari</strong> può cancellare i dati salvati dopo un periodo di inattività: esporta la sessione per conservarli.</li>
+<li><strong>Copia non riuscita</strong>: se il browser rifiuta l'accesso agli appunti compare il messaggio "Copia non riuscita": seleziona il testo e copialo a mano, oppure usa l'export in un file.</li>
+</ul>
+</section>
