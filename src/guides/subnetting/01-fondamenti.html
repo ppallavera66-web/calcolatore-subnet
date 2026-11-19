@@ -1,0 +1,273 @@
+<header class="hero">
+  <p class="eyebrow">GUIDA DI STUDIO · v0.4 · DA REVISIONARE</p>
+  <h2 class="hero-title">Subnetting IPv4, dalle basi ai calcoli a mente</h2>
+  <p class="lead">Una guida in quattro parti: prima il perché delle reti e del binario, poi il metodo classico da fare a mano, poi i metodi rapidi per calcolare quasi a mente, infine la progettazione di un piano di indirizzamento. Ogni metodo descritto qui è una funzione del calcolatore: i collegamenti "Apri nel calcolatore" aprono gli esempi con i passaggi.</p>
+  <div class="legend">
+    <div><b class="n-c">11111111</b> bit di rete</div>
+    <div><b class="h-c">00000000</b> bit di host</div>
+    <div>Gli esercizi hanno la soluzione nascosta: prova prima a mano.</div>
+    <div><span class="gl-sample">Termini sottolineati</span>: spiegazione al passaggio del mouse, al tocco o con il tasto Tab, <a href="#/guide/subnetting/app-b">glossario completo</a>.</div>
+  </div>
+</header>
+
+<!-- =================== PARTE I =================== -->
+<div class="part" id="parte-1">
+  <p class="eyebrow">PARTE I</p>
+  <h2>Fondamenti: il perché</h2>
+  <p class="intro">Prima di fare calcoli serve capire a cosa servono. Questi cinque capitoli spiegano cos'è una rete, come un computer decide dove mandare un pacchetto, perché tutto si basa sul binario e perché vale la pena dividere una rete in sottoreti.</p>
+</div>
+
+<section class="chap prose" id="cap-1">
+<h3><span class="num">01</span>Cos'è una rete dati</h3>
+<p>Una <strong>rete dati</strong> è un insieme di dispositivi (gli <strong>host</strong>: PC, server, stampanti, telefoni IP, access point) collegati in modo da potersi scambiare informazioni. Le informazioni viaggiano divise in piccoli blocchi chiamati <strong>pacchetti</strong>, ognuno con un'intestazione che dice da dove viene e dove deve andare.</p>
+<p>Si distingue di solito tra:</p>
+<ul>
+  <li><strong>LAN</strong> (Local Area Network): la rete locale di un edificio, un piano, un laboratorio. Velocità alte, un'unica amministrazione.</li>
+  <li><strong>WAN</strong> (Wide Area Network): il collegamento tra reti lontane, per esempio tra due sedi o verso Internet.</li>
+</ul>
+
+<h4>Il modello a livelli</h4>
+<p>Per non dover risolvere tutto in un colpo solo, le reti sono progettate a <strong>livelli</strong>. Ogni livello fa un mestiere preciso e si appoggia su quello sottostante. Il riferimento teorico è il modello <strong>ISO/OSI</strong> a 7 livelli; quello usato nella pratica è il modello <strong>TCP/IP</strong>, più compatto.</p>
+<div class="tbl"><table>
+<thead><tr><th>OSI</th><th>TCP/IP</th><th>Cosa fa</th><th>Unità dati</th><th>Dispositivo tipico</th></tr></thead>
+<tbody>
+<tr><td>7 Applicazione<br>6 Presentazione<br>5 Sessione</td><td>Applicazione</td><td>Servizi per l'utente: HTTP, DNS, SMTP, SIP</td><td>Dati</td><td>Server, client</td></tr>
+<tr><td>4 Trasporto</td><td>Trasporto</td><td>Dialogo tra processi: TCP, UDP, porte</td><td>Segmento</td><td>Firewall (in parte)</td></tr>
+<tr class="hl"><td>3 Rete</td><td>Internet</td><td><strong>Indirizzamento IP e instradamento tra reti</strong></td><td>Pacchetto</td><td>Router, switch L3</td></tr>
+<tr><td>2 Collegamento</td><td rowspan="2">Accesso alla rete</td><td>Consegna nella stessa rete locale, indirizzi MAC</td><td>Frame</td><td>Switch</td></tr>
+<tr><td>1 Fisico</td><td>Segnali su cavo, fibra, radio</td><td>Bit</td><td>Cavi, hub, transceiver</td></tr>
+</tbody></table></div>
+<p>Il subnetting vive interamente al <strong>livello 3</strong>. Tutto quello che vedremo riguarda il modo in cui il livello di rete organizza gli indirizzi.</p>
+
+<h4>Due indirizzi diversi: MAC e IP</h4>
+<p>Ogni scheda di rete ha due tipi di indirizzo, con scopi diversi:</p>
+<div class="tbl"><table>
+<thead><tr><th><span class="sr-only">Caratteristica</span></th><th>Indirizzo MAC</th><th>Indirizzo IP (v4)</th></tr></thead>
+<tbody>
+<tr><td>Livello</td><td>2</td><td>3</td></tr>
+<tr><td>Lunghezza</td><td class="mono">48 bit</td><td class="mono">32 bit</td></tr>
+<tr><td>Esempio</td><td class="mono">3C-52-82-1A-7F-09</td><td class="mono">192.168.10.75</td></tr>
+<tr><td>Chi lo assegna</td><td>Il produttore della scheda</td><td>L'amministratore di rete (statico o via DHCP)</td></tr>
+<tr><td>Struttura</td><td>Piatta: non dice dove si trova l'host</td><td>Gerarchica: una parte indica la rete, una l'host</td></tr>
+<tr><td>Serve per</td><td>Consegnare il frame nella rete locale</td><td>Raggiungere qualunque rete, anche remota</td></tr>
+</tbody></table></div>
+<div class="box key"><span class="lbl">Il punto chiave</span>
+<p>Il MAC è come il nome di una persona: la identifica, ma non dice dove abita. L'IP è come un indirizzo postale: dice in che "via" (rete) si trova e a che "numero civico" (host). È proprio questa struttura gerarchica che rende possibile il subnetting.</p></div>
+</section>
+
+<section class="chap prose" id="cap-2">
+<h3><span class="num">02</span>L'indirizzo IP come indirizzo postale</h3>
+<p>Un indirizzo IPv4 è un numero di 32 bit, scritto per comodità come quattro numeri decimali da 0 a 255 separati da punti (<strong>notazione decimale puntata</strong>). Ogni numero rappresenta 8 bit e si chiama <strong>ottetto</strong>.</p>
+<p>Quei 32 bit sono divisi in due parti:</p>
+<ul>
+  <li>la <strong class="n-c">parte di rete</strong>, uguale per tutti gli host della stessa rete (la via);</li>
+  <li>la <strong class="h-c">parte di host</strong>, diversa per ogni host (il numero civico).</li>
+</ul>
+<p>Il confine tra le due parti non è fisso: lo stabilisce la <strong>subnet mask</strong>, un secondo numero di 32 bit che ha degli 1 in corrispondenza della parte di rete e degli 0 in corrispondenza della parte di host.</p>
+<pre class="bin">IP      192.168.10.75   <span class="n">11000000.10101000.00001010</span>.<span class="h">01001011</span>
+Mask    255.255.255.0   <span class="n">11111111.11111111.11111111</span>.<span class="h">00000000</span>
+                        <span class="m">└──────── rete (24 bit) ──┘ └ host ┘</span></pre>
+
+<h4>Perché la mask esiste davvero: la decisione di inoltro</h4>
+<p>Ogni volta che un PC deve inviare un pacchetto, si pone una sola domanda: <strong>il destinatario è nella mia stessa rete oppure no?</strong></p>
+<ul>
+  <li>Se <strong>sì</strong>, lo consegna direttamente: chiede il MAC del destinatario con ARP e invia.</li>
+  <li>Se <strong>no</strong>, consegna il pacchetto al <strong>default gateway</strong> (il router), che si occuperà di portarlo a destinazione.</li>
+</ul>
+<p>Per rispondere, il PC applica la <strong>propria</strong> mask sia al proprio indirizzo sia a quello di destinazione, con un'operazione di AND bit a bit (la vediamo nel capitolo 3). Se i due risultati coincidono, i due indirizzi stanno nella stessa rete.</p>
+<pre class="bin"><span class="m">PC: 192.168.1.10 / 255.255.255.0 · gateway 192.168.1.1</span>
+
+Destinazione 192.168.1.50
+  192.168.1.10 AND 255.255.255.0 = <span class="r">192.168.1.0</span>
+  192.168.1.50 AND 255.255.255.0 = <span class="r">192.168.1.0</span>   <span class="ok-c">→ uguali: consegna diretta</span>
+
+Destinazione 8.8.8.8
+  192.168.1.10 AND 255.255.255.0 = <span class="r">192.168.1.0</span>
+  8.8.8.8      AND 255.255.255.0 = <span class="r">8.8.8.0</span>       <span class="w">→ diversi: al gateway 192.168.1.1</span></pre>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/stessa?a=192.168.1.10&amp;pa=24&amp;b=192.168.1.50&amp;did=1&amp;metodo=binary">Apri nel calcolatore: 192.168.1.10 e 192.168.1.50 /24, AND con la mask</a></li>
+</ul></div>
+<div class="box warn"><span class="lbl">Ricaduta pratica</span>
+<p>Una mask sbagliata su un solo PC produce guasti subdoli. Se un host ha <code>/16</code> invece di <code>/24</code>, crederà "locali" indirizzi che in realtà stanno dietro al router: proverà a raggiungerli con ARP, non riceverà risposta e la comunicazione fallirà, mentre tutto il resto sembra funzionare. Saper ragionare sulla mask serve prima di tutto al troubleshooting.</p></div>
+</section>
+
+<section class="chap prose" id="cap-3">
+<h3><span class="num">03</span>Perché il binario</h3>
+<p>I circuiti digitali distinguono in modo affidabile solo due stati: acceso o spento, tensione alta o bassa. Per questo ogni informazione, dentro un computer o un router, è una sequenza di <strong>bit</strong> (0 e 1). Gli indirizzi IP e le mask non fanno eccezione: la notazione decimale puntata esiste solo per gli esseri umani.</p>
+<p>C'è anche una ragione di efficienza. Il router deve decidere dove inoltrare milioni di pacchetti al secondo, e l'operazione che gli serve, l'<strong>AND bit a bit</strong>, è la più semplice ed economica che un circuito possa eseguire. Ragionare in binario significa ragionare come il router.</p>
+
+<h4>Il sistema posizionale</h4>
+<p>Nel sistema decimale ogni cifra vale una potenza di 10 in base alla posizione: 203 = 2×100 + 0×10 + 3×1. Il binario funziona allo stesso modo con le potenze di 2. In un ottetto le posizioni valgono:</p>
+<pre class="bin">posizione   7    6    5    4    3    2    1    0
+peso      <span class="n">128   64   32   16    8    4    2    1</span>     <span class="m">(somma = 255)</span></pre>
+<p>Con 8 bit si rappresentano 2<sup>8</sup> = 256 valori, da 0 a 255. Ecco perché ogni ottetto di un IP non supera mai 255.</p>
+
+<h4>Da decimale a binario: metodo della sottrazione dei pesi</h4>
+<p>È il metodo più rapido a mano. Si scorrono i pesi da sinistra: se il peso "ci sta" nel numero rimasto, si scrive 1 e lo si sottrae; altrimenti si scrive 0.</p>
+<pre class="bin">203:  128 ci sta?  sì → <span class="n">1</span>   resto 75
+       64 ci sta?  sì → <span class="n">1</span>   resto 11
+       32 ci sta?  no → <span class="m">0</span>
+       16 ci sta?  no → <span class="m">0</span>
+        8 ci sta?  sì → <span class="n">1</span>   resto 3
+        4 ci sta?  no → <span class="m">0</span>
+        2 ci sta?  sì → <span class="n">1</span>   resto 1
+        1 ci sta?  sì → <span class="n">1</span>   resto 0
+                       → <span class="r">11001011</span></pre>
+
+<h4>Da decimale a binario: metodo delle divisioni successive</h4>
+<p>Si divide per 2 finché si arriva a 0 e si leggono i resti <strong>dal basso verso l'alto</strong>. È più meccanico, utile se non si ricordano i pesi.</p>
+<pre class="bin">203 : 2 = 101  resto 1   ↑
+101 : 2 =  50  resto 1   │
+ 50 : 2 =  25  resto 0   │
+ 25 : 2 =  12  resto 1   │  leggi dal basso
+ 12 : 2 =   6  resto 0   │
+  6 : 2 =   3  resto 0   │
+  3 : 2 =   1  resto 1   │
+  1 : 2 =   0  resto 1   │   → <span class="r">11001011</span></pre>
+
+<h4>Da binario a decimale</h4>
+<p>Si sommano i pesi dei bit che valgono 1.</p>
+<pre class="bin">1 0 1 1 0 1 1 0  →  128 + 32 + 16 + 4 + 2 = <span class="r">182</span></pre>
+
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/conversioni?n=203&amp;b=10&amp;did=1&amp;metodo=weights">Apri nel calcolatore: 203 in binario con la sottrazione dei pesi</a></li>
+<li><a href="#/calcola/conversioni?n=203&amp;b=10&amp;did=1&amp;metodo=divisions">Apri nel calcolatore: 203 in binario con le divisioni successive</a></li>
+<li><a href="#/calcola/conversioni?n=10110110&amp;b=2&amp;did=1&amp;metodo=weights">Apri nel calcolatore: 10110110 in decimale</a></li>
+</ul></div>
+
+<h4>L'operazione AND</h4>
+<p>L'AND confronta due bit e restituisce 1 solo se <strong>entrambi</strong> valgono 1. Applicato tra un indirizzo e una mask, "lascia passare" i bit dove la mask vale 1 e azzera quelli dove vale 0.</p>
+<div class="tbl"><table style="max-width:420px">
+<thead><tr><th class="mono">A</th><th class="mono">B</th><th class="mono">A AND B</th><th class="mono">A OR B</th></tr></thead>
+<tbody>
+<tr><td class="mono">0</td><td class="mono">0</td><td class="mono">0</td><td class="mono">0</td></tr>
+<tr><td class="mono">0</td><td class="mono">1</td><td class="mono">0</td><td class="mono">1</td></tr>
+<tr><td class="mono">1</td><td class="mono">0</td><td class="mono">0</td><td class="mono">1</td></tr>
+<tr><td class="mono">1</td><td class="mono">1</td><td class="mono">1</td><td class="mono">1</td></tr>
+</tbody></table></div>
+<p>L'OR ci servirà più avanti per calcolare il broadcast: restituisce 1 se <strong>almeno uno</strong> dei due bit vale 1.</p>
+
+<h4>Le potenze di 2 da sapere a memoria</h4>
+<p>Quasi tutti i calcoli rapidi si basano su questa tabella. Vale la pena impararla fino a 2<sup>16</sup>.</p>
+<div class="tbl"><table>
+<thead><tr><th class="mono">2ⁿ</th><th>Valore</th><th class="mono">2ⁿ</th><th>Valore</th><th class="mono">2ⁿ</th><th>Valore</th></tr></thead>
+<tbody>
+<tr><td class="mono">2¹</td><td class="mono">2</td><td class="mono">2⁷</td><td class="mono">128</td><td class="mono">2¹³</td><td class="mono">8.192</td></tr>
+<tr><td class="mono">2²</td><td class="mono">4</td><td class="mono">2⁸</td><td class="mono">256</td><td class="mono">2¹⁴</td><td class="mono">16.384</td></tr>
+<tr><td class="mono">2³</td><td class="mono">8</td><td class="mono">2⁹</td><td class="mono">512</td><td class="mono">2¹⁵</td><td class="mono">32.768</td></tr>
+<tr><td class="mono">2⁴</td><td class="mono">16</td><td class="mono">2¹⁰</td><td class="mono">1.024</td><td class="mono">2¹⁶</td><td class="mono">65.536</td></tr>
+<tr><td class="mono">2⁵</td><td class="mono">32</td><td class="mono">2¹¹</td><td class="mono">2.048</td><td class="mono">2²⁴</td><td class="mono">16.777.216</td></tr>
+<tr><td class="mono">2⁶</td><td class="mono">64</td><td class="mono">2¹²</td><td class="mono">4.096</td><td class="mono">2³²</td><td class="mono">4.294.967.296</td></tr>
+</tbody></table></div>
+
+<h4>Un cenno all'esadecimale</h4>
+<p>L'esadecimale (base 16) usa le cifre 0–9 e A–F. Ogni cifra esadecimale corrisponde esattamente a 4 bit (un <strong>nibble</strong>), quindi un ottetto si scrive sempre con due cifre: <code>203</code> = <code>1100 1011</code> = <code>CB</code>. Non serve per il subnetting IPv4, ma si usa per gli indirizzi MAC e diventa indispensabile con IPv6 (capitolo 19).</p>
+</section>
+
+<section class="chap prose" id="cap-4">
+<h3><span class="num">04</span>Classi, indirizzi speciali e CIDR</h3>
+<p>Nei primi anni di Internet il confine tra rete e host non era libero: lo decideva la <strong>classe</strong> dell'indirizzo, riconoscibile dai primi bit del primo ottetto. È il sistema <strong>classful</strong>.</p>
+<div class="tbl"><table>
+<thead><tr><th>Classe</th><th>Primi bit</th><th>Primo ottetto</th><th>Mask di default</th><th>Reti</th><th>Host per rete</th></tr></thead>
+<tbody>
+<tr><td><strong>A</strong></td><td class="mono">0</td><td class="mono">1 – 126</td><td class="mono">/8 · 255.0.0.0</td><td class="mono">126</td><td class="mono">16.777.214</td></tr>
+<tr><td><strong>B</strong></td><td class="mono">10</td><td class="mono">128 – 191</td><td class="mono">/16 · 255.255.0.0</td><td class="mono">16.384</td><td class="mono">65.534</td></tr>
+<tr><td><strong>C</strong></td><td class="mono">110</td><td class="mono">192 – 223</td><td class="mono">/24 · 255.255.255.0</td><td class="mono">2.097.152</td><td class="mono">254</td></tr>
+<tr><td><strong>D</strong></td><td class="mono">1110</td><td class="mono">224 – 239</td><td colspan="3">Multicast (nessuna mask)</td></tr>
+<tr><td><strong>E</strong></td><td class="mono">1111</td><td class="mono">240 – 255</td><td colspan="3">Sperimentale, riservata</td></tr>
+</tbody></table></div>
+<p>Lo 0 e il 127 come primo ottetto sono esclusi dalla classe A: <code>0.x.x.x</code> significa "questa rete", <code>127.x.x.x</code> è il loopback.</p>
+
+<h4>Il problema delle classi: lo spreco</h4>
+<p>Le classi offrivano solo tre taglie: 254, 65.534 o 16,7 milioni di host. Un'organizzazione con 300 host non entrava in una classe C e riceveva una classe B intera, sprecando oltre 65.000 indirizzi. Con la crescita di Internet lo spazio IPv4 si stava esaurendo rapidamente.</p>
+
+<h4>La soluzione: CIDR</h4>
+<p>Nel 1993 è stato introdotto il <strong>CIDR</strong> (Classless Inter-Domain Routing, oggi RFC 4632). Con il CIDR il confine tra rete e host può cadere su <strong>qualunque bit</strong>, e si indica con la <strong>lunghezza del prefisso</strong>: <code>/23</code> significa "i primi 23 bit sono di rete". All'organizzazione con 300 host basta un <code>/23</code>, cioè 510 host utilizzabili.</p>
+<div class="box note"><span class="lbl">Oggi</span>
+<p>Le classi sono un concetto storico: router e sistemi operativi ragionano solo per prefisso. Però il linguaggio è rimasto ("una classe C" per dire un /24) e le mask di default compaiono ancora nei corsi e in alcune interfacce di configurazione.</p></div>
+
+<h4>Indirizzi privati e speciali</h4>
+<p>Alcuni blocchi sono riservati a usi particolari. I più importanti:</p>
+<div class="tbl"><table>
+<thead><tr><th>Blocco</th><th>Uso</th><th>Riferimento</th></tr></thead>
+<tbody>
+<tr class="hl"><td class="mono">10.0.0.0/8</td><td>Privato (reti interne)</td><td>RFC 1918</td></tr>
+<tr class="hl"><td class="mono">172.16.0.0/12</td><td>Privato: da 172.16.0.0 a 172.31.255.255</td><td>RFC 1918</td></tr>
+<tr class="hl"><td class="mono">192.168.0.0/16</td><td>Privato</td><td>RFC 1918</td></tr>
+<tr><td class="mono">127.0.0.0/8</td><td>Loopback: l'host stesso (di solito 127.0.0.1)</td><td>RFC 1122</td></tr>
+<tr><td class="mono">169.254.0.0/16</td><td>Link-local / APIPA: Windows lo assegna se il DHCP non risponde</td><td>RFC 3927</td></tr>
+<tr><td class="mono">100.64.0.0/10</td><td>Carrier-grade NAT degli operatori</td><td>RFC 6598</td></tr>
+<tr><td class="mono">0.0.0.0/8</td><td>"Questa rete"; 0.0.0.0/0 indica la rotta di default</td><td>RFC 1122</td></tr>
+<tr><td class="mono">255.255.255.255</td><td>Broadcast limitato (tutta la rete locale)</td><td>RFC 919</td></tr>
+<tr><td class="mono">192.0.2.0/24<br>198.51.100.0/24<br>203.0.113.0/24</td><td>Riservati alla documentazione e agli esempi</td><td>RFC 5737</td></tr>
+</tbody></table></div>
+<p>Gli indirizzi privati non sono instradati su Internet: per uscire, una rete privata passa attraverso il <strong>NAT</strong>, che traduce gli indirizzi interni in uno o più indirizzi pubblici. CIDR, indirizzi privati e NAT insieme hanno prolungato di decenni la vita di IPv4.</p>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/analisi?ip=169.254.10.10&amp;did=1&amp;metodo=rules">Apri nel calcolatore: tipo dell'indirizzo 169.254.10.10</a></li>
+<li><a href="#/calcola/analisi?ip=172.32.0.1&amp;did=1&amp;metodo=rules">Apri nel calcolatore: tipo dell'indirizzo 172.32.0.1, appena fuori dal blocco privato</a></li>
+</ul></div>
+</section>
+
+<section class="chap prose" id="cap-5">
+<h3><span class="num">05</span>Perché creare sottoreti</h3>
+<p>Fare <strong>subnetting</strong> significa prendere un blocco di indirizzi e dividerlo in blocchi più piccoli, spostando a destra il confine tra rete e host. Si "prendono in prestito" bit dalla parte di host per creare nuove reti. Ma perché non usare semplicemente una grande rete unica?</p>
+
+<h4>1. Contenere il dominio di broadcast</h4>
+<p>Molti protocolli di base (ARP, DHCP, NetBIOS, mDNS e altri) usano il <strong>broadcast</strong>: un messaggio inviato a tutti gli host della rete, che ognuno deve ricevere ed esaminare. In una rete piatta con migliaia di host, il traffico di broadcast cresce fino a diventare rumore di fondo che occupa banda e CPU. Il router non inoltra i broadcast, quindi <strong>ogni subnet è un dominio di broadcast separato</strong>: più piccole sono le subnet, più contenuto è il rumore.</p>
+
+<h4>2. Sicurezza e segmentazione</h4>
+<p>Il traffico tra subnet diverse passa necessariamente da un router o da un firewall, dove si possono applicare regole (<strong>ACL</strong>). Separare le postazioni didattiche dagli uffici, i server dalle stampanti, i telefoni VoIP dai PC permette di decidere chi può parlare con chi. Un problema (un malware, un loop, un dispositivo impazzito) resta confinato nella sua subnet.</p>
+
+<h4>3. Organizzazione e gestione</h4>
+<p>Un buon piano di indirizzamento si legge: dall'IP si capisce subito sede, piano o funzione. Nella pratica a ogni subnet corrisponde di solito una <strong>VLAN</strong>, cioè una rete logica separata sugli stessi switch fisici. Il rapporto tipico è 1 VLAN = 1 subnet.</p>
+
+<h4>4. Non sprecare indirizzi</h4>
+<p>Con il CIDR si assegna a ogni segmento la dimensione giusta: un /30 per un collegamento tra due router, un /27 per un piccolo ufficio, un /23 per un grande laboratorio. Con il VLSM (capitolo 16) si combinano dimensioni diverse nello stesso blocco.</p>
+
+<h4>5. Instradamento più efficiente</h4>
+<p>Se le subnet sono assegnate in modo ordinato e contiguo, un router remoto può raggiungerle tutte con <strong>una sola rotta riassuntiva</strong> (capitolo 17): tabelle di routing più piccole e più stabili.</p>
+
+<figure>
+<svg viewBox="0 0 720 300" role="img" aria-label="Schema: un blocco 10.40.0.0/16 diviso in subnet collegate a un router">
+  <rect x="290" y="20" width="140" height="56" rx="8" style="fill:var(--surface-2);stroke:var(--net);stroke-width:1.5"/>
+  <text x="360" y="44" text-anchor="middle" style="fill:var(--text);font:600 15px var(--font-display)">Router / L3</text>
+  <text x="360" y="63" text-anchor="middle" style="fill:var(--muted);font:12px var(--font-mono)">10.40.0.0/16</text>
+  <g style="stroke:var(--line);stroke-width:1.5">
+    <line x1="360" y1="76" x2="90" y2="170"/><line x1="360" y1="76" x2="270" y2="170"/>
+    <line x1="360" y1="76" x2="450" y2="170"/><line x1="360" y1="76" x2="630" y2="170"/>
+  </g>
+  <g>
+    <rect x="20" y="170" width="140" height="96" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+    <text x="90" y="196" text-anchor="middle" style="fill:var(--text);font:600 14px var(--font-display)">Uffici</text>
+    <text x="90" y="216" text-anchor="middle" style="fill:var(--host);font:12px var(--font-mono)">VLAN 10</text>
+    <text x="90" y="236" text-anchor="middle" style="fill:var(--net);font:12.5px var(--font-mono)">10.40.10.0/24</text>
+    <text x="90" y="254" text-anchor="middle" style="fill:var(--muted);font:11.5px var(--font-body)">254 host</text>
+  </g>
+  <g>
+    <rect x="200" y="170" width="140" height="96" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+    <text x="270" y="196" text-anchor="middle" style="fill:var(--text);font:600 14px var(--font-display)">Laboratori</text>
+    <text x="270" y="216" text-anchor="middle" style="fill:var(--host);font:12px var(--font-mono)">VLAN 20</text>
+    <text x="270" y="236" text-anchor="middle" style="fill:var(--net);font:12.5px var(--font-mono)">10.40.20.0/23</text>
+    <text x="270" y="254" text-anchor="middle" style="fill:var(--muted);font:11.5px var(--font-body)">510 host</text>
+  </g>
+  <g>
+    <rect x="380" y="170" width="140" height="96" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+    <text x="450" y="196" text-anchor="middle" style="fill:var(--text);font:600 14px var(--font-display)">Telefonia VoIP</text>
+    <text x="450" y="216" text-anchor="middle" style="fill:var(--host);font:12px var(--font-mono)">VLAN 30</text>
+    <text x="450" y="236" text-anchor="middle" style="fill:var(--net);font:12.5px var(--font-mono)">10.40.30.0/25</text>
+    <text x="450" y="254" text-anchor="middle" style="fill:var(--muted);font:11.5px var(--font-body)">126 host</text>
+  </g>
+  <g>
+    <rect x="560" y="170" width="140" height="96" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+    <text x="630" y="196" text-anchor="middle" style="fill:var(--text);font:600 14px var(--font-display)">Server</text>
+    <text x="630" y="216" text-anchor="middle" style="fill:var(--host);font:12px var(--font-mono)">VLAN 40</text>
+    <text x="630" y="236" text-anchor="middle" style="fill:var(--net);font:12.5px var(--font-mono)">10.40.40.0/27</text>
+    <text x="630" y="254" text-anchor="middle" style="fill:var(--muted);font:11.5px var(--font-body)">30 host</text>
+  </g>
+</svg>
+<figcaption>Un'ipotetica sede con il blocco 10.40.0.0/16, diviso in subnet di dimensioni diverse, una per funzione e una VLAN per subnet. Il traffico tra i riquadri passa dal router, dove si applicano le regole di accesso.</figcaption>
+</figure>
+
+<div class="box key"><span class="lbl">In sintesi</span>
+<p>Subnettare significa decidere <strong>quanti bit</strong> dedicare alla rete. Più bit di rete vuol dire più subnet, ciascuna con meno host. Tutti i calcoli dei prossimi capitoli rispondono a una sola domanda: dato un indirizzo e una mask, quali sono i confini del blocco che lo contiene?</p></div>
+</section>

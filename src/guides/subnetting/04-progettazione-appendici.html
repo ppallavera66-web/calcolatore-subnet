@@ -1,0 +1,296 @@
+
+<!-- =================== PARTE IV =================== -->
+<div class="part" id="parte-4">
+  <p class="eyebrow">PARTE IV</p>
+  <h2>Progettazione</h2>
+  <p class="intro">Saper analizzare un indirizzo è metà del lavoro. L'altra metà è progettare: suddividere un blocco assegnato tra esigenze diverse, riassumere le rotte, gestire i casi particolari. Chiude la parte uno sguardo a IPv6.</p>
+</div>
+
+<section class="chap prose" id="cap-16">
+<h3><span class="num">16</span>VLSM: il piano di indirizzamento</h3>
+<p>Con il <strong>VLSM</strong> (Variable Length Subnet Mask) un blocco viene diviso in subnet di <strong>dimensioni diverse</strong>, ognuna tagliata sul proprio fabbisogno. È il modo in cui si progettano le reti reali.</p>
+
+<h4>La regola d'oro: allineamento</h4>
+<p>Un blocco di dimensione M deve sempre <strong>iniziare a un multiplo di M</strong>. Un /26 (64 indirizzi) può iniziare a .0, .64, .128 o .192, mai a .32. Per questo si assegnano le subnet <strong>dalla più grande alla più piccola</strong>: così ogni blocco finisce dove il successivo, più piccolo, è già allineato, e non restano buchi.</p>
+
+<h4>Esempio · Il blocco <code>192.168.100.0/24</code> per una sede</h4>
+<p>Requisiti: un laboratorio da 100 host, le aule da 50, gli uffici da 25, le stampanti da 10, due collegamenti punto-punto tra router.</p>
+<p><strong>Passo 1 · Ordina per dimensione e scegli il prefisso</strong> (calcolo inverso, capitolo 11):</p>
+<pre class="bin">Laboratorio  100 → 102 → 2⁷ = 128 → <span class="n">/25</span>
+Aule          50 →  52 → 2⁶ =  64 → <span class="n">/26</span>
+Uffici        25 →  27 → 2⁵ =  32 → <span class="n">/27</span>
+Stampanti     10 →  12 → 2⁴ =  16 → <span class="n">/28</span>
+P2P 1 e 2      2 →   4 → 2² =   4 → <span class="n">/30</span> ciascuno</pre>
+<p><strong>Passo 2 · Assegna in sequenza</strong>: ogni subnet parte dal broadcast della precedente + 1.</p>
+<div class="tbl"><table>
+<thead><tr><th>Segmento</th><th>Subnet</th><th>Primo host</th><th>Ultimo host</th><th>Broadcast</th><th>Host</th></tr></thead>
+<tbody>
+<tr><td>Laboratorio</td><td class="mono"><strong>192.168.100.0/25</strong></td><td class="mono">.1</td><td class="mono">.126</td><td class="mono">.127</td><td class="mono">126</td></tr>
+<tr><td>Aule</td><td class="mono"><strong>192.168.100.128/26</strong></td><td class="mono">.129</td><td class="mono">.190</td><td class="mono">.191</td><td class="mono">62</td></tr>
+<tr><td>Uffici</td><td class="mono"><strong>192.168.100.192/27</strong></td><td class="mono">.193</td><td class="mono">.222</td><td class="mono">.223</td><td class="mono">30</td></tr>
+<tr><td>Stampanti</td><td class="mono"><strong>192.168.100.224/28</strong></td><td class="mono">.225</td><td class="mono">.238</td><td class="mono">.239</td><td class="mono">14</td></tr>
+<tr><td>P2P 1</td><td class="mono"><strong>192.168.100.240/30</strong></td><td class="mono">.241</td><td class="mono">.242</td><td class="mono">.243</td><td class="mono">2</td></tr>
+<tr><td>P2P 2</td><td class="mono"><strong>192.168.100.244/30</strong></td><td class="mono">.245</td><td class="mono">.246</td><td class="mono">.247</td><td class="mono">2</td></tr>
+<tr class="hl"><td><em>Libero</em></td><td class="mono">192.168.100.248/29</td><td class="mono">.249</td><td class="mono">.254</td><td class="mono">.255</td><td class="mono">6</td></tr>
+</tbody></table></div>
+<p>Usati 248 indirizzi su 256; restano 8 indirizzi, un /29 pronto per un uso futuro.</p>
+
+<div class="box warn"><span class="lbl">Cosa succede se non ordini</span>
+<p>Se assegni prima gli uffici a <code>192.168.100.0/27</code> e poi provi a mettere il laboratorio "subito dopo", a <code>.32/25</code>, sbagli: la rete di <code>.32</code> con un /25 è <code>.0</code>, quindi il laboratorio si <strong>sovrappone</strong> agli uffici. Devi saltare a <code>.128</code> e ricordarti di riempire a mano il buco da <code>.32</code> a <code>.127</code>. Con l'ordine decrescente, il primo indirizzo libero è sempre già allineato per la subnet successiva e lo spazio libero resta contiguo in fondo.</p></div>
+<div class="box note"><span class="lbl">Nella realtà</span>
+<p>Si lascia spazio di crescita: invece di riempire il blocco al 97%, conviene prevedere subnet un po' più grandi del necessario o riservare un blocco intero per le espansioni. Rinumerare una subnet in produzione costa molto più di qualche indirizzo inutilizzato.</p></div>
+<div class="box note"><span class="lbl">Nel calcolatore</span>
+<p>Il pianificatore VLSM arriverà con la versione 2. Intanto il <a href="#/pianifica/inverso?h=100&amp;did=1">calcolo inverso</a> dà il prefisso di ogni segmento, e <a href="#/calcola/analisi?ip=192.168.100.32&amp;p=25&amp;did=1&amp;metodo=magic">Analisi di 192.168.100.32/25</a> mostra la sovrapposizione descritta qui sopra: la rete risulta 192.168.100.0.</p></div>
+</section>
+
+<section class="chap prose" id="cap-17">
+<h3><span class="num">17</span>Supernetting e summarization</h3>
+<p>È il subnetting al contrario: si uniscono più reti contigue in un unico prefisso più corto. Si usa soprattutto nelle tabelle di routing (<strong>summarization</strong> o <strong>aggregazione</strong>): invece di annunciare quattro reti, un router ne annuncia una che le contiene tutte.</p>
+
+<h4>Metodo binario: i bit in comune</h4>
+<p>Si scrivono le reti in binario e si contano i bit iniziali uguali in tutte.</p>
+<pre class="bin">172.16.32.0/24   →  172.16.<span class="n">001000</span><span class="h">00</span>.0
+172.16.33.0/24   →  172.16.<span class="n">001000</span><span class="h">01</span>.0
+172.16.34.0/24   →  172.16.<span class="n">001000</span><span class="h">10</span>.0
+172.16.35.0/24   →  172.16.<span class="n">001000</span><span class="h">11</span>.0
+                           <span class="m">└ 6 bit uguali ┘</span>
+Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre>
+
+<h4>Metodo rapido</h4>
+<div class="box trick"><span class="lbl">La regola</span>
+<p>N reti contigue della stessa dimensione si riassumono esattamente se:</p>
+<ol>
+<li><strong>N è una potenza di 2</strong> (2, 4, 8, 16…), e</li>
+<li>la <strong>prima rete è un multiplo di N</strong> nell'ottetto interessante.</li>
+</ol>
+<p>Il prefisso riassuntivo è quello originale meno log₂N: 4 reti /24 → /22, 8 reti /24 → /21.</p></div>
+<p>Nell'esempio: 4 reti (potenza di 2), la prima è 32 (multiplo di 4) → <code>/24 − 2 = /22</code>. Fatto.</p>
+
+<div class="box warn"><span class="lbl">Riassunto troppo largo</span>
+<p>Le reti da <code>172.16.33.0/24</code> a <code>172.16.36.0/24</code> sono quattro, ma 33 non è multiplo di 4. Il più piccolo prefisso che le contiene tutte è <code>172.16.32.0/21</code>, che copre da 32 a 39: include quattro reti che non sono tue. Annunciarlo può attirare traffico destinato altrove. In questi casi si usano due o più rotte riassuntive, o si accetta di non riassumere.</p></div>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore (la funzione di summarization arriverà con la versione 2)</p><ul>
+<li><a href="#/pianifica/suddivisione?b=172.16.32.0&amp;p=22&amp;np=24">Apri nel calcolatore: le quattro /24 contenute in 172.16.32.0/22</a></li>
+</ul></div>
+</section>
+
+<section class="chap prose" id="cap-18">
+<h3><span class="num">18</span>Casi limite: /30, /31, /32</h3>
+<div class="tbl"><table>
+<thead><tr><th>Prefisso</th><th>Indirizzi</th><th>Uso tipico</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td class="mono"><strong>/30</strong></td><td class="mono">4</td><td>Collegamento punto-punto tradizionale</td><td>2 host utilizzabili su 4: il 50% va in rete e broadcast.</td></tr>
+<tr><td class="mono"><strong>/31</strong></td><td class="mono">2</td><td>Collegamento punto-punto (RFC 3021)</td><td>Nessun indirizzo di rete né di broadcast: <strong>entrambi</strong> gli indirizzi sono assegnabili. Dimezza lo spreco dei /30. Supportato dai router moderni.</td></tr>
+<tr><td class="mono"><strong>/32</strong></td><td class="mono">1</td><td>Un singolo host</td><td>Interfacce di loopback dei router, rotte verso un host, voci di ACL e firewall per un solo indirizzo.</td></tr>
+<tr><td class="mono"><strong>/0</strong></td><td class="mono">tutti</td><td>Rotta di default <code>0.0.0.0/0</code></td><td>Corrisponde a qualunque destinazione: è "il resto del mondo".</td></tr>
+</tbody></table></div>
+
+<h4>Indirizzi che sembrano sbagliati ma non lo sono</h4>
+<p>L'abitudine al /24 porta a pensare che gli indirizzi che finiscono per <code>.0</code> o <code>.255</code> non siano mai assegnabili. Con prefissi più corti non è così:</p>
+<pre class="bin">10.0.0.0/23   va da 10.0.<span class="n">0</span>.0 a 10.0.<span class="n">1</span>.255
+   10.0.0.255  → <span class="ok-c">host valido</span> (è a metà del blocco)
+   10.0.1.0    → <span class="ok-c">host valido</span>
+   10.0.0.0    → <span class="w">rete</span>        10.0.1.255 → <span class="w">broadcast</span></pre>
+<p>Alcuni vecchi dispositivi o software li rifiutano comunque: se un host con indirizzo <code>.0</code> o <code>.255</code> dà problemi strani, è un sospettato da considerare.</p>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/analisi?ip=10.0.0.255&amp;p=23&amp;did=1&amp;metodo=binary">Apri nel calcolatore: 10.0.0.255/23, un host valido</a></li>
+<li><a href="#/calcola/analisi?ip=192.168.1.255&amp;p=31&amp;did=1&amp;metodo=binary">Apri nel calcolatore: 192.168.1.255/31, punto-punto</a></li>
+<li><a href="#/calcola/analisi?ip=10.1.1.1&amp;p=32&amp;did=1&amp;metodo=binary">Apri nel calcolatore: 10.1.1.1/32, un solo host</a></li>
+</ul></div>
+
+<h4>Errori frequenti, in breve</h4>
+<ul>
+<li>Assegnare a un host l'indirizzo di rete o di broadcast (esercizio 5 del capitolo 8).</li>
+<li>Gateway fuori dalla subnet dell'host: spesso la configurazione viene accettata, ma il traffico verso l'esterno non parte.</li>
+<li>Mask diverse tra host della stessa VLAN (capitolo 15).</li>
+<li>Subnet sovrapposte in un piano VLSM non allineato (capitolo 16).</li>
+</ul>
+</section>
+
+<section class="chap prose" id="cap-19">
+<h3><span class="num">19</span>Cenni di IPv6</h3>
+<p>IPv6 nasce per risolvere l'esaurimento di IPv4 e cambia il problema del subnetting alla radice. Lo spazio è talmente ampio che non si risparmiano più gli host: si pianificano le reti.</p>
+
+<h4>L'indirizzo</h4>
+<ul>
+  <li><strong>128 bit</strong> invece di 32.</li>
+  <li>Scritto in <strong>esadecimale</strong>, 8 gruppi da 16 bit (4 cifre esadecimali) separati da due punti.</li>
+  <li>Due regole di abbreviazione: si tolgono gli <strong>zeri iniziali</strong> di ogni gruppo, e <strong>una sola volta</strong> una sequenza di gruppi tutti a zero si sostituisce con <code>::</code>.</li>
+</ul>
+<pre class="bin">2001:0db8:0000:0000:0000:ff00:0042:8329
+2001: db8:   0:   0:   0:ff00:  42:8329   <span class="m">← tolti gli zeri iniziali</span>
+<span class="r">2001:db8::ff00:42:8329</span>                    <span class="m">← tre gruppi a zero diventano ::</span></pre>
+
+<h4>La struttura standard</h4>
+<pre class="bin"><span class="n">│← prefisso globale (/48) →│← subnet (16) →│</span><span class="h">←── interface ID (64 bit) ──→│</span>
+<span class="n">  2001  :  0db8  :  abcd   :     0010      </span>:<span class="h"> xxxx : xxxx : xxxx : xxxx</span></pre>
+<ul>
+<li>Una LAN IPv6 è quasi sempre un <strong>/64</strong>: i 64 bit di destra identificano l'interfaccia, e l'autoconfigurazione (SLAAC) funziona solo con un /64.</li>
+<li>Un sito riceve tipicamente un <strong>/48</strong> (o un /56) dal provider. Tra /48 e /64 ci sono 16 bit: <strong>65.536 subnet /64</strong> disponibili. Con un /56 sono 256.</li>
+<li>Non esiste il broadcast: si usa il multicast. Non c'è quindi nessun "−2".</li>
+</ul>
+
+<div class="box trick"><span class="lbl">Il trucco del nibble</span>
+<p>Ogni cifra esadecimale corrisponde a 4 bit. Se si scelgono prefissi multipli di 4 (/48, /52, /56, /60, /64), i confini cadono sempre tra una cifra e l'altra e il calcolo si riduce a "quali cifre posso cambiare". Da <code>2001:db8:abcd::/48</code> le subnet /64 vanno da <code>2001:db8:abcd:0000::/64</code> a <code>2001:db8:abcd:ffff::/64</code>: il quarto gruppo è tuo, e lo si può strutturare, per esempio prima cifra = sede, seconda = edificio, ultime due = VLAN.</p></div>
+
+<h4>Prefissi da riconoscere</h4>
+<div class="tbl"><table>
+<thead><tr><th>Prefisso</th><th>Significato</th><th>Equivalente IPv4</th></tr></thead>
+<tbody>
+<tr><td class="mono">2000::/3</td><td>Indirizzi globali (Internet)</td><td>Pubblici</td></tr>
+<tr><td class="mono">fd00::/8</td><td>Unique Local Address, in pratica privati (fc00::/7)</td><td>RFC 1918</td></tr>
+<tr><td class="mono">fe80::/10</td><td>Link-local, sempre presenti su ogni interfaccia</td><td>169.254.0.0/16</td></tr>
+<tr><td class="mono">::1/128</td><td>Loopback</td><td>127.0.0.1</td></tr>
+<tr><td class="mono">ff00::/8</td><td>Multicast</td><td>Classe D</td></tr>
+<tr><td class="mono">2001:db8::/32</td><td>Documentazione</td><td>RFC 5737</td></tr>
+</tbody></table></div>
+<p>Per il lavoro quotidiano su IPv4 questo capitolo è solo un riferimento; il calcolatore includerà un modulo IPv6 di base (appendice C).</p>
+</section>
+
+<!-- =================== APPENDICI =================== -->
+<div class="part" id="appendici">
+  <p class="eyebrow">APPENDICI</p>
+  <h2>Riferimenti</h2>
+</div>
+
+<section class="chap" id="app-a">
+<h3><span class="num">A</span>Cheat sheet</h3>
+<div class="prose">
+<p><strong>Procedura rapida:</strong> ottetto interessante → M = 2<sup>8−b</sup> → rete = multiplo di M ≤ valore → broadcast = rete + M − 1 e 255 a destra → host = 2<sup>32−n</sup> − 2 (fino a /30; /31 → 2 host punto-punto, /32 → 1 host).</p>
+<p class="mu small">La colonna M indica il numero magico e l'ottetto in cui si applica. Nelle righe /8, /16 e /24 il confine cade esattamente tra due ottetti: per convenzione l'ottetto interessante è l'ultimo che vale 255 e M = 1, cioè le subnet avanzano di 1 in quell'ottetto e gli ottetti a destra vanno da 0 a 255. Le righe evidenziate sono le più usate.</p>
+</div>
+<div class="tbl"><table data-check="cheat-sheet">
+<thead><tr><th>CIDR</th><th>Subnet mask</th><th>Wildcard</th><th>M · ottetto</th><th>Indirizzi</th><th>Host</th></tr></thead>
+<tbody>
+<tr><td class="mono"><strong>/8</strong></td><td class="mono">255.0.0.0</td><td class="mono">0.255.255.255</td><td class="mono">1 · 1°</td><td class="mono">16.777.216</td><td class="mono">16.777.214</td></tr>
+<tr><td class="mono"><strong>/9</strong></td><td class="mono">255.128.0.0</td><td class="mono">0.127.255.255</td><td class="mono">128 · 2°</td><td class="mono">8.388.608</td><td class="mono">8.388.606</td></tr>
+<tr><td class="mono"><strong>/10</strong></td><td class="mono">255.192.0.0</td><td class="mono">0.63.255.255</td><td class="mono">64 · 2°</td><td class="mono">4.194.304</td><td class="mono">4.194.302</td></tr>
+<tr><td class="mono"><strong>/11</strong></td><td class="mono">255.224.0.0</td><td class="mono">0.31.255.255</td><td class="mono">32 · 2°</td><td class="mono">2.097.152</td><td class="mono">2.097.150</td></tr>
+<tr><td class="mono"><strong>/12</strong></td><td class="mono">255.240.0.0</td><td class="mono">0.15.255.255</td><td class="mono">16 · 2°</td><td class="mono">1.048.576</td><td class="mono">1.048.574</td></tr>
+<tr><td class="mono"><strong>/13</strong></td><td class="mono">255.248.0.0</td><td class="mono">0.7.255.255</td><td class="mono">8 · 2°</td><td class="mono">524.288</td><td class="mono">524.286</td></tr>
+<tr><td class="mono"><strong>/14</strong></td><td class="mono">255.252.0.0</td><td class="mono">0.3.255.255</td><td class="mono">4 · 2°</td><td class="mono">262.144</td><td class="mono">262.142</td></tr>
+<tr><td class="mono"><strong>/15</strong></td><td class="mono">255.254.0.0</td><td class="mono">0.1.255.255</td><td class="mono">2 · 2°</td><td class="mono">131.072</td><td class="mono">131.070</td></tr>
+<tr><td class="mono"><strong>/16</strong></td><td class="mono">255.255.0.0</td><td class="mono">0.0.255.255</td><td class="mono">1 · 2°</td><td class="mono">65.536</td><td class="mono">65.534</td></tr>
+<tr><td class="mono"><strong>/17</strong></td><td class="mono">255.255.128.0</td><td class="mono">0.0.127.255</td><td class="mono">128 · 3°</td><td class="mono">32.768</td><td class="mono">32.766</td></tr>
+<tr><td class="mono"><strong>/18</strong></td><td class="mono">255.255.192.0</td><td class="mono">0.0.63.255</td><td class="mono">64 · 3°</td><td class="mono">16.384</td><td class="mono">16.382</td></tr>
+<tr><td class="mono"><strong>/19</strong></td><td class="mono">255.255.224.0</td><td class="mono">0.0.31.255</td><td class="mono">32 · 3°</td><td class="mono">8.192</td><td class="mono">8.190</td></tr>
+<tr><td class="mono"><strong>/20</strong></td><td class="mono">255.255.240.0</td><td class="mono">0.0.15.255</td><td class="mono">16 · 3°</td><td class="mono">4.096</td><td class="mono">4.094</td></tr>
+<tr><td class="mono"><strong>/21</strong></td><td class="mono">255.255.248.0</td><td class="mono">0.0.7.255</td><td class="mono">8 · 3°</td><td class="mono">2.048</td><td class="mono">2.046</td></tr>
+<tr><td class="mono"><strong>/22</strong></td><td class="mono">255.255.252.0</td><td class="mono">0.0.3.255</td><td class="mono">4 · 3°</td><td class="mono">1.024</td><td class="mono">1.022</td></tr>
+<tr><td class="mono"><strong>/23</strong></td><td class="mono">255.255.254.0</td><td class="mono">0.0.1.255</td><td class="mono">2 · 3°</td><td class="mono">512</td><td class="mono">510</td></tr>
+<tr class="hl"><td class="mono"><strong>/24</strong></td><td class="mono">255.255.255.0</td><td class="mono">0.0.0.255</td><td class="mono">1 · 3°</td><td class="mono">256</td><td class="mono">254</td></tr>
+<tr><td class="mono"><strong>/25</strong></td><td class="mono">255.255.255.128</td><td class="mono">0.0.0.127</td><td class="mono">128 · 4°</td><td class="mono">128</td><td class="mono">126</td></tr>
+<tr><td class="mono"><strong>/26</strong></td><td class="mono">255.255.255.192</td><td class="mono">0.0.0.63</td><td class="mono">64 · 4°</td><td class="mono">64</td><td class="mono">62</td></tr>
+<tr><td class="mono"><strong>/27</strong></td><td class="mono">255.255.255.224</td><td class="mono">0.0.0.31</td><td class="mono">32 · 4°</td><td class="mono">32</td><td class="mono">30</td></tr>
+<tr><td class="mono"><strong>/28</strong></td><td class="mono">255.255.255.240</td><td class="mono">0.0.0.15</td><td class="mono">16 · 4°</td><td class="mono">16</td><td class="mono">14</td></tr>
+<tr><td class="mono"><strong>/29</strong></td><td class="mono">255.255.255.248</td><td class="mono">0.0.0.7</td><td class="mono">8 · 4°</td><td class="mono">8</td><td class="mono">6</td></tr>
+<tr class="hl"><td class="mono"><strong>/30</strong></td><td class="mono">255.255.255.252</td><td class="mono">0.0.0.3</td><td class="mono">4 · 4°</td><td class="mono">4</td><td class="mono">2</td></tr>
+<tr><td class="mono"><strong>/31</strong></td><td class="mono">255.255.255.254</td><td class="mono">0.0.0.1</td><td class="mono">2 · 4°</td><td class="mono">2</td><td class="mono">2 (p2p)</td></tr>
+<tr><td class="mono"><strong>/32</strong></td><td class="mono">255.255.255.255</td><td class="mono">0.0.0.0</td><td class="mono">1 · 4°</td><td class="mono">1</td><td class="mono">1</td></tr>
+</tbody></table></div>
+
+<div class="prose">
+<h4 id="app-a-inv">Host richiesti → prefisso</h4>
+<p class="mu small">Il calcolo inverso già fatto: cerca la fascia che contiene il numero di host (gateway e margine di crescita compresi). Il limite superiore di ogni fascia è 2<sup>h</sup> − 2. Spiegazione ed esempi nel <a href="#/guide/subnetting/cap-11">capitolo 11</a>; per un collegamento punto-punto si può usare anche un /31 (capitolo 18).</p>
+</div>
+<div class="two-col">
+<div class="tbl"><table data-check="hosts-prefix-mask">
+<thead><tr><th>Host richiesti</th><th>Prefisso</th><th>Mask</th></tr></thead>
+<tbody>
+<tr><td class="mono">1 – 2</td><td class="mono"><strong>/30</strong></td><td class="mono">255.255.255.252</td></tr>
+<tr><td class="mono">3 – 6</td><td class="mono"><strong>/29</strong></td><td class="mono">255.255.255.248</td></tr>
+<tr><td class="mono">7 – 14</td><td class="mono"><strong>/28</strong></td><td class="mono">255.255.255.240</td></tr>
+<tr><td class="mono">15 – 30</td><td class="mono"><strong>/27</strong></td><td class="mono">255.255.255.224</td></tr>
+<tr><td class="mono">31 – 62</td><td class="mono"><strong>/26</strong></td><td class="mono">255.255.255.192</td></tr>
+<tr><td class="mono">63 – 126</td><td class="mono"><strong>/25</strong></td><td class="mono">255.255.255.128</td></tr>
+<tr><td class="mono">127 – 254</td><td class="mono"><strong>/24</strong></td><td class="mono">255.255.255.0</td></tr>
+</tbody></table></div>
+<div class="tbl"><table data-check="hosts-prefix-mask">
+<thead><tr><th>Host richiesti</th><th>Prefisso</th><th>Mask</th></tr></thead>
+<tbody>
+<tr><td class="mono">255 – 510</td><td class="mono"><strong>/23</strong></td><td class="mono">255.255.254.0</td></tr>
+<tr><td class="mono">511 – 1.022</td><td class="mono"><strong>/22</strong></td><td class="mono">255.255.252.0</td></tr>
+<tr><td class="mono">1.023 – 2.046</td><td class="mono"><strong>/21</strong></td><td class="mono">255.255.248.0</td></tr>
+<tr><td class="mono">2.047 – 4.094</td><td class="mono"><strong>/20</strong></td><td class="mono">255.255.240.0</td></tr>
+<tr><td class="mono">4.095 – 8.190</td><td class="mono"><strong>/19</strong></td><td class="mono">255.255.224.0</td></tr>
+<tr><td class="mono">8.191 – 16.382</td><td class="mono"><strong>/18</strong></td><td class="mono">255.255.192.0</td></tr>
+<tr><td class="mono">16.383 – 32.766</td><td class="mono"><strong>/17</strong></td><td class="mono">255.255.128.0</td></tr>
+<tr><td class="mono">32.767 – 65.534</td><td class="mono"><strong>/16</strong></td><td class="mono">255.255.0.0</td></tr>
+</tbody></table></div>
+</div>
+</section>
+
+<section class="chap prose" id="app-b">
+<h3><span class="num">B</span>Glossario</h3>
+<p>Nel testo della guida, i termini sottolineati a puntini mostrano questa definizione al passaggio del mouse, con un tocco su mobile o raggiungendoli con il tasto Tab, insieme al collegamento al capitolo che li spiega.</p>
+<div class="tbl"><table class="gloss">
+<thead><tr><th>Termine</th><th>Definizione</th><th>Cap.</th></tr></thead>
+<tbody>
+<tr id="gl-acl" data-terms="ACL" data-case="1" data-ref="cap-14"><td><strong>ACL</strong></td><td id="gl-acl-def">Access Control List: elenco di regole su router o firewall che consente o blocca il traffico, per esempio tra due subnet.</td><td class="mono"><a href="#/guide/subnetting/cap-14">14</a></td></tr>
+<tr id="gl-and" data-terms="AND" data-case="1" data-ref="cap-3"><td><strong>AND (bit a bit)</strong></td><td id="gl-and-def">Operazione che restituisce 1 solo se entrambi i bit valgono 1. IP AND mask = indirizzo di rete.</td><td class="mono"><a href="#/guide/subnetting/cap-3">3</a></td></tr>
+<tr id="gl-apipa" data-terms="APIPA" data-case="1" data-ref="cap-4"><td><strong>APIPA</strong></td><td id="gl-apipa-def">Indirizzo 169.254.x.x che Windows si assegna da solo quando il DHCP non risponde. Se lo vedi, l'host non ha ottenuto un indirizzo valido.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-arp" data-terms="ARP" data-case="1" data-ref="cap-2"><td><strong>ARP</strong></td><td id="gl-arp-def">Protocollo che ricava l'indirizzo MAC di un host a partire dal suo IP, nella stessa rete locale.</td><td class="mono"><a href="#/guide/subnetting/cap-2">2</a></td></tr>
+<tr id="gl-block" data-terms="block size" data-ref="cap-9"><td><strong>Block size</strong></td><td id="gl-block-def">Altro nome del numero magico: la dimensione di ogni blocco di indirizzi.</td><td class="mono"><a href="#/guide/subnetting/cap-9">9</a></td></tr>
+<tr id="gl-bc" data-terms="broadcast" data-ref="cap-7"><td><strong>Broadcast</strong></td><td id="gl-bc-def">Indirizzo con tutti i bit di host a 1: un messaggio inviato lì raggiunge tutti gli host della subnet. Non si assegna agli host.</td><td class="mono"><a href="#/guide/subnetting/cap-7">7</a></td></tr>
+<tr id="gl-cidr" data-terms="CIDR" data-case="1" data-ref="cap-4"><td><strong>CIDR</strong></td><td id="gl-cidr-def">Classless Inter-Domain Routing: il confine tra rete e host può cadere su qualunque bit e si indica con /n.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-gw" data-terms="default gateway|gateway" data-ref="cap-2"><td><strong>Default gateway</strong></td><td id="gl-gw-def">Il router a cui un host consegna i pacchetti destinati a reti diverse dalla propria. Deve stare nella stessa subnet dell'host.</td><td class="mono"><a href="#/guide/subnetting/cap-2">2</a></td></tr>
+<tr id="gl-dhcp" data-terms="DHCP" data-case="1" data-ref=""><td><strong>DHCP</strong></td><td id="gl-dhcp-def">Protocollo che assegna automaticamente agli host indirizzo IP, mask, gateway e DNS.</td><td class="mono"><span class="mu">—</span></td></tr>
+<tr id="gl-dombc" data-terms="dominio di broadcast|domini di broadcast" data-ref="cap-5"><td><strong>Dominio di broadcast</strong></td><td id="gl-dombc-def">L'insieme di host raggiunti da un broadcast. Ogni subnet ne è uno: il router non inoltra i broadcast.</td><td class="mono"><a href="#/guide/subnetting/cap-5">5</a></td></tr>
+<tr id="gl-host" data-terms="host" data-ref="cap-1"><td><strong>Host</strong></td><td id="gl-host-def">Qualunque dispositivo con un indirizzo IP: PC, server, stampante, telefono, access point.</td><td class="mono"><a href="#/guide/subnetting/cap-1">1</a></td></tr>
+<tr id="gl-privati" data-terms="indirizzi privati|indirizzo privato" data-ref="cap-4"><td><strong>Indirizzi privati</strong></td><td id="gl-privati-def">I blocchi 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16 (RFC 1918), per le reti interne. Non sono instradati su Internet.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-iid" data-terms="interface ID" data-ref="cap-19"><td><strong>Interface ID</strong></td><td id="gl-iid-def">In IPv6, i 64 bit di destra dell'indirizzo, che identificano l'interfaccia.</td><td class="mono"><a href="#/guide/subnetting/cap-19">19</a></td></tr>
+<tr id="gl-lan" data-terms="LAN" data-case="1" data-ref="cap-1"><td><strong>LAN</strong></td><td id="gl-lan-def">Local Area Network: la rete locale di un edificio, un piano, un laboratorio.</td><td class="mono"><a href="#/guide/subnetting/cap-1">1</a></td></tr>
+<tr id="gl-loop" data-terms="loopback" data-ref="cap-4"><td><strong>Loopback</strong></td><td id="gl-loop-def">Indirizzo che rimanda all'host stesso (127.0.0.1 in IPv4, ::1 in IPv6). Sui router indica anche un'interfaccia virtuale sempre attiva.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-mac" data-terms="indirizzo MAC|MAC" data-case="1" data-ref="cap-1"><td><strong>Indirizzo MAC</strong></td><td id="gl-mac-def">Indirizzo fisico di 48 bit della scheda di rete, usato per la consegna nella rete locale (livello 2).</td><td class="mono"><a href="#/guide/subnetting/cap-1">1</a></td></tr>
+<tr id="gl-multi" data-terms="multicast" data-ref="cap-4"><td><strong>Multicast</strong></td><td id="gl-multi-def">Invio a un gruppo di host interessati, invece che a tutti. In IPv4 è la vecchia classe D; in IPv6 sostituisce il broadcast.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-nat" data-terms="NAT" data-case="1" data-ref="cap-4"><td><strong>NAT</strong></td><td id="gl-nat-def">Network Address Translation: traduzione tra indirizzi privati interni e indirizzi pubblici.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-nibble" data-terms="nibble" data-ref="cap-3"><td><strong>Nibble</strong></td><td id="gl-nibble-def">Gruppo di 4 bit; corrisponde a una cifra esadecimale.</td><td class="mono"><a href="#/guide/subnetting/cap-3">3</a></td></tr>
+<tr id="gl-magic" data-terms="numero magico|numeri magici" data-ref="cap-9"><td><strong>Numero magico (M)</strong></td><td id="gl-magic-def">256 meno il valore della mask nell'ottetto interessante: la distanza tra una subnet e la successiva.</td><td class="mono"><a href="#/guide/subnetting/cap-9">9</a></td></tr>
+<tr id="gl-ospf" data-terms="OSPF" data-case="1" data-ref="cap-14"><td><strong>OSPF</strong></td><td id="gl-ospf-def">Protocollo di routing dinamico molto diffuso nelle reti aziendali; nella configurazione Cisco usa le wildcard mask.</td><td class="mono"><a href="#/guide/subnetting/cap-14">14</a></td></tr>
+<tr id="gl-oi" data-terms="ottetto interessante" data-ref="cap-6"><td><strong>Ottetto interessante</strong></td><td id="gl-oi-def">L'ottetto in cui la mask non vale né 255 né 0: lì si fa tutto il calcolo. Se il prefisso è multiplo di 8, per convenzione è l'ultimo ottetto che vale 255 (M = 1). Termine di questa guida.</td><td class="mono"><a href="#/guide/subnetting/cap-6">6</a></td></tr>
+<tr id="gl-ott" data-terms="ottetto|ottetti" data-ref="cap-2"><td><strong>Ottetto</strong></td><td id="gl-ott-def">Gruppo di 8 bit; un indirizzo IPv4 ne ha quattro, ognuno da 0 a 255.</td><td class="mono"><a href="#/guide/subnetting/cap-2">2</a></td></tr>
+<tr id="gl-pref" data-terms="prefisso|prefissi" data-ref="cap-4"><td><strong>Prefisso</strong></td><td id="gl-pref-def">Il numero di bit di rete, scritto /n. Per estensione indica la rete stessa, come in 172.16.32.0/20.</td><td class="mono"><a href="#/guide/subnetting/cap-4">4</a></td></tr>
+<tr id="gl-slaac" data-terms="SLAAC" data-case="1" data-ref="cap-19"><td><strong>SLAAC</strong></td><td id="gl-slaac-def">Autoconfigurazione degli indirizzi IPv6 senza DHCP; funziona solo su subnet /64.</td><td class="mono"><a href="#/guide/subnetting/cap-19">19</a></td></tr>
+<tr id="gl-sub" data-terms="sottorete|sottoreti|subnet" data-ref="cap-5"><td><strong>Subnet (sottorete)</strong></td><td id="gl-sub-def">Blocco di indirizzi ricavato da uno più grande spostando a destra il confine tra rete e host.</td><td class="mono"><a href="#/guide/subnetting/cap-5">5</a></td></tr>
+<tr id="gl-mask" data-terms="subnet mask|mask" data-ref="cap-6"><td><strong>Subnet mask</strong></td><td id="gl-mask-def">Numero di 32 bit con gli 1 consecutivi a sinistra: separa la parte di rete (1) dalla parte di host (0).</td><td class="mono"><a href="#/guide/subnetting/cap-6">6</a></td></tr>
+<tr id="gl-summ" data-terms="summarization|supernetting|rotta riassuntiva" data-ref="cap-17"><td><strong>Summarization</strong></td><td id="gl-summ-def">Aggregazione di più reti contigue in un unico prefisso più corto, per ridurre le rotte da annunciare.</td><td class="mono"><a href="#/guide/subnetting/cap-17">17</a></td></tr>
+<tr id="gl-vlan" data-terms="VLAN" data-case="1" data-ref="cap-5"><td><strong>VLAN</strong></td><td id="gl-vlan-def">Rete logica separata sugli stessi switch fisici; di norma corrisponde a una subnet.</td><td class="mono"><a href="#/guide/subnetting/cap-5">5</a></td></tr>
+<tr id="gl-vlsm" data-terms="VLSM" data-case="1" data-ref="cap-16"><td><strong>VLSM</strong></td><td id="gl-vlsm-def">Variable Length Subnet Mask: divisione di un blocco in subnet di dimensioni diverse.</td><td class="mono"><a href="#/guide/subnetting/cap-16">16</a></td></tr>
+<tr id="gl-wan" data-terms="WAN" data-case="1" data-ref="cap-1"><td><strong>WAN</strong></td><td id="gl-wan-def">Wide Area Network: collegamento tra reti lontane, per esempio tra sedi o verso Internet.</td><td class="mono"><a href="#/guide/subnetting/cap-1">1</a></td></tr>
+<tr id="gl-wild" data-terms="wildcard mask|wildcard" data-ref="cap-14"><td><strong>Wildcard mask</strong></td><td id="gl-wild-def">La mask invertita (255 − mask): indica i bit liberi. Si usa in ACL e OSPF.</td><td class="mono"><a href="#/guide/subnetting/cap-14">14</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section class="chap prose" id="app-c">
+<h3><span class="num">C</span>Specifiche del calcolatore</h3>
+<p>Ogni capitolo della guida si traduce in una funzione del software. La caratteristica distintiva rispetto ai calcolatori esistenti è la <strong>modalità didattica</strong>: per ogni risultato, il programma può mostrare i passaggi con il metodo scelto (binario, numero magico, multipli), come in questa guida. Il dettaglio è nel documento delle specifiche di progetto.</p>
+<div class="tbl"><table>
+<thead><tr><th>ID</th><th>Funzione</th><th>Input → Output</th><th>Cap.</th><th>Rilascio</th></tr></thead>
+<tbody>
+<tr><td class="mono">F01</td><td>Analisi subnet</td><td>IP + prefisso o mask → rete, broadcast, range, host, mask, wildcard, M</td><td class="mono">7, 9, 13</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F02</td><td>Conversioni</td><td>Decimale ↔ binario ↔ esadecimale, CIDR ↔ mask decimale</td><td class="mono">3, 6</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F03</td><td>Validazione mask</td><td>Mask → valida/non valida, con il motivo</td><td class="mono">6</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F04</td><td>Tipo di indirizzo</td><td>IP → classe storica, privato/pubblico, speciale</td><td class="mono">4</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F05</td><td>Calcolo inverso</td><td>Host o subnet richiesti → prefisso minimo</td><td class="mono">11</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F06</td><td>Suddivisione</td><td>Blocco + nuovo prefisso → elenco di tutte le subnet</td><td class="mono">11, 13</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F07</td><td>Stessa subnet</td><td>Due IP + prefisso (o due prefissi diversi) → esito e spiegazione</td><td class="mono">15</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F08</td><td>Pianificatore VLSM</td><td>Blocco + elenco di segmenti con host richiesti → piano ordinato, spazio libero, avvisi</td><td class="mono">16</td><td class="mono">v2</td></tr>
+<tr><td class="mono">F09</td><td>Summarization</td><td>Elenco di reti → rotta riassuntiva esatta o minima, con avviso di eccesso</td><td class="mono">17</td><td class="mono">v2</td></tr>
+<tr><td class="mono">F10</td><td>Wildcard e snippet</td><td>Subnet → wildcard e righe pronte per ACL/OSPF</td><td class="mono">14</td><td class="mono">v1 base, v2</td></tr>
+<tr><td class="mono">F11</td><td>Modulo IPv6 di base</td><td>Abbreviazione/espansione, suddivisione /48 → /64</td><td class="mono">19</td><td class="mono">v3</td></tr>
+<tr><td class="mono">F12</td><td>Modalità didattica</td><td>Passaggi mostrati con il metodo scelto, con rimando al capitolo della guida</td><td class="mono">7–17</td><td class="mono">v1</td></tr>
+<tr><td class="mono">F13</td><td>Allenamento</td><td>Esercizi casuali per livello, con verifica della risposta e tempo impiegato</td><td class="mono">8</td><td class="mono">v2</td></tr>
+</tbody></table></div>
+<h4>Decisioni prese</h4>
+<ul>
+<li><strong>Piattaforma</strong>: un unico file HTML autosufficiente, che funziona offline e si apre da disco o da qualunque web server; responsive e pensato prima per il telefono.</li>
+<li><strong>Modalità d'uso</strong>: calcolo rapido, didattica e professionale, attivabili con interruttori indipendenti (modalità didattica, export, memorizza i dati), tutti spenti per default.</li>
+<li><strong>Dati</strong>: salvataggio nel browser solo se richiesto; per spostare o condividere il lavoro, export e import della sessione in JSON, con cifratura facoltativa protetta da passphrase.</li>
+<li><strong>Export</strong>: appunti, CSV, JSON, Markdown, testo, stampa/PDF e snippet di configurazione.</li>
+<li><strong>Temi</strong>: Automatico, Chiaro, Scuro e Alto contrasto, gli stessi di questa guida.</li>
+<li><strong>Guide</strong>: questa guida e la <a href="#/guide/uso">guida all'uso</a>, integrate nel calcolatore. Gli esempi hanno collegamenti "Apri nel calcolatore" che aprono la funzione con i dati dell'esempio e i passaggi didattici.</li>
+</ul>
+</section>
+
+<footer class="guide-foot">
+<p>Guida al subnetting IPv4 · versione 0.4 di studio, integrata nel Calcolatore Subnet, da revisionare. Gli esempi usano indirizzi privati o di documentazione; tutti i calcoli sono stati verificati con uno script.</p>
+</footer>

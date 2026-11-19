@@ -2,12 +2,13 @@
 import { defineConfig } from 'vitest/config';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { readFileSync } from 'node:fs';
+import { guidesPlugin } from './tools/guides.js';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export default defineConfig({
   base: './',
-  plugins: [viteSingleFile()],
+  plugins: [guidesPlugin(), viteSingleFile()],
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     // SOURCE_DATE_EPOCH (secondi) rende la build riproducibile; altrimenti la data di oggi

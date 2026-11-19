@@ -1,0 +1,278 @@
+
+<!-- =================== PARTE III =================== -->
+<div class="part" id="parte-3">
+  <p class="eyebrow">PARTE III</p>
+  <h2>Metodi rapidi</h2>
+  <p class="intro">Tutti i metodi di questa parte evitano la conversione in binario dell'ottetto interessante. Si basano su un'unica osservazione: le subnet di una certa dimensione iniziano sempre a multipli regolari. Con un po' di allenamento si arriva al risultato a mente in pochi secondi.</p>
+</div>
+
+<section class="chap prose" id="cap-9">
+<h3><span class="num">09</span>Il numero magico</h3>
+<p>È il trucco più importante della guida, alla base di quasi tutti gli altri. Si chiama anche <strong>block size</strong> (dimensione del blocco) o <strong>incremento</strong>.</p>
+<div class="box trick"><span class="lbl">La regola</span>
+<p><strong>Numero magico M = 256 − valore della mask nell'ottetto interessante.</strong></p>
+<p>Le subnet iniziano a tutti i multipli di M (0, M, 2M, 3M…) in quell'ottetto. La rete che contiene il tuo IP è il multiplo di M più grande che non supera il valore dell'ottetto.</p></div>
+<p>Perché funziona? M è il peso del bit di rete più a destra. Nel /26 l'ultimo 1 della mask cade sulla posizione che vale 64: cambiando quel bit si passa da una subnet alla successiva, quindi le subnet sono distanti 64 l'una dall'altra.</p>
+<pre class="bin">mask 192 = <span class="n">11</span><span class="h">000000</span>
+             <span class="n">↑</span>
+             <span class="m">ultimo bit di rete: peso</span> <span class="r">64</span>  =  256 − 192</pre>
+
+<h4>Esempio · <code>192.168.10.75/26</code></h4>
+<pre class="bin">1. Ottetto interessante: quarto (mask 192)
+2. M = 256 − 192 = <span class="n">64</span>
+3. Multipli di 64:  0   <span class="r">64</span>   128   192
+4. 75 sta tra 64 e 127  →  rete <span class="r">192.168.10.64</span>
+5. Rete successiva 128  →  broadcast <span class="r">192.168.10.127</span></pre>
+
+<h4>Esempio · <code>172.16.45.200/20</code></h4>
+<pre class="bin">1. Ottetto interessante: terzo (mask 240)
+2. M = 256 − 240 = <span class="n">16</span>
+3. Multipli di 16:  0  16  <span class="r">32</span>  48  64 …
+4. 45 sta tra 32 e 47   →  rete <span class="r">172.16.32.0</span>
+5. Broadcast: 47 nel terzo, 255 nel quarto  →  <span class="r">172.16.47.255</span></pre>
+<p>Stesso risultato del capitolo 7, senza scrivere un solo bit.</p>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore, con il numero magico</p><ul>
+<li><a href="#/calcola/analisi?ip=192.168.10.75&amp;p=26&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 192.168.10.75/26</a></li>
+<li><a href="#/calcola/analisi?ip=172.16.45.200&amp;p=20&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 172.16.45.200/20</a></li>
+</ul></div>
+
+<h4>Il numero magico direttamente dal prefisso</h4>
+<p>Non serve nemmeno passare dalla mask decimale. Conta quanti bit di rete cadono nell'ottetto interessante (prefisso meno il multiplo di 8 precedente): se sono <em>b</em>, allora <strong>M = 2<sup>8−b</sup></strong>.</p>
+<pre class="bin">/26 → 26 − 24 = 2 bit  →  M = 2⁶ = <span class="n">64</span>
+/20 → 20 − 16 = 4 bit  →  M = 2⁴ = <span class="n">16</span>
+/11 → 11 −  8 = 3 bit  →  M = 2⁵ = <span class="n">32</span>
+/29 → 29 − 24 = 5 bit  →  M = 2³ = <span class="n">8</span></pre>
+<div class="box note"><span class="lbl">Relazione da ricordare</span>
+<p><strong>mask + M = 256</strong>. Conoscendo uno dei due si ricava l'altro: 224 ↔ 32, 248 ↔ 8, 252 ↔ 4.</p></div>
+</section>
+
+<section class="chap prose" id="cap-10">
+<h3><span class="num">10</span>La tabella a scaletta</h3>
+<p>È il trucco "da esame": una tabella che si ricostruisce su un foglio in mezzo minuto e contiene tutto quello che serve. Si scrive così:</p>
+<ol>
+<li>Prima riga: i pesi dei bit, da 128 a 1. Sono i <strong>numeri magici</strong>.</li>
+<li>Seconda riga: le somme progressive (128, 128+64, …). Sono i <strong>valori della mask</strong>.</li>
+<li>Sopra: i prefissi, che scorrono di 1 per colonna. Si scrive solo la riga dell'ottetto che serve (/25–/32 per il quarto, /17–/24 per il terzo, /9–/16 per il secondo).</li>
+</ol>
+<div class="scale-wrap">
+<div class="scale">
+  <div class="h">Prefisso · 2° ottetto</div><div>/9</div><div>/10</div><div>/11</div><div>/12</div><div>/13</div><div>/14</div><div>/15</div><div>/16</div>
+  <div class="h">Prefisso · 3° ottetto</div><div>/17</div><div>/18</div><div>/19</div><div>/20</div><div>/21</div><div>/22</div><div>/23</div><div>/24</div>
+  <div class="h">Prefisso · 4° ottetto</div><div class="c4">/25</div><div class="c4">/26</div><div class="c4">/27</div><div class="c4">/28</div><div class="c4">/29</div><div class="c4">/30</div><div class="c4">/31</div><div class="c4">/32</div>
+  <div class="h">Numero magico (M)</div><div class="mg">128</div><div class="mg">64</div><div class="mg">32</div><div class="mg">16</div><div class="mg">8</div><div class="mg">4</div><div class="mg">2</div><div class="mg">1</div>
+  <div class="h">Valore mask</div><div class="mk">128</div><div class="mk">192</div><div class="mk">224</div><div class="mk">240</div><div class="mk">248</div><div class="mk">252</div><div class="mk">254</div><div class="mk">255</div>
+  <div class="h">Host (4° ottetto)</div><div>126</div><div>62</div><div>30</div><div>14</div><div>6</div><div>2</div><div>2*</div><div>1*</div>
+</div>
+</div>
+<p class="mu small">* /31 e /32 sono casi speciali: vedi capitolo 18.</p>
+<p>Si legge in verticale. Per un <code>/27</code>: colonna 3 → M = 32, mask 224, 30 host. Per un <code>/21</code>: stessa colonna 5 del /29 → M = 8 nel terzo ottetto, mask <code>255.255.248.0</code>.</p>
+
+<h4>Host quando l'ottetto interessante non è il quarto</h4>
+<p>Ogni passo a sinistra raddoppia gli host. Conviene ricordare la sequenza del terzo ottetto, la più usata nelle LAN aziendali:</p>
+<div class="tbl"><table>
+<thead><tr><th>Prefisso</th><th class="mono">/17</th><th class="mono">/18</th><th class="mono">/19</th><th class="mono">/20</th><th class="mono">/21</th><th class="mono">/22</th><th class="mono">/23</th><th class="mono">/24</th></tr></thead>
+<tbody><tr><td>Host</td><td class="mono">32.766</td><td class="mono">16.382</td><td class="mono">8.190</td><td class="mono">4.094</td><td class="mono">2.046</td><td class="mono">1.022</td><td class="mono">510</td><td class="mono">254</td></tr></tbody>
+</table></div>
+<div class="box trick"><span class="lbl">Memoria a lungo termine</span>
+<p>Basta ricordare due cose: la riga dei pesi (128…1) e il fatto che le somme progressive si ottengono aggiungendo il peso successivo. Tutto il resto della tabella si ricava al momento.</p></div>
+</section>
+
+<section class="chap prose" id="cap-11">
+<h3><span class="num">11</span>Che mask mi serve? Il calcolo inverso</h3>
+<p>Nella progettazione il problema è al contrario: non hai una mask da analizzare, ma un requisito da soddisfare.</p>
+
+<h4>Caso A · Mi servono N host: che prefisso uso?</h4>
+<div class="box trick"><span class="lbl">La regola</span>
+<p>Trova la più piccola potenza di 2 che sia <strong>almeno N + 2</strong>. Se è 2<sup>h</sup>, il prefisso è <strong>/(32 − h)</strong>.</p></div>
+<pre class="bin">  50 host →  52 → 2⁶ =   64 → h = 6  → <span class="r">/26</span>  (62 host)
+ 500 host → 502 → 2⁹ =  512 → h = 9  → <span class="r">/23</span>  (510 host)
+1000 host → 1002 → 2¹⁰ = 1024 → h = 10 → <span class="r">/22</span>  (1.022 host)
+  62 host →  64 → 2⁶ =   64 → h = 6  → <span class="r">/26</span>  (esatto)
+  63 host →  65 → 2⁷ =  128 → h = 7  → <span class="r">/25</span>  (126 host)</pre>
+<p>Gli ultimi due esempi mostrano perché il "+2" conta: con 63 host il /26 non basta più, per un solo indirizzo.</p>
+<h4 id="cap-11-tabella">Tabella di consultazione rapida: host richiesti → mask</h4>
+<p>Per non ripetere il calcolo ogni volta. Ogni riga raddoppia la precedente, e il limite superiore è sempre una potenza di 2 meno 2.</p>
+<div class="tbl"><table data-check="hosts-prefix-mask-available">
+<thead><tr><th>Host richiesti</th><th>Prefisso</th><th>Mask</th><th>Host disponibili</th></tr></thead>
+<tbody>
+<tr><td class="mono">1 – 2</td><td class="mono"><strong>/30</strong></td><td class="mono">255.255.255.252</td><td class="mono">2</td></tr>
+<tr><td class="mono">3 – 6</td><td class="mono"><strong>/29</strong></td><td class="mono">255.255.255.248</td><td class="mono">6</td></tr>
+<tr><td class="mono">7 – 14</td><td class="mono"><strong>/28</strong></td><td class="mono">255.255.255.240</td><td class="mono">14</td></tr>
+<tr><td class="mono">15 – 30</td><td class="mono"><strong>/27</strong></td><td class="mono">255.255.255.224</td><td class="mono">30</td></tr>
+<tr><td class="mono">31 – 62</td><td class="mono"><strong>/26</strong></td><td class="mono">255.255.255.192</td><td class="mono">62</td></tr>
+<tr><td class="mono">63 – 126</td><td class="mono"><strong>/25</strong></td><td class="mono">255.255.255.128</td><td class="mono">126</td></tr>
+<tr><td class="mono">127 – 254</td><td class="mono"><strong>/24</strong></td><td class="mono">255.255.255.0</td><td class="mono">254</td></tr>
+<tr><td class="mono">255 – 510</td><td class="mono"><strong>/23</strong></td><td class="mono">255.255.254.0</td><td class="mono">510</td></tr>
+<tr><td class="mono">511 – 1.022</td><td class="mono"><strong>/22</strong></td><td class="mono">255.255.252.0</td><td class="mono">1.022</td></tr>
+<tr><td class="mono">1.023 – 2.046</td><td class="mono"><strong>/21</strong></td><td class="mono">255.255.248.0</td><td class="mono">2.046</td></tr>
+<tr><td class="mono">2.047 – 4.094</td><td class="mono"><strong>/20</strong></td><td class="mono">255.255.240.0</td><td class="mono">4.094</td></tr>
+<tr><td class="mono">4.095 – 8.190</td><td class="mono"><strong>/19</strong></td><td class="mono">255.255.224.0</td><td class="mono">8.190</td></tr>
+<tr><td class="mono">8.191 – 16.382</td><td class="mono"><strong>/18</strong></td><td class="mono">255.255.192.0</td><td class="mono">16.382</td></tr>
+<tr><td class="mono">16.383 – 32.766</td><td class="mono"><strong>/17</strong></td><td class="mono">255.255.128.0</td><td class="mono">32.766</td></tr>
+<tr><td class="mono">32.767 – 65.534</td><td class="mono"><strong>/16</strong></td><td class="mono">255.255.0.0</td><td class="mono">65.534</td></tr>
+</tbody></table></div>
+<p><strong>Esempio completo.</strong> Un'aula con 40 postazioni, più il gateway e due stampanti: 43 host. 43 + 2 = 45 → 2⁶ = 64 → h = 6 → <strong>/26</strong> → la mask è 24 bit pieni più 2 bit nel quarto ottetto, cioè <code>255.255.255.192</code> (tabella del capitolo 6). Restano 62 − 43 = 19 indirizzi per la crescita.</p>
+
+<div class="box warn"><span class="lbl">In pratica</span>
+<p>Gli host includono anche il gateway, le interfacce di gestione degli switch, eventuali stampanti e un margine di crescita. Un laboratorio da 60 postazioni non va in un /26.</p></div>
+
+<h4>Caso B · Mi servono S subnet: che prefisso uso?</h4>
+<div class="box trick"><span class="lbl">La regola</span>
+<p>Partendo da un blocco <code>/p</code>, trova la più piccola potenza di 2 che sia <strong>almeno S</strong>. Se è 2<sup>s</sup>, le subnet sono <strong>/(p + s)</strong>.</p></div>
+<p>Esempio: dividere <code>10.0.0.0/16</code> in almeno 6 subnet. 6 → 2³ = 8 → s = 3 → <strong>/19</strong>. Il numero magico del /19 nel terzo ottetto è 32, quindi le subnet sono:</p>
+<pre class="bin">10.0.<span class="n">0</span>.0/19     10.0.<span class="n">32</span>.0/19    10.0.<span class="n">64</span>.0/19    10.0.<span class="n">96</span>.0/19
+10.0.<span class="n">128</span>.0/19   10.0.<span class="n">160</span>.0/19   10.0.<span class="n">192</span>.0/19   10.0.<span class="n">224</span>.0/19
+<span class="m">ognuna con 2¹³ − 2 = 8.190 host · 2 subnet restano di scorta</span></pre>
+
+<h4>Caso C · Entrambi i vincoli</h4>
+<p>Hai <code>192.168.5.0/24</code> e ti servono subnet da almeno 20 host. Caso A: 22 → 2⁵ → <strong>/27</strong> (30 host). Bit presi in prestito: 27 − 24 = 3 → <strong>8 subnet</strong>. Se te ne servissero 10, il vincolo non sarebbe soddisfacibile con subnet tutte uguali: serve un blocco più grande o il VLSM.</p>
+
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/pianifica/inverso?h=50&amp;did=1">Apri nel calcolatore: caso A, 50 host</a></li>
+<li><a href="#/pianifica/inverso?h=43&amp;did=1">Apri nel calcolatore: caso A, l'aula da 43 host</a></li>
+<li><a href="#/pianifica/inverso?p=16&amp;s=6&amp;did=1">Apri nel calcolatore: caso B, /16 diviso in almeno 6 subnet</a></li>
+<li><a href="#/pianifica/suddivisione?b=10.0.0.0&amp;p=16&amp;np=19&amp;did=1">Apri nel calcolatore: le 8 subnet /19 di 10.0.0.0/16</a></li>
+<li><a href="#/pianifica/inverso?p=24&amp;h=20&amp;s=8&amp;did=1">Apri nel calcolatore: caso C, /24 con 20 host e 8 subnet</a></li>
+<li><a href="#/pianifica/inverso?p=24&amp;h=20&amp;s=10&amp;did=1">Apri nel calcolatore: caso C non soddisfacibile, 20 host e 10 subnet</a></li>
+</ul></div>
+</section>
+
+<section class="chap prose" id="cap-12">
+<h3><span class="num">12</span>Il metodo dei multipli</h3>
+<p>Il passo 4 del numero magico ("qual è il multiplo di M che non supera il valore?") a volte non è immediato, per esempio con M = 8 o M = 4 e valori alti. Ci sono due modi per farlo senza esitazioni.</p>
+
+<h4>Con la divisione intera</h4>
+<div class="box trick"><span class="lbl">La regola</span>
+<p><strong>Rete = (valore ÷ M, parte intera) × M</strong></p></div>
+<pre class="bin">75  ÷ 64 = 1,17…  →  1 × 64 = <span class="r">64</span>
+200 ÷ 16 = 12,5   → 12 × 16 = <span class="r">192</span>
+140 ÷ 32 = 4,375  →  4 × 32 = <span class="r">128</span>
+77  ÷ 32 = 2,40…  →  2 × 32 = <span class="r">64</span>
+99  ÷ 4  = 24,75  → 24 × 4  = <span class="r">96</span></pre>
+
+<h4>Con il resto</h4>
+<p>In alternativa: <strong>rete = valore − (valore mod M)</strong>, dove "mod" è il resto della divisione. Il resto è anche la <strong>distanza dell'host dall'indirizzo di rete</strong>, un'informazione utile di per sé.</p>
+<pre class="bin">200 mod 16 = 8    → 200 − 8 = <span class="r">192</span>   <span class="m">(l'host è il 9° indirizzo del blocco)</span>
+99  mod 4  = 3    →  99 − 3 = <span class="r">96</span>    <span class="m">(resto = M − 1: è il broadcast!)</span></pre>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore, con il metodo dei multipli</p><ul>
+<li><a href="#/calcola/analisi?ip=192.168.1.200&amp;p=28&amp;did=1&amp;metodo=multiples">Apri nel calcolatore: 192.168.1.200/28, il 9° indirizzo del blocco</a></li>
+<li><a href="#/calcola/analisi?ip=192.168.50.99&amp;p=30&amp;did=1&amp;metodo=multiples">Apri nel calcolatore: 192.168.50.99/30, resto M − 1 cioè il broadcast</a></li>
+</ul></div>
+
+<div class="box trick"><span class="lbl">Ancore mentali</span>
+<p>Per i numeri magici più grandi conviene conoscere a memoria i multipli, che sono pochi:</p>
+<ul>
+<li><strong>M = 128</strong> → 0, 128</li>
+<li><strong>M = 64</strong> → 0, 64, 128, 192</li>
+<li><strong>M = 32</strong> → 0, 32, 64, 96, 128, 160, 192, 224</li>
+<li><strong>M = 16</strong> → 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240</li>
+</ul>
+<p>Per M = 8 e M = 4 si parte dall'ancora di 16 o 32 più vicina e si aggiunge: 203 con M = 8 → 192 è multiplo, 192 + 8 = 200, 208 è troppo → rete 200.</p></div>
+</section>
+
+<section class="chap prose" id="cap-13">
+<h3><span class="num">13</span>Broadcast e host in un lampo</h3>
+<p>Trovata la rete, tutto il resto si ricava con due somme.</p>
+<div class="box trick"><span class="lbl">Le regole</span>
+<ul>
+<li><strong>Rete successiva</strong> = rete + M (nell'ottetto interessante)</li>
+<li><strong>Broadcast</strong> = rete successiva − 1, cioè rete + M − 1 nell'ottetto interessante e <strong>255</strong> in tutti gli ottetti a destra</li>
+<li><strong>Ultimo host</strong> = broadcast − 1; <strong>primo host</strong> = rete + 1</li>
+<li><strong>Host</strong> = M × 256<sup>k</sup> − 2, dove k è il numero di ottetti a destra di quello interessante (vale fino a /30)</li>
+</ul></div>
+<pre class="bin">10.1.77.33/19   M = 32 nel terzo      rete   10.1.<span class="r">64</span>.0
+                                      bc     10.1.<span class="r">95</span>.255   <span class="m">(64 + 32 − 1 = 95)</span>
+                                      host   32 × 256 − 2 = <span class="r">8.190</span>
+
+10.150.33.7/11  M = 32 nel secondo    rete   10.<span class="r">128</span>.0.0
+                                      bc     10.<span class="r">159</span>.255.255
+                                      host   32 × 256 × 256 − 2 = <span class="r">2.097.150</span></pre>
+
+<div class="box warn"><span class="lbl">Eccezioni: /31 e /32</span>
+<p>Le regole qui sopra valgono da /0 a /30. Negli ultimi due prefissi la formula darebbe numeri senza senso (0 host per il /31, −1 per il /32), perché lì non ci sono indirizzi di rete e di broadcast da togliere:</p>
+<ul>
+<li><strong>/31</strong>: 2 indirizzi, <strong>entrambi assegnabili</strong>, solo per collegamenti punto-punto (RFC 3021). Non c'è broadcast.</li>
+<li><strong>/32</strong>: 1 indirizzo, che identifica un singolo host (loopback, rotte e regole per un solo indirizzo).</li>
+</ul>
+<p>Dettagli e usi nel capitolo 18.</p></div>
+
+<div class="box warn"><span class="lbl">Attenzione al riporto</span>
+<p>Se rete + M arriva a 256, la rete successiva "scavalca" nell'ottetto a sinistra: dopo <code>192.168.10.192/26</code> viene <code>192.168.11.0/26</code>, non 192.168.10.256. Il broadcast resta comunque <code>192.168.10.255</code>.</p></div>
+
+<h4>La procedura completa a mente</h4>
+<p>Mettendo insieme i capitoli 9–13, un esercizio si risolve in cinque domande:</p>
+<ol>
+<li>Qual è l'ottetto interessante? (dal prefisso)</li>
+<li>Quanto vale M? (2<sup>8−b</sup>, oppure 256 − mask)</li>
+<li>Qual è il multiplo di M che non supera il valore? → <strong>rete</strong></li>
+<li>Rete + M − 1, e 255 a destra → <strong>broadcast</strong></li>
+<li>M × 256<sup>k</sup> − 2 → <strong>host</strong> (per /31 e /32 vedi le eccezioni)</li>
+</ol>
+<p>Prova a rifare gli esercizi del capitolo 8 con questa procedura e confronta i tempi.</p>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/analisi?ip=10.1.77.33&amp;p=19&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 10.1.77.33/19 con le cinque domande</a></li>
+<li><a href="#/calcola/analisi?ip=10.150.33.7&amp;p=11&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 10.150.33.7/11 con le cinque domande</a></li>
+<li><a href="#/calcola/analisi?ip=192.168.10.200&amp;p=26&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 192.168.10.200/26, il riporto dopo .192</a></li>
+<li><a href="#/calcola/analisi?ip=10.0.0.1&amp;p=31&amp;did=1&amp;metodo=magic">Apri nel calcolatore: l'eccezione /31</a></li>
+</ul></div>
+</section>
+
+<section class="chap prose" id="cap-14">
+<h3><span class="num">14</span>Wildcard mask rapida</h3>
+<div class="box trick"><span class="lbl">La regola</span>
+<p><strong>Wildcard = 255 − mask</strong>, ottetto per ottetto. In pratica: <strong>0</strong> negli ottetti di rete pieni, <strong>M − 1</strong> nell'ottetto interessante, <strong>255</strong> a destra.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Prefisso</th><th>Mask</th><th>M</th><th>Wildcard</th></tr></thead>
+<tbody>
+<tr><td class="mono">/26</td><td class="mono">255.255.255.192</td><td class="mono">64</td><td class="mono"><strong>0.0.0.63</strong></td></tr>
+<tr><td class="mono">/20</td><td class="mono">255.255.240.0</td><td class="mono">16</td><td class="mono"><strong>0.0.15.255</strong></td></tr>
+<tr><td class="mono">/11</td><td class="mono">255.224.0.0</td><td class="mono">32</td><td class="mono"><strong>0.31.255.255</strong></td></tr>
+<tr><td class="mono">/30</td><td class="mono">255.255.255.252</td><td class="mono">4</td><td class="mono"><strong>0.0.0.3</strong></td></tr>
+</tbody></table></div>
+
+<h4>Dove si usa</h4>
+<pre class="bin"><span class="m">! ACL Cisco: consenti l'intera subnet 192.168.10.64/26</span>
+access-list 10 permit 192.168.10.64 <span class="n">0.0.0.63</span>
+
+<span class="m">! OSPF: attiva il protocollo sulle interfacce in 10.1.64.0/19</span>
+router ospf 1
+ network 10.1.64.0 <span class="n">0.0.31.255</span> area 0</pre>
+
+<div class="box trick"><span class="lbl">Broadcast con la wildcard</span>
+<p><strong>Broadcast = rete + wildcard</strong>, ottetto per ottetto, senza riporti: <code>172.16.32.0</code> + <code>0.0.15.255</code> = <code>172.16.47.255</code>. È l'OR del capitolo 7, fatto in decimale.</p></div>
+<p class="mu small">Nota: nelle ACL una wildcard può anche essere non contigua (per esempio per selezionare solo i terzi ottetti pari). Una subnet mask invece no.</p>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore: sezione "Wildcard e configurazione" di Analisi</p><ul>
+<li><a href="#/calcola/analisi?ip=192.168.10.64&amp;p=26&amp;did=1">Apri nel calcolatore: wildcard e ACL di 192.168.10.64/26</a></li>
+<li><a href="#/calcola/analisi?ip=10.1.64.0&amp;p=19&amp;did=1">Apri nel calcolatore: wildcard e OSPF di 10.1.64.0/19</a></li>
+</ul></div>
+</section>
+
+<section class="chap prose" id="cap-15">
+<h3><span class="num">15</span>Stessa subnet o no?</h3>
+<p>È la domanda del capitolo 2, quella che il PC si pone a ogni pacchetto. A mente si risolve così:</p>
+<div class="box trick"><span class="lbl">La regola</span>
+<ol>
+<li>Gli ottetti a sinistra di quello interessante devono essere <strong>identici</strong>.</li>
+<li>Nell'ottetto interessante, i due valori devono cadere nello <strong>stesso blocco di M</strong> (stesso multiplo di M come rete).</li>
+<li>Gli ottetti a destra non contano.</li>
+</ol></div>
+<div class="tbl"><table>
+<thead><tr><th>Host A</th><th>Host B</th><th>Prefisso</th><th>Ragionamento</th><th>Esito</th></tr></thead>
+<tbody>
+<tr><td class="mono">192.168.10.70</td><td class="mono">192.168.10.130</td><td class="mono">/25</td><td>M = 128: 70 → 0, 130 → 128</td><td class="w-c"><strong>No</strong></td></tr>
+<tr><td class="mono">192.168.10.70</td><td class="mono">192.168.10.130</td><td class="mono">/24</td><td>Confine sull'ottetto: primi tre uguali</td><td class="ok-c"><strong>Sì</strong></td></tr>
+<tr><td class="mono">172.16.33.10</td><td class="mono">172.16.46.200</td><td class="mono">/20</td><td>M = 16: 33 → 32, 46 → 32</td><td class="ok-c"><strong>Sì</strong></td></tr>
+<tr><td class="mono">10.1.63.5</td><td class="mono">10.1.64.5</td><td class="mono">/19</td><td>M = 32: 63 → 32, 64 → 64</td><td class="w-c"><strong>No</strong></td></tr>
+</tbody></table></div>
+<p>L'ultimo caso è il classico tranello: due indirizzi "vicinissimi" ma su due lati di un confine di blocco.</p>
+
+<div class="box warn"><span class="lbl">Mask diverse sui due host</span>
+<p>Ogni host decide con la <strong>propria</strong> mask. Se A è <code>192.168.1.10/24</code> e B è <code>192.168.1.200/25</code>, A considera B locale e lo cerca con ARP; B invece calcola la propria rete <code>192.168.1.128/25</code>, considera A remoto e manda la risposta al proprio gateway.</p>
+<p>C'è di più: se il gateway è il solito <code>192.168.1.1</code>, per B sta <strong>fuori dalla sua subnet</strong>. A seconda del sistema operativo, la configurazione di B viene rifiutata oppure accettata trattando il gateway come raggiungibile direttamente. Il risultato è un traffico asimmetrico, o a senso unico, che funziona "a volte": uno dei guasti più difficili da diagnosticare senza questo ragionamento.</p></div>
+
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/stessa?a=10.1.63.5&amp;pa=19&amp;b=10.1.64.5&amp;pb=19&amp;did=1&amp;metodo=magic">Apri nel calcolatore: il tranello 10.1.63.5 e 10.1.64.5 /19</a></li>
+<li><a href="#/calcola/stessa?a=172.16.33.10&amp;pa=20&amp;b=172.16.46.200&amp;pb=20&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 172.16.33.10 e 172.16.46.200 /20</a></li>
+<li><a href="#/calcola/stessa?a=192.168.1.10&amp;pa=24&amp;b=192.168.1.200&amp;pb=25&amp;gw=192.168.1.1&amp;did=1&amp;metodo=magic">Apri nel calcolatore: mask diverse e gateway fuori dalla subnet di B</a></li>
+</ul></div>
+</section>

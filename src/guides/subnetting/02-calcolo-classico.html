@@ -1,0 +1,200 @@
+
+<!-- =================== PARTE II =================== -->
+<div class="part" id="parte-2">
+  <p class="eyebrow">PARTE II</p>
+  <h2>Il calcolo classico</h2>
+  <p class="intro">Il metodo binario è lento, ma è la base di tutto: ogni trucco della Parte III è una scorciatoia di questo procedimento. Va saputo fare a mano, anche solo per verificare i risultati di un calcolo rapido.</p>
+</div>
+
+<section class="chap prose" id="cap-6">
+<h3><span class="num">06</span>Subnet mask e notazione CIDR</h3>
+<p>La subnet mask è un numero di 32 bit con una regola rigida: <strong>tutti gli 1 a sinistra, tutti gli 0 a destra</strong>, senza interruzioni. La si può scrivere in due modi equivalenti:</p>
+<ul>
+  <li><strong>decimale puntata</strong>: <code>255.255.255.192</code> (così la mostra <code>ipconfig</code> su Windows);</li>
+  <li><strong>CIDR</strong>: <code>/26</code>, cioè il numero di bit a 1 (così la mostra <code>ip addr</code> su Linux e la usano i router).</li>
+</ul>
+<pre class="bin">/26 = <span class="n">11111111.11111111.11111111.11</span><span class="h">000000</span>
+    =   255   .   255  .   255  .  192</pre>
+
+<h4>I 9 valori possibili di un ottetto</h4>
+<p>Visto che gli 1 sono sempre consecutivi da sinistra, un ottetto della mask può assumere solo 9 valori. Si ottengono sommando i pesi da sinistra. Questa tabella va imparata a memoria:</p>
+<div class="tbl"><table style="max-width:520px">
+<thead><tr><th>Bit a 1</th><th>Binario</th><th>Valore</th><th>Somma dei pesi</th></tr></thead>
+<tbody>
+<tr><td class="mono">0</td><td class="mono"><span class="h-c">00000000</span></td><td class="mono"><strong>0</strong></td><td class="mono mu">0</td></tr>
+<tr><td class="mono">1</td><td class="mono"><span class="n-c">1</span><span class="h-c">0000000</span></td><td class="mono"><strong>128</strong></td><td class="mono mu">128</td></tr>
+<tr><td class="mono">2</td><td class="mono"><span class="n-c">11</span><span class="h-c">000000</span></td><td class="mono"><strong>192</strong></td><td class="mono mu">128+64</td></tr>
+<tr><td class="mono">3</td><td class="mono"><span class="n-c">111</span><span class="h-c">00000</span></td><td class="mono"><strong>224</strong></td><td class="mono mu">192+32</td></tr>
+<tr><td class="mono">4</td><td class="mono"><span class="n-c">1111</span><span class="h-c">0000</span></td><td class="mono"><strong>240</strong></td><td class="mono mu">224+16</td></tr>
+<tr><td class="mono">5</td><td class="mono"><span class="n-c">11111</span><span class="h-c">000</span></td><td class="mono"><strong>248</strong></td><td class="mono mu">240+8</td></tr>
+<tr><td class="mono">6</td><td class="mono"><span class="n-c">111111</span><span class="h-c">00</span></td><td class="mono"><strong>252</strong></td><td class="mono mu">248+4</td></tr>
+<tr><td class="mono">7</td><td class="mono"><span class="n-c">1111111</span><span class="h-c">0</span></td><td class="mono"><strong>254</strong></td><td class="mono mu">252+2</td></tr>
+<tr><td class="mono">8</td><td class="mono"><span class="n-c">11111111</span></td><td class="mono"><strong>255</strong></td><td class="mono mu">254+1</td></tr>
+</tbody></table></div>
+
+<h4>Da CIDR a decimale (e ritorno)</h4>
+<p>Per convertire <code>/n</code>: ogni gruppo di 8 bit pieni vale 255; i bit rimanenti si cercano nella tabella; il resto è 0.</p>
+<pre class="bin">/20 = 8 + 8 + <span class="n">4</span> + 0  →  255.255.<span class="n">240</span>.0
+/11 = 8 + <span class="n">3</span> + 0 + 0  →  255.<span class="n">224</span>.0.0
+/29 = 8 + 8 + 8 + <span class="n">5</span>  →  255.255.255.<span class="n">248</span></pre>
+<p>Al contrario, da decimale a CIDR: 8 per ogni 255, più i bit corrispondenti al valore "spezzato". <code>255.255.254.0</code> = 8 + 8 + 7 = <code>/23</code>.</p>
+
+<div class="box warn"><span class="lbl">Mask non valide</span>
+<p><code>255.255.0.255</code> non è valida (ci sono 1 dopo degli 0). Neanche <code>255.255.250.0</code> lo è: 250 non compare tra i 9 valori (in binario è <code>11111010</code>). Se un valore non è nella tabella, la mask è sbagliata.</p></div>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/conversioni?pm=20">Apri nel calcolatore: /20 in mask decimale e in binario</a></li>
+<li><a href="#/calcola/mask?m=255.255.250.0&amp;did=1">Apri nel calcolatore: perché 255.255.250.0 non è valida</a></li>
+<li><a href="#/calcola/mask?m=255.255.0.255&amp;did=1">Apri nel calcolatore: perché 255.255.0.255 non è valida</a></li>
+</ul></div>
+
+<h4>L'ottetto interessante</h4>
+<p>In ogni mask c'è al massimo un ottetto che non vale né 255 né 0: lo chiameremo <strong>ottetto interessante</strong>. Tutto il lavoro vero si fa lì. Si trova subito dal prefisso:</p>
+<div class="tbl"><table style="max-width:520px">
+<thead><tr><th>Prefisso</th><th>Ottetto interessante</th></tr></thead>
+<tbody>
+<tr><td class="mono">/1 – /8</td><td>primo</td></tr>
+<tr><td class="mono">/9 – /16</td><td>secondo</td></tr>
+<tr><td class="mono">/17 – /24</td><td>terzo</td></tr>
+<tr><td class="mono">/25 – /32</td><td>quarto</td></tr>
+</tbody></table></div>
+<p>Se il prefisso è un multiplo di 8 (<code>/8</code>, <code>/16</code>, <code>/24</code>, <code>/32</code>), il confine cade esattamente tra due ottetti e il calcolo è immediato: si copiano gli ottetti di rete e si azzerano gli altri. Per non avere eccezioni, in questa guida l'ottetto interessante è in quel caso <strong>l'ultimo che vale 255</strong>, come indica la tabella: per <code>/24</code> è il terzo. Lì il numero magico (capitolo 9) vale 256 − 255 = <strong>1</strong>: le subnet avanzano di 1 in quell'ottetto (<code>10.0.0.0/24</code>, <code>10.0.1.0/24</code>, <code>10.0.2.0/24</code>…) e gli ottetti a destra vanno da 0 a 255.</p>
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
+<li><a href="#/calcola/analisi?ip=10.1.2.3&amp;p=24&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 10.1.2.3/24, confine sull'ottetto e numero magico 1</a></li>
+</ul></div>
+
+<h4>La wildcard mask</h4>
+<p>La <strong>wildcard</strong> è la mask invertita: gli 1 diventano 0 e viceversa. Per <code>/26</code> vale <code>0.0.0.63</code>. Indica quali bit sono "liberi" e si usa nelle ACL e nella configurazione di OSPF sui dispositivi Cisco. Il modo rapido per calcolarla è nel capitolo 14.</p>
+</section>
+
+<section class="chap prose" id="cap-7">
+<h3><span class="num">07</span>Il metodo binario passo-passo</h3>
+<p>Dato un indirizzo IP con la sua mask, vogliamo trovare: <strong>indirizzo di rete</strong>, <strong>broadcast</strong>, <strong>primo e ultimo host</strong>, <strong>numero di host</strong>.</p>
+<div class="box key"><span class="lbl">Il procedimento in 6 passi</span>
+<ol>
+<li>Converti la mask in binario.</li>
+<li>Converti l'IP in binario. Basta l'ottetto interessante: dove la mask vale 255 l'ottetto si copia, dove vale 0 diventa 0.</li>
+<li><strong>Rete</strong> = IP AND mask.</li>
+<li><strong>Broadcast</strong> = rete con tutti i bit di host a 1 (equivale a rete OR wildcard).</li>
+<li><strong>Primo host</strong> = rete + 1; <strong>ultimo host</strong> = broadcast − 1.</li>
+<li><strong>Host utilizzabili</strong> = 2<sup>h</sup> − 2, dove h è il numero di bit di host (32 − prefisso). Vale fino a /30: /31 e /32 sono eccezioni (capitolo 18).</li>
+</ol></div>
+<p>Si tolgono 2 indirizzi perché il primo (tutti i bit di host a 0) identifica la rete stessa e l'ultimo (tutti a 1) è il broadcast: nessuno dei due si può assegnare a un host.</p>
+
+<h4>Esempio 1 · Mask spezzata nel quarto ottetto: <code>192.168.10.75/26</code></h4>
+<p>Mask: /26 = 24 + 2 → <code>255.255.255.192</code>. Ottetto interessante: il quarto. Convertiamo 75 = 64 + 8 + 2 + 1.</p>
+<pre class="bin">          IP 75   <span class="n">01</span><span class="h">001011</span>
+       Mask 192   <span class="n">11</span><span class="h">000000</span>
+                  ────────
+  AND  →  rete    <span class="n">01</span><span class="h">000000</span>  = <span class="r">64</span>
+  host a 1 → bc   <span class="n">01</span><span class="h">111111</span>  = <span class="r">127</span></pre>
+<div class="tbl"><table>
+<tbody>
+<tr><td>Rete</td><td class="mono"><strong>192.168.10.64</strong></td><td>Broadcast</td><td class="mono"><strong>192.168.10.127</strong></td></tr>
+<tr><td>Primo host</td><td class="mono">192.168.10.65</td><td>Ultimo host</td><td class="mono">192.168.10.126</td></tr>
+<tr><td>Bit di host</td><td class="mono">6</td><td>Host utilizzabili</td><td class="mono">2⁶ − 2 = 62</td></tr>
+</tbody></table></div>
+<p>I 2 bit presi in prestito al /24 originale producono 2² = <strong>4 subnet</strong>: .0, .64, .128, .192.</p>
+
+<h4>Esempio 2 · Mask spezzata nel terzo ottetto: <code>172.16.45.200/20</code></h4>
+<p>Mask: /20 = 16 + 4 → <code>255.255.240.0</code>. Ottetto interessante: il terzo. Il quarto ha mask 0: nella rete diventa 0, nel broadcast 255. Convertiamo 45 = 32 + 8 + 4 + 1.</p>
+<pre class="bin">         IP 45   <span class="n">0010</span><span class="h">1101</span>
+      Mask 240   <span class="n">1111</span><span class="h">0000</span>
+                 ────────
+  AND → rete     <span class="n">0010</span><span class="h">0000</span>  = <span class="r">32</span>     → 172.16.<span class="r">32</span>.<span class="h">0</span>
+  host a 1 → bc  <span class="n">0010</span><span class="h">1111</span>  = <span class="r">47</span>     → 172.16.<span class="r">47</span>.<span class="h">255</span></pre>
+<div class="tbl"><table>
+<tbody>
+<tr><td>Rete</td><td class="mono"><strong>172.16.32.0</strong></td><td>Broadcast</td><td class="mono"><strong>172.16.47.255</strong></td></tr>
+<tr><td>Primo host</td><td class="mono">172.16.32.1</td><td>Ultimo host</td><td class="mono">172.16.47.254</td></tr>
+<tr><td>Bit di host</td><td class="mono">12</td><td>Host utilizzabili</td><td class="mono">2¹² − 2 = 4.094</td></tr>
+</tbody></table></div>
+
+<h4>Esempio 3 · Mask spezzata nel secondo ottetto: <code>10.150.33.7/11</code></h4>
+<p>Mask: /11 = 8 + 3 → <code>255.224.0.0</code>. Ottetto interessante: il secondo; terzo e quarto vanno a 0 nella rete e a 255 nel broadcast. Convertiamo 150 = 128 + 16 + 4 + 2.</p>
+<pre class="bin">         IP 150   <span class="n">100</span><span class="h">10110</span>
+       Mask 224   <span class="n">111</span><span class="h">00000</span>
+                  ────────
+  AND → rete      <span class="n">100</span><span class="h">00000</span>  = <span class="r">128</span>    → 10.<span class="r">128</span>.<span class="h">0.0</span>
+  host a 1 → bc   <span class="n">100</span><span class="h">11111</span>  = <span class="r">159</span>    → 10.<span class="r">159</span>.<span class="h">255.255</span></pre>
+<div class="tbl"><table>
+<tbody>
+<tr><td>Rete</td><td class="mono"><strong>10.128.0.0</strong></td><td>Broadcast</td><td class="mono"><strong>10.159.255.255</strong></td></tr>
+<tr><td>Primo host</td><td class="mono">10.128.0.1</td><td>Ultimo host</td><td class="mono">10.159.255.254</td></tr>
+<tr><td>Bit di host</td><td class="mono">21</td><td>Host utilizzabili</td><td class="mono">2²¹ − 2 = 2.097.150</td></tr>
+</tbody></table></div>
+
+<h4>Quante subnet, quanti host</h4>
+<p>Partendo da un blocco con prefisso <code>/p</code> e dividendolo in subnet <code>/n</code>:</p>
+<ul>
+<li><strong>bit presi in prestito</strong> s = n − p → <strong>numero di subnet</strong> = 2<sup>s</sup></li>
+<li><strong>bit di host</strong> h = 32 − n → <strong>host per subnet</strong> = 2<sup>h</sup> − 2 (fino a /30)</li>
+</ul>
+<div class="box note"><span class="lbl">Se nel tuo vecchio corso era 2ˢ − 2</span>
+<p>Alcuni corsi insegnavano subnet = 2<sup>s</sup> − 2, escludendo la prima ("subnet zero") e l'ultima ("all-ones"). Era una limitazione di vecchi router classful. Dalla RFC 1878 (1995) e con <code>ip subnet-zero</code> attivo di default su Cisco da IOS 12.0, tutte le subnet sono utilizzabili: la formula corretta oggi è <strong>2<sup>s</sup></strong>. Il −2 vale solo per gli host.</p></div>
+
+<div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore, con il metodo binario</p><ul>
+<li><a href="#/calcola/analisi?ip=192.168.10.75&amp;p=26&amp;did=1&amp;metodo=binary">Apri nel calcolatore: esempio 1, 192.168.10.75/26</a></li>
+<li><a href="#/calcola/analisi?ip=172.16.45.200&amp;p=20&amp;did=1&amp;metodo=binary">Apri nel calcolatore: esempio 2, 172.16.45.200/20</a></li>
+<li><a href="#/calcola/analisi?ip=10.150.33.7&amp;p=11&amp;did=1&amp;metodo=binary">Apri nel calcolatore: esempio 3, 10.150.33.7/11</a></li>
+<li><a href="#/pianifica/suddivisione?b=192.168.10.0&amp;p=24&amp;np=26&amp;did=1">Apri nel calcolatore: le 4 subnet /26 di 192.168.10.0/24</a></li>
+</ul></div>
+</section>
+
+<section class="chap prose" id="cap-8">
+<h3><span class="num">08</span>Esercizi guidati</h3>
+<p>Per ogni indirizzo trova rete, broadcast, range degli host e numero di host <strong>con il metodo binario</strong>. Apri la soluzione solo dopo aver finito. Gli stessi esercizi li rifaremo con i metodi rapidi della Parte III, per confrontare i tempi.</p>
+
+<div class="ex"><div class="q"><span class="tag">ES. 1</span><span class="addr">10.20.30.140/27</span></div>
+<details class="sol"><summary>Mostra la soluzione</summary><div class="body">
+<pre class="bin">/27 → 255.255.255.<span class="n">224</span>        140 = 128+8+4
+  IP   <span class="n">100</span><span class="h">01100</span>
+  Mask <span class="n">111</span><span class="h">00000</span>
+  Rete <span class="n">100</span><span class="h">00000</span> = <span class="r">128</span>     Bc <span class="n">100</span><span class="h">11111</span> = <span class="r">159</span></pre>
+<p>Rete <code>10.20.30.128</code> · Broadcast <code>10.20.30.159</code> · Host da <code>.129</code> a <code>.158</code> · 2⁵ − 2 = <strong>30 host</strong></p>
+<p class="open-calc-inline"><a href="#/calcola/analisi?ip=10.20.30.140&amp;p=27&amp;did=1&amp;metodo=binary">Verifica nel calcolatore: 10.20.30.140/27</a></p>
+</div></details></div>
+
+<div class="ex"><div class="q"><span class="tag">ES. 2</span><span class="addr">192.168.1.200/28</span></div>
+<details class="sol"><summary>Mostra la soluzione</summary><div class="body">
+<pre class="bin">/28 → 255.255.255.<span class="n">240</span>        200 = 128+64+8
+  IP   <span class="n">1100</span><span class="h">1000</span>
+  Mask <span class="n">1111</span><span class="h">0000</span>
+  Rete <span class="n">1100</span><span class="h">0000</span> = <span class="r">192</span>     Bc <span class="n">1100</span><span class="h">1111</span> = <span class="r">207</span></pre>
+<p>Rete <code>192.168.1.192</code> · Broadcast <code>192.168.1.207</code> · Host da <code>.193</code> a <code>.206</code> · 2⁴ − 2 = <strong>14 host</strong></p>
+<p class="open-calc-inline"><a href="#/calcola/analisi?ip=192.168.1.200&amp;p=28&amp;did=1&amp;metodo=binary">Verifica nel calcolatore: 192.168.1.200/28</a></p>
+</div></details></div>
+
+<div class="ex"><div class="q"><span class="tag">ES. 3</span><span class="addr">172.20.100.5/22</span></div>
+<details class="sol"><summary>Mostra la soluzione</summary><div class="body">
+<pre class="bin">/22 → 255.255.<span class="n">252</span>.0          terzo ottetto: 100 = 64+32+4
+  IP   <span class="n">011001</span><span class="h">00</span>
+  Mask <span class="n">111111</span><span class="h">00</span>
+  Rete <span class="n">011001</span><span class="h">00</span> = <span class="r">100</span>     Bc <span class="n">011001</span><span class="h">11</span> = <span class="r">103</span></pre>
+<p>Rete <code>172.20.100.0</code> · Broadcast <code>172.20.103.255</code> · Host da <code>172.20.100.1</code> a <code>172.20.103.254</code> · 2¹⁰ − 2 = <strong>1.022 host</strong></p>
+<p class="open-calc-inline"><a href="#/calcola/analisi?ip=172.20.100.5&amp;p=22&amp;did=1&amp;metodo=binary">Verifica nel calcolatore: 172.20.100.5/22</a></p>
+</div></details></div>
+
+<div class="ex"><div class="q"><span class="tag">ES. 4</span><span class="addr">10.1.77.33/19</span></div>
+<details class="sol"><summary>Mostra la soluzione</summary><div class="body">
+<pre class="bin">/19 → 255.255.<span class="n">224</span>.0          terzo ottetto: 77 = 64+8+4+1
+  IP   <span class="n">010</span><span class="h">01101</span>
+  Mask <span class="n">111</span><span class="h">00000</span>
+  Rete <span class="n">010</span><span class="h">00000</span> = <span class="r">64</span>      Bc <span class="n">010</span><span class="h">11111</span> = <span class="r">95</span></pre>
+<p>Rete <code>10.1.64.0</code> · Broadcast <code>10.1.95.255</code> · Host da <code>10.1.64.1</code> a <code>10.1.95.254</code> · 2¹³ − 2 = <strong>8.190 host</strong></p>
+<p class="open-calc-inline"><a href="#/calcola/analisi?ip=10.1.77.33&amp;p=19&amp;did=1&amp;metodo=binary">Verifica nel calcolatore: 10.1.77.33/19</a></p>
+</div></details></div>
+
+<div class="ex"><div class="q"><span class="tag">ES. 5 · TRANELLO</span><span class="addr">192.168.50.99/30</span></div>
+<details class="sol"><summary>Mostra la soluzione</summary><div class="body">
+<pre class="bin">/30 → 255.255.255.<span class="n">252</span>        99 = 64+32+2+1
+  IP   <span class="n">011000</span><span class="h">11</span>
+  Mask <span class="n">111111</span><span class="h">00</span>
+  Rete <span class="n">011000</span><span class="h">00</span> = <span class="r">96</span>      Bc <span class="n">011000</span><span class="h">11</span> = <span class="r">99</span></pre>
+<p>Rete <code>192.168.50.96</code> · Broadcast <code>192.168.50.99</code> · Host <code>.97</code> e <code>.98</code> · <strong>2 host</strong></p>
+<p class="w-c">L'indirizzo dato coincide con il broadcast: non si può assegnare a un host. Un sistema operativo lo rifiuterebbe.</p>
+<p class="open-calc-inline"><a href="#/calcola/analisi?ip=192.168.50.99&amp;p=30&amp;did=1&amp;metodo=binary">Verifica nel calcolatore: 192.168.50.99/30</a></p>
+</div></details></div>
+
+<div class="box note"><span class="lbl">Allenamento libero</span>
+<p>Gli esercizi casuali con verifica della risposta e tempo impiegato arriveranno nel calcolatore con la versione 2 (funzione F13). Nel frattempo inventa un indirizzo privato con un prefisso a piacere, risolvilo a mano e controlla il risultato in <a href="#/calcola/analisi?did=1&amp;metodo=binary">Analisi, con i passaggi del metodo binario</a>.</p></div>
+</section>
