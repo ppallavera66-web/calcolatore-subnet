@@ -217,6 +217,51 @@ describe('persistenza (8.3)', () => {
     expect(b.win.size()).toBe(0);
   });
 
+  test('più schede: con il salvataggio spento i dati della visita restano; accendendo si uniscono a quelli salvati (revisione B1)', async () => {
+    const a = setup();
+    await a.p.start();
+    const b = setup({ backend: a.backend });
+    await b.p.start();
+    for (let i = 1; i <= 3; i++) b.store.set((s) => addHistory(s, entry(i), hmeta(i)));
+    b.store.set((s) => addPlan(s, plan('importante')));
+
+    a.store.set((s) => addHistory(s, entry(9), hmeta(9)));
+    await a.p.enable();
+    await b.win.fire(KEYS.history);
+    expect(b.store.get().settings.persist).toBe(false);
+    expect(b.store.get().history).toHaveLength(3);
+    expect(b.store.get().plans.map((x) => x.id)).toEqual(['importante']);
+    expect(b.events).toEqual([]);
+
+    expect(await b.p.enable()).toBe(true);
+    const ips = b.store.get().history.map((h) => h.input.ip);
+    expect(ips).toEqual(['10.0.0.9', '10.0.0.3', '10.0.0.2', '10.0.0.1']);
+    expect(JSON.parse(/** @type {string} */ (a.backend.getItem(KEYS.history)))).toHaveLength(4);
+    expect(JSON.parse(/** @type {string} */ (a.backend.getItem(KEYS.plans))).map((/** @type {any} */ x) => x.id)).toEqual(['importante']);
+  });
+
+  test('dati salvati di una versione successiva o illeggibili: needsOverwrite li segnala prima di accendere (revisione B2)', async () => {
+    const backend = memoryBackend();
+    backend.setItem(KEYS.meta, JSON.stringify({ schema: 9, savedAt: NOW }));
+    backend.setItem(KEYS.plans, JSON.stringify([{ id: 'v9' }]));
+    const { p } = setup({ backend });
+    await p.start();
+    expect(await p.needsOverwrite()).toBe('newer');
+    expect(backend.getItem(KEYS.plans)).toContain('v9');
+    expect(await p.enable()).toBe(true);
+    expect(p.status().load).toBe('loaded');
+    expect(await p.needsOverwrite()).toBe(null);
+
+    const bad = memoryBackend();
+    bad.setItem(KEYS.meta, '{rotto');
+    const c = setup({ backend: bad });
+    await c.p.start();
+    expect(await c.p.needsOverwrite()).toBe('corrupt');
+    const empty = setup();
+    await empty.p.start();
+    expect(await empty.p.needsOverwrite()).toBe(null);
+  });
+
   test('flushNow scrive subito ciò che è in attesa; usage', async () => {
     const { p, store, backend } = setup();
     await p.start();

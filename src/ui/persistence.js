@@ -14,7 +14,7 @@
  *   spegne il salvataggio, questa smette di salvare ma tiene i dati in memoria.
  */
 import { KEYS, isAppKey } from '../storage/storage.js';
-import { readSessionObject } from '../session/session.js';
+import { readSessionObject, applyImport } from '../session/session.js';
 import { SESSION_FORMAT, SESSION_VERSION, SESSION_SETTINGS, isIsoDate } from '../session/schema.js';
 
 export const SAVE_DELAY = 300;
@@ -156,6 +156,9 @@ export function createPersistence(o) {
   /** Evento `storage` da un'altra scheda. */
   async function onStorage(/** @type {StorageEvent} */ e) {
     if (e.key !== null && !isAppKey(e.key)) return;
+    // con il salvataggio spento questa scheda tiene i suoi dati della visita: ciò che salva
+    // un'altra scheda non li sostituisce (si uniscono solo se qui si accende "Memorizza i dati")
+    if (!store.get().settings.persist) return;
     const r = await read();
     if (r.status === 'loaded' && r.data) {
       apply(r.data);
@@ -191,13 +194,41 @@ export function createPersistence(o) {
       return status.load;
     },
 
-    /** Accensione: si salva subito lo stato attuale. */
+    /**
+     * Prima di accendere: i dati salvati sono illeggibili o di una versione successiva?
+     * In quel caso accendere li sovrascrive e l'interfaccia deve chiedere conferma.
+     * @returns {Promise<'corrupt' | 'newer' | null>}
+     */
+    async needsOverwrite() {
+      if (!status.available) return null;
+      const r = await read();
+      return r.status === 'corrupt' || r.status === 'newer' ? r.status : null;
+    },
+
+    /**
+     * Accensione: si salva subito lo stato attuale. Se nel browser ci sono già dati validi
+     * (salvati da un'altra scheda) si uniscono a quelli della visita, come "Unisci" dell'import,
+     * invece di sovrascriverli. Dati illeggibili o di una versione successiva vengono
+     * sovrascritti: l'interfaccia chiede prima conferma con `needsOverwrite()`.
+     */
     async enable() {
       if (!status.available) return false;
+      if (timer !== null) cancel(timer);
+      timer = null;
+      const r = await read();
+      if (r.status === 'loaded' && r.data) {
+        const cur = store.get();
+        const m = applyImport({ settings: cur.settings, history: cur.history, plans: cur.plans }, r.data, { mode: 'merge' });
+        store.set((s) => ({ ...s, history: m.history, plans: m.plans }));
+      }
       store.set((s) => ({ ...s, settings: { ...s.settings, persist: true } }));
       if (timer !== null) cancel(timer);
       timer = null;
       await queue(true);
+      if (status.problem === null) {
+        status.load = 'loaded';
+        status.skipped = 0;
+      }
       return status.problem === null;
     },
 

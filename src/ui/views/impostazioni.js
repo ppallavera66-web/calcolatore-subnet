@@ -84,6 +84,20 @@ export function createImpostazioni(ctx) {
   /** @param {boolean} on */
   async function onPersist(on) {
     if (on) {
+      const stored = await persistence.needsOverwrite();
+      if (stored) {
+        const newer = stored === 'newer';
+        const sure = await confirmDialog({
+          title: t('ui.set.persist.overwrite.title'),
+          text: t(newer ? 'ui.set.persist.overwrite.newer' : 'ui.set.persist.overwrite.corrupt'),
+          confirm: t('ui.set.persist.overwrite.ok'),
+          danger: true,
+        });
+        if (!sure) {
+          persist.setChecked(false);
+          return;
+        }
+      }
       const ok = await persistence.enable();
       ctx.toast(ok ? t('ui.set.persist.on') : t('ui.set.persist.quota'));
     } else {
