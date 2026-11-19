@@ -1,0 +1,39 @@
+/* Stampa (specifica tecnica, 9.9): sempre su fondo chiaro; niente navigazione, barra di export,
+   pulsanti e cronologia; in testa vista, input e data; passaggi aperti se la modalità didattica è attiva
+   (sono già nella pagina); tabelle senza righe spezzate. I riquadri richiudibili vengono aperti
+   prima della stampa e richiusi dopo (main.js), più la regola per i browser recenti qui sotto. */
+@media print{
+  :root:not([data-theme]),:root[data-theme]{
+    --bg:#fff;--surface:#fff;--surface-2:#f2f2f2;--line:#c8c8c8;--line-strong:#8a8a8a;--text:#111;--muted:#555;--strong:#000;
+    --net:#8a5a00;--host:#00666b;--warn:#a8392a;--ok:#2d7a4c;--on-net:#fff;
+    --net-soft:transparent;--hl-row:#f3ead8;--host-soft:transparent;--shadow:none;color-scheme:light}
+  @page{margin:14mm 12mm}
+  body{font-size:11pt;background:#fff}
+  .sidebar,.topbar,.bottom-bar,.subtabs-wrap,.view-tools,.to-top,.toast,.skip-link,.export-bar,.copy-btn,.icon-btn,
+  .examples,.prefix-controls,.find,.pager,.snip-options,.segmented,.history-btn,.btn,.field-hint,.view-lead,.chip,dialog{display:none !important}
+  .app{display:block}
+  .main{padding:0;max-width:none}
+  .view-head{margin:0 0 8pt}
+  .print-head{display:block;border-bottom:1.5pt solid #000;margin:0 0 10pt;padding-bottom:6pt}
+  .print-head p{margin:0}
+  .print-app{font-family:var(--font-display);font-weight:700;font-size:10pt;letter-spacing:.08em;text-transform:uppercase}
+  .print-inputs{font-size:11pt;margin-top:2pt !important}
+  .print-date{font-size:9pt;color:#555}
+  .input{border:0;padding:0;min-height:0;box-shadow:none}
+  .field-label{font-size:9pt;color:#555}
+  .form-row{gap:4pt 18pt}
+  .card,.kv-item,.notice,.snip-block,.bitrows,.side{break-inside:avoid;box-shadow:none}
+  .card{border:1px solid #c8c8c8;padding:8pt}
+  .kv-primary .kv-item{border-color:#000}
+  .tbl,.tbl-scroll{max-height:none;overflow:visible;border:0}
+  table{font-size:9.5pt}
+  thead{display:table-header-group}
+  thead th{position:static}
+  tr{break-inside:avoid}
+  .steps-panel{border-left-width:2pt}
+  a{color:#000;text-decoration:none}
+  .chapter-link::after{content:" →"}
+}
+/* Browser recenti: il contenuto dei <details> chiusi resta visibile in stampa
+   (regola separata: se il browser non la riconosce, il resto non ne risente) */
+@media print{ details::details-content{content-visibility:visible;display:block} }

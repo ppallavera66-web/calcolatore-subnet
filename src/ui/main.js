@@ -1,104 +1,165 @@
 // @ts-check
 /**
- * Guscio minimo della fase 3: collauda build e motore nel browser.
- * Sarà sostituito dall'interfaccia della fase 4. Testi sempre con textContent.
+ * Avvio dell'interfaccia (fase 4): stili, stato, router, tema, guscio, viste, cronologia,
+ * annunci per i lettori di schermo, stampa. Sostituisce il guscio di collaudo della fase 3.
  */
-import { analyzeText, explain, methodsFor, maskOf, wildcardOf, interestingOctet, hostRule, toDotted } from '../engine/index.js';
-import { t, fmtNumber, magicLabel } from '../i18n/strings.it.js';
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/layout.css';
+import '../styles/components.css';
+import '../styles/print.css';
 
-const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
+import { h, replace, debounce, reducedMotion } from './dom.js';
+import { icon } from './icons.js';
+import { createStore, initialState, setInputs, addHistory, newId } from './state.js';
+import { createRouter, routeTo, buildHash } from './router.js';
+import { applyTheme } from './theme.js';
+import { copyText } from './clipboard.js';
+import { createShell } from './shell.js';
+import { openHistoryPanel } from './components/history-panel.js';
+import { dateTime } from './format.js';
+import { VIEWS } from './views/index.js';
+import { t } from '../i18n/strings.it.js';
 
-/**
- * @param {string} tag
- * @param {string} text
- */
-function el(tag, text) {
-  const e = document.createElement(tag);
-  e.textContent = text;
-  return e;
+const store = createStore(initialState());
+
+// ---------------------------------------------------------------- annunci e messaggi brevi (9.4, 9.7)
+const live = h('div', { class: 'sr-only', 'aria-live': 'polite', 'aria-atomic': 'true' });
+const toastEl = h('div', { class: 'toast', role: 'status', 'aria-live': 'polite' });
+/** L'ultimo annuncio vince: mentre si scrive non si legge ogni risultato intermedio. */
+const announce = debounce((/** @type {string} */ text) => {
+  live.textContent = '';
+  setTimeout(() => {
+    live.textContent = text;
+  }, 40);
+}, 700);
+/** @type {ReturnType<typeof setTimeout> | undefined} */
+let toastTimer;
+function toast(/** @type {string} */ text) {
+  toastEl.textContent = text;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
 }
 
-const ipInput = /** @type {HTMLInputElement} */ ($('ip'));
-const methodSelect = /** @type {HTMLSelectElement} */ ($('method'));
-for (const m of methodsFor('F01')) {
-  const o = el('option', t(`method.${m}`));
-  /** @type {HTMLOptionElement} */ (o).value = m;
-  methodSelect.append(o);
+// ---------------------------------------------------------------- cronologia: si registra dopo 2 s di calma, o subito con Invio
+/** @param {{ fn: string, input: Record<string, any> }} entry */
+function commitHistory(entry) {
+  store.set((s) => addHistory(s, entry, { id: newId(crypto.getRandomValues(new Uint8Array(12))), now: new Date().toISOString() }));
 }
+const recordLater = debounce(commitHistory, 2000);
 
-function render() {
-  const r = analyzeText(ipInput.value);
-  const result = $('result');
-  const warnings = $('warnings');
-  const steps = $('steps');
-  result.replaceChildren();
-  warnings.replaceChildren();
-  steps.replaceChildren();
-  if (!r.ok) {
-    $('ip-err').textContent = t(r.error.code, r.error.params);
-    ipInput.setAttribute('aria-invalid', 'true');
-    return;
-  }
-  $('ip-err').textContent = '';
-  ipInput.removeAttribute('aria-invalid');
-  const v = r.value;
-  const none = t('none');
-  const rows = [
-    ['Rete', `${toDotted(v.network)}/${v.prefix}`],
-    ['Broadcast', v.broadcast === null ? none : toDotted(v.broadcast)],
-    ['Primo host', toDotted(v.firstHost)],
-    ['Ultimo host', toDotted(v.lastHost)],
-    ['Host utilizzabili', `${fmtNumber(v.usableHosts)} (${t(`kind.${v.hostKind}`)})`],
-    ['Subnet mask', toDotted(v.mask)],
-    ['Wildcard', toDotted(v.wildcard)],
-    ['Numero magico', magicLabel(v.interesting.magic, v.interesting.index)],
-    ['Ruolo dell\'indirizzo', t(`role.${v.role}`)],
-    ['Tipo', `${t(`scope.${v.classification.scope}`)}${v.classification.primary ? ` · ${t(`block.${v.classification.primary.code}`)}` : ''} · classe ${v.classification.historicalClass.letter}`],
-  ];
-  for (const [k, val] of rows) result.append(el('dt', k), el('dd', val));
-  for (const w of r.warnings) {
-    const p = el('p', t(w.code, w.params));
-    p.classList.add('warn');
-    warnings.append(p);
-  }
-  const ex = explain('F01', v, methodSelect.value);
-  $('steps-title').textContent = `Passaggi · ${t(`method.${ex.method}`)} · ${t('chapter', { chapter: ex.chapter })}`;
-  for (const s of ex.steps) steps.append(el('li', t(`step.${s.id}`, s.values)));
-}
+/** @type {import('./types.js').View | null} */
+let view = null;
+let viewName = '';
 
-function renderTable() {
-  const body = $('ref');
-  for (let p = 0; p <= 32; p++) {
-    const io = interestingOctet(p);
-    const rule = hostRule(p);
-    const tr = document.createElement('tr');
-    const host = p === 31 ? `${rule.usable} (p2p)` : fmtNumber(rule.usable);
-    for (const c of [`/${p}`, toDotted(maskOf(p)), toDotted(wildcardOf(p)), magicLabel(io.magic, io.index), fmtNumber(rule.total), host]) {
-      tr.append(el('td', c));
-    }
-    body.append(tr);
-  }
-}
+/** @type {import('./types.js').Ctx} */
+const ctx = {
+  store,
+  route: () => router.current(),
+  setParams(name, params) {
+    store.set((s) => setInputs(s, name, params));
+    router.navigate(routeTo(name, params), { replace: true });
+  },
+  go(name, params, anchor = null) {
+    router.navigate(routeTo(name, params ?? store.get().inputs[name] ?? {}, anchor));
+  },
+  href: (name, params = {}, anchor = null) => buildHash(routeTo(name, params, anchor)),
+  announce,
+  toast(text) {
+    toast(text);
+  },
+  async copy(text, what) {
+    const ok = await copyText(text);
+    toast(ok ? t('ui.copied', { text: text.length > 60 ? `${what}` : text }) : t('ui.copyFailed'));
+  },
+  record(entry, now = false) {
+    if (!entry) return recordLater.cancel();
+    if (now) {
+      recordLater.cancel();
+      commitHistory(entry);
+    } else recordLater(entry);
+  },
+  openHistory: () => openHistoryPanel(ctx),
+  print() {
+    window.print();
+  },
+};
 
-function setupToTop() {
-  const b = $('to-top');
-  const update = () => b.classList.toggle('show', window.scrollY > 400);
-  window.addEventListener('scroll', update, { passive: true });
-  update();
-  b.addEventListener('click', () => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-    ipInput.focus({ preventScroll: true });
-  });
-}
-
-ipInput.addEventListener('input', render);
-methodSelect.addEventListener('change', render);
-$('f01').addEventListener('submit', (e) => {
-  e.preventDefault();
-  render();
+// ---------------------------------------------------------------- guscio
+const shell = createShell(ctx, {
+  version: __APP_VERSION__,
+  focusMain: () => shell.title.focus(),
 });
-$('about').textContent = `Calcolatore Subnet ${__APP_VERSION__} · codice con licenza MIT · motore verificato con un oracolo Python indipendente.`;
-renderTable();
-setupToTop();
-render();
+
+const toTop = h('button', { type: 'button', class: 'to-top', 'aria-label': t('ui.toTop'), title: t('ui.toTop') }, icon('up'));
+toTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
+  shell.title.focus({ preventScroll: true });
+});
+const updateToTop = () => toTop.classList.toggle('show', window.scrollY > 400);
+window.addEventListener('scroll', updateToTop, { passive: true });
+
+document.body.replaceChildren(shell.skip, shell.root, live, toastEl, toTop);
+
+// ---------------------------------------------------------------- tema
+applyTheme(document.documentElement, store.get().settings.theme);
+store.subscribe((s, prev) => {
+  if (s.settings.theme !== prev.settings.theme) applyTheme(document.documentElement, s.settings.theme);
+  if (s.inputs !== prev.inputs) shell.refreshLinks();
+});
+
+// ---------------------------------------------------------------- stampa (9.9): intestazione con vista, input e data
+function fillPrintHead() {
+  const route = router.current();
+  const lines = view?.printInputs?.() ?? [];
+  replace(
+    shell.printHead,
+    h('p', { class: 'print-app' }, `${t('ui.app.name')} · ${t(`ui.title.${route.view}`)}`),
+    lines.length ? h('p', { class: 'print-inputs mono' }, lines.join(' · ')) : null,
+    h('p', { class: 'print-date' }, t('ui.print.date', { date: dateTime(new Date().toISOString()) })),
+  );
+}
+window.addEventListener('beforeprint', () => {
+  fillPrintHead();
+  // i riquadri richiudibili si aprono in stampa e si richiudono dopo (come nella guida)
+  document.querySelectorAll('details:not([open])').forEach((d) => {
+    /** @type {HTMLDetailsElement} */ (d).dataset.printOpen = '1';
+    /** @type {HTMLDetailsElement} */ (d).open = true;
+  });
+});
+window.addEventListener('afterprint', () => {
+  document.querySelectorAll('details[data-print-open]').forEach((d) => {
+    /** @type {HTMLDetailsElement} */ (d).open = false;
+    delete (/** @type {HTMLDetailsElement} */ (d).dataset.printOpen);
+  });
+});
+
+// ---------------------------------------------------------------- navigazione
+/**
+ * @param {import('./types.js').Route} route
+ * @param {{ initial: boolean }} info
+ */
+function onRoute(route, info) {
+  store.set((s) => setInputs(s, route.view, route.params));
+  shell.setRoute(route);
+  if (route.view !== viewName) {
+    recordLater.flush();
+    view?.destroy?.();
+    const next = VIEWS[route.view](ctx, route);
+    view = next;
+    viewName = route.view;
+    shell.viewHost.replaceChildren(next.el);
+    if (!info.initial) {
+      window.scrollTo({ top: 0 });
+      shell.title.focus({ preventScroll: true });
+    }
+  } else {
+    view?.update?.(route);
+  }
+  updateToTop();
+}
+
+const router = createRouter(window, onRoute);
+router.start();

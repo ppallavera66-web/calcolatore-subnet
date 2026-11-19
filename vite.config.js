@@ -10,6 +10,10 @@ export default defineConfig({
   plugins: [viteSingleFile()],
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+    // SOURCE_DATE_EPOCH (secondi) rende la build riproducibile; altrimenti la data di oggi
+    __BUILD_DATE__: JSON.stringify(
+      new Date(process.env.SOURCE_DATE_EPOCH ? Number(process.env.SOURCE_DATE_EPOCH) * 1000 : Date.now()).toISOString().slice(0, 10),
+    ),
   },
   build: {
     target: 'es2022',
