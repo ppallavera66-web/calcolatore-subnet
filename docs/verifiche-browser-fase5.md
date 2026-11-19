@@ -4,7 +4,7 @@ Prove della specifica tecnica, sezione 11: Web Crypto, localStorage e appunti co
 
 ## Già verificato in automatico
 
-`npm run e2e` usa Chrome for Testing 153.0.8010.12, senza interfaccia, su Linux, con la pagina aperta da disco. Esito: 40 prove su 40.
+`npm run e2e` usa Chrome for Testing 153.0.8010.12, senza interfaccia, su Linux, con la pagina aperta da disco. Esito: 40 prove su 40 nella fase 5, 52 su 52 nella fase 7 (v1.0.0).
 
 | Voce | Esito in Chrome da `file://` |
 |---|---|
@@ -18,7 +18,7 @@ Prove della specifica tecnica, sezione 11: Web Crypto, localStorage e appunti co
 
 ## Come preparare le prove
 
-1. Prendi il file `calcolatore-subnet-fase5.html` consegnato insieme all'archivio (è `dist/index.html` della build).
+1. Scarica `calcolatore-subnet-v1.0.0.html` dalla Release v1.0.0 del repository (è `dist/index.html` della build). Per le prove da HTTPS usa la pubblicazione su GitHub Pages.
 2. Mettilo in una cartella, per esempio `Documenti/prova-subnet/`, e aprilo con un doppio clic o trascinandolo nel browser.
 3. Per ogni browser compila la tabella dei risultati in fondo: **sì**, **no**, oppure una breve nota.
 

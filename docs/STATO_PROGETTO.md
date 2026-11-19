@@ -1,19 +1,26 @@
 # Stato del progetto: Calcolatore Subnet
 
-Ultimo aggiornamento: 19 novembre 2026 (fase 6)
+Ultimo aggiornamento: 19 novembre 2026 (fase 7, rilascio v1.0.0)
 
 ## Fase corrente
-**Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1**
+**Fase 8 · Revisione finale di Paolo su applicazione e guide**
 Modello consigliato: **Opus 5.5** · Impegno: **Medio**
-Contenuto: revisione indipendente di codice, guide e test; verifica dei criteri di accettazione della v1; prove nei browser; `npm run e2e` in CI; rilascio v1.0.0 (versione, tag, Release con il file unico, GitHub Pages).
+Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, più le segnalazioni per la fase 8 della revisione indipendente (`docs/revisione-fase7.md`) e quelle di questo file; aggiornamento della sezione "Browser e apertura da disco" con le prove nei browser; rilascio v1.1.0.
 
-**Prima di iniziare (azione per Paolo):** allegare `calcolatore-subnet-fase6.zip` alla conversazione (oppure pubblicarlo su GitHub e collegare l'account GitHub in claude.ai, Connettori); se possibile, compilare la tabella di `docs/verifiche-browser-fase5.md` e incollarla nel prompt: i risultati servono alla sezione "Browser e apertura da disco" della guida all'uso.
+**Prima di iniziare (azione per Paolo):**
+- usare l'app (Release v1.0.0 o GitHub Pages) e leggere le due guide, annotando le note con le quattro etichette Errore, Chiarezza, Mancanza, Taglio;
+- se possibile, compilare la tabella di `docs/verifiche-browser-fase5.md` (Edge, Firefox, Safari, telefoni);
+- tenere collegato l'account GitHub in claude.ai, così la fase lavora direttamente sul repository.
 
 ## Repository
-- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase6.zip` alla fine della fase 6 (comprende i commit delle fasi 3, 4, 5 e 6): l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione. Insieme all'archivio c'è `calcolatore-subnet-fase6.html`, il file unico pronto da aprire.
-- Per pubblicarlo nel repository pubblico vuoto `calcolatore-subnet`: estrarre l'archivio, entrare nella cartella ed eseguire `git remote add origin https://github.com/<utente>/calcolatore-subnet.git` e `git push -u origin main`.
-- Dopo il primo push: in GitHub, Settings → Pages → Source: **GitHub Actions**, per la pubblicazione HTTPS dal ramo `main`. Il primo giro reale della CI avviene con quel push (in locale tutti i passi del workflow, più `npm run e2e`, sono stati eseguiti su un clone pulito).
-- Da completare: in `src/ui/views/impostazioni.js` la costante `REPO_URL` è vuota finché non si conosce il nome utente GitHub; la sezione Informazioni mostra per ora il nome del repository senza collegamento.
+- **GitHub**: <https://github.com/ppallavera66-web/calcolatore-subnet>, ramo `main`, con tutta la storia delle fasi 3–7 (un commit per passo), unita al commit iniziale creato da GitHub. Tag **`v1.0.0`**.
+- **Visibilità**: al momento del push il repository era **privato**. Paolo ha scelto di renderlo pubblico (decisione D4), ma il proxy della sessione non permette di cambiare le impostazioni del repository, quindi va fatto a mano:
+  - Settings → General → Danger Zone → Change visibility → **Public**;
+  - Settings → Pages → Source: **GitHub Actions**;
+  - Actions → ultimo giro "CI" su `main` → **Re-run failed jobs**, per pubblicare su Pages.
+- **Release**: la crea il workflow dal tag `v1.0.0`, con `calcolatore-subnet-v1.0.0.html`, la sua impronta `.sha256` e la nota `docs/note-rilascio/v1.0.0.md`.
+- **Indirizzo di Pages** (dopo l'attivazione): <https://ppallavera66-web.github.io/calcolatore-subnet/>.
+- **Autore dei commit**: `Paolo Pallavera <paolo.pallavera@users.noreply.github.com>`, come nelle fasi precedenti. Per collegarli al profilo GitHub servirebbe l'indirizzo noreply dell'account (Settings → Emails); si può adottare dalla fase 8.
 
 ## Completato
 - **Fase 0 · Impostazione** (conversazione iniziale):
@@ -104,6 +111,66 @@ Contenuto: revisione indipendente di codice, guide e test; verifica dei criteri 
     - `dist/index.html` di 630.611 byte (60,1% del limite di 1 MB): JavaScript 196 KB, CSS 49 KB, font 245 KB, **guide 126 KB**;
     - e2e 48/48 in Chrome 153.0.8010.12 (headless, Linux) da `file://`: le 40 prove della fase 5 più 8 sulle guide (ancore con focus e voce attiva, indice e tasto indietro, telefono a 390 px con indice in alto e aree di tocco, "Capitolo N" e i sette "?" più Impostazioni, Apri nel calcolatore con impostazioni invariate, glossario da tastiera e mouse, tema dall'indice salvato e ricaricato, stampa con PDF di 38 pagine); axe-core WCAG 2.2 AA senza violazioni sulle due guide nei tre temi espliciti, con il riquadro del glossario aperto, e a 390 px in tema scuro con l'indice aperto.
 
+- **Fase 7 · Verifica finale e rilascio v1** (19 novembre 2026):
+  - **revisione indipendente** (`docs/revisione-fase7.md`): tre revisori separati, nessuno dei quali aveva scritto il codice, su una copia ferma del codice della fase 6. A: motore e test. B: export, sessione, busta cifrata e storage. C: interfaccia, accessibilità e guide.
+    - Esito: 0 differenze del motore rispetto a Python su circa 55.000 casi nuovi, nessuna eccezione su 300.000 input casuali, nessun errore di calcolo nella guida al subnetting.
+    - Corretti 19 difetti, ognuno con un test che fallisce senza la correzione:
+      - persistenza con più schede e con dati di una versione successiva (B1, B2);
+      - passaggio "è il broadcast" con /31 e /32 (A1);
+      - "100.0" host letto come 1.000 (A2);
+      - nome ACL di sole cifre (A5);
+      - Unisci senza avviso dei limiti (I1);
+      - formule CSV dopo gli spazi (I2);
+      - piano aperto su una suddivisione diversa (I3, C5);
+      - area OSPF importata non validata (I4);
+      - test dell'AAD (I5);
+      - annullamento durante la cifratura (I6);
+      - Invio nelle finestre (M1, C7);
+      - focus sotto le barre fisse (C1) e "torna su" raggiungibile (C2);
+      - focus perso al ridisegno (C3);
+      - annunci di Conversioni (C4);
+      - "Apri in Analisi" (C6);
+      - contrasto dei segnaposto (C10).
+    - Il resto è nell'elenco "Per la fase 8" del documento.
+  - **requisiti** (`docs/verifica-requisiti-v1.md`): tabella requisito → dove → come verificato → esito, per le specifiche (sezioni 2–6) e la specifica tecnica (sezioni 0 e 9). Ciò che resta fuori: browser diversi da Chrome, telefoni reali, lettori di schermo reali, primo giro di Actions;
+  - **CI**:
+    - job `e2e` con il Chrome del runner (`CHROME_PATH`) e l'artefatto `e2e-report`;
+    - Release e Pages solo con `test` ed `e2e` verdi;
+    - controllo tag = versione di `package.json` e presenza della nota di rilascio;
+    - Release con l'impronta `.sha256`;
+    - build riproducibile con `SOURCE_DATE_EPOCH` = data dell'ultimo commit;
+    - azioni aggiornate al runtime Node 24 (`checkout@v6`, `setup-node@v6`, `setup-python@v6`, `upload-artifact@v6`, `download-artifact@v7`, `upload-pages-artifact@v4`, `deploy-pages@v4`).
+    - Il workflow è controllato con actionlint ed eseguito passo per passo in locale; il primo giro reale è quello del push;
+  - **e2e**: nuove prove:
+    - nessuna richiesta di rete e app funzionante con il browser offline;
+    - Tab a 390 px senza controlli coperti dalle barre;
+    - focus conservato (paginazione, esempi, piani);
+    - annunci di Conversioni;
+    - "Apri in Analisi";
+    - Esc durante la cifratura;
+    - Invio nella passphrase;
+    - piano con parametri diversi;
+  - **manifest PWA**: valutato e **non incluso nella v1** (`docs/decisione-pwa.md`):
+    - Chrome non accetta un manifest come URL `data:`, quindi servirebbero file separati su Pages;
+    - l'uso offline dell'app installata richiede un service worker;
+    - il vantaggio è piccolo, perché il file unico funziona già offline e su iOS c'è "Aggiungi alla schermata Home".
+    - Possibile in seguito, solo per Pages;
+  - **rilascio**:
+    - versione 1.0.0;
+    - `REPO_URL` = repository GitHub (collegamento in Informazioni, in una nuova scheda);
+    - `CHANGELOG.md` e `docs/note-rilascio/v1.0.0.md`;
+    - README con download, Pages e istruzioni di rilascio;
+    - specifica tecnica 3.6 aggiornata (nome ACL);
+    - guida all'uso aggiornata su Unisci;
+    - tag annotato `v1.0.0`;
+  - **verifiche** (su un clone pulito con `npm ci`):
+    - 1.037 test in 29 file, anche con altri due semi per le proprietà;
+    - copertura di motore, testi, export, sessione e storage: 99,6% istruzioni, 97,3% rami, 99,8% funzioni;
+    - oracolo: fixture rigenerati identici; `npm run check` senza errori;
+    - `dist/index.html` di 635.192 byte (60,6% del limite di 1 MB): JavaScript 200 KB, CSS 49 KB, font 245 KB, guide 126 KB. Due build dello stesso commit producono lo stesso file;
+    - e2e 52/52 in Chrome 153.0.8010.12 (headless, Linux) da `file://`;
+    - actionlint senza segnalazioni.
+
 ## Decisioni di Paolo
 **Fase 1**
 - Alla chiusura di ogni fase va sempre fornito il **titolo** della conversazione successiva (`Fase N · Titolo`) e il **prompt** da incollare per avviarla (regola registrata nella sezione 7.1 delle specifiche).
@@ -136,6 +203,14 @@ Contenuto: revisione indipendente di codice, guide e test; verifica dei criteri 
 - Piano degli 11 interventi approvato, con le scelte a–d: guida al subnetting in **una pagina unica** (`cap-N` scorre al capitolo); **allenamento libero** sostituito dai collegamenti sugli esercizi 1–5, con rimando a F13 (v2); guida integrata come **v0.4**, con il repository come fonte (il file del progetto resta la v0.3); **note sui browser** con quanto verificato in Chrome e formulazioni prudenti per gli altri, da aggiornare con le prove. Aggiunto il pulsante "?" in Impostazioni.
 - Fase svolta con Opus 5.5 invece di Sonnet 5.5.
 - Repository consegnato come archivio con storia git (account GitHub non collegato a Claude).
+
+**Fase 7**
+- Piano degli interventi approvato, con **tre revisori** invece di uno.
+- Nome utente GitHub: **ppallavera66-web**; account collegato a Claude durante la fase, push fatto dalla sessione.
+- Nessuna prova nei browser fatta finora: la sezione "Browser e apertura da disco" resta prudente, le prove passano alla fase 8.
+- Criterio di "bloccante" approvato: calcolo sbagliato, dati persi o corrotti, falla in import, busta o export, funzione inutilizzabile, violazione WCAG AA in un flusso principale, requisito v1 mancante.
+- Repository da rendere **pubblico** (D4); il cambio va fatto da Paolo, perché il proxy della sessione non lo permette.
+- Manifest PWA non incluso nella v1.
 
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
 - **Codici aggiunti**: `MASK_OCTET_VALUE` e `MASK_NONCONTIGUOUS` anche come errori, sul campo `mask`, per una mask non valida dentro `IP mask` o `IP/mask` (caso E della 10.2); `ACL_NAME_FORMAT` e `ACL_ACTION_VALUE` per F10; motivi `BOTH_BLOCK_TOO_SMALL` e `BOTH_CONFLICT` per F05 caso C.
@@ -182,7 +257,23 @@ Contenuto: revisione indipendente di codice, guide e test; verifica dei criteri 
 - **Tabelle verificate**: attributo `data-check` su cheat sheet e tabelle host → prefisso, letto dai test.
 - **Stampa**: ogni parte della guida su una pagina nuova; i blocchi binari vanno a capo solo se non entrano nella riga.
 
+## Scelte tecniche della fase 7 (dove la specifica non decideva)
+- **Persistenza**:
+  - con il salvataggio spento, l'evento `storage` di un'altra scheda viene ignorato;
+  - accendendo "Memorizza i dati", i dati già salvati si uniscono a quelli della visita, con la logica di Unisci;
+  - `needsOverwrite()` segnala i dati illeggibili o di una versione successiva prima di sovrascriverli.
+- **Conteggi**: il separatore delle migliaia (punto o spazio) è ammesso solo a gruppi di tre cifre.
+- **Nome ACL**: deve iniziare con una lettera (`^[A-Za-z][A-Za-z0-9_-]{0,63}$`).
+- **CSV**: la protezione dalle formule vale anche dopo spazi iniziali (compresi U+3000 e BOM) e per `＝ ＋ － ＠`.
+- **Input F10 nella sessione**: l'area come testo è ammessa solo con cifre e punti, al massimo 15 caratteri, e viene salvata nella forma del motore. L'area come numero resta un numero.
+- **Piani**: `piano=<id>` apre il piano solo se blocco, prefisso e nuovo prefisso sono quelli del piano, altrimenti compare l'avviso `ui.plans.mismatch`. `setPlanLabel` accetta solo indici entro il numero di subnet.
+- **Focus**: un `MutationObserver` in `main.js` sposta il focus quando il controllo che lo aveva viene tolto dal DOM: va al primo controllo della finestra aperta oppure al titolo della schermata. La paginazione di Suddivisione rimette il focus sul pulsante equivalente (o sul numero di pagina) e annuncia la pagina; gli esempi portano al primo campo.
+- **Barre fisse**: `scroll-padding-top: 72px` sotto i 980 px; `scroll-padding-bottom` uguale all'altezza della barra in basso più 12 px sotto i 720 px.
+- **Invio** nei campi senza `onEnter` non viene più bloccato: nelle finestre conferma il modulo.
+- **Repository**: il commit iniziale creato da GitHub (README e LICENSE con il nome utente) è unito alla storia senza forzare il push; restano i file del progetto e la licenza MIT a nome di Paolo Pallavera.
+
 ## Segnalazioni da applicare nella revisione finale
+- **Revisione indipendente della fase 7**: l'elenco "Per la fase 8" di `docs/revisione-fase7.md` (A3, A4, A7–A12, M2–M4, C8, C9, C11–C19 e il resto di C6), compresa l'intestazione "v0.4 · DA REVISIONARE" della guida al subnetting (C16).
 - ~~Guida, widget del cap. 7 e 15: la funzione `analyze()` tratta /8, /16, /24 come "confine sull'ottetto"~~: **chiusa in fase 6** (widget sostituiti).
 - Guida al subnetting, telefono: i blocchi binari larghi (per esempio cap. 13, cap. 17) scorrono in orizzontale come nella v0.3; valutare una versione più stretta o a capo per gli schermi piccoli.
 - Guida all'uso: rileggerla tutta insieme ai testi dell'interfaccia (tono, nomi dei pulsanti, esempi) e aggiornare "Browser e apertura da disco" con le prove nei browser.
@@ -194,38 +285,44 @@ Contenuto: revisione indipendente di codice, guide e test; verifica dei criteri 
 
 
 ## Problemi aperti
-- Primo giro reale di GitHub Actions al primo push; abilitare GitHub Pages con sorgente "GitHub Actions".
-- Nome utente GitHub da inserire in `REPO_URL` (`src/ui/views/impostazioni.js`) per il collegamento nella sezione Informazioni.
-- Da verificare su dispositivo: **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata), Safari su iPhone e Android con Chrome. In fase 4 la prova è stata fatta solo in Chrome desktop, con emulazione del telefono.
-- Verifiche nei browser della fase 5: in Chrome da `file://` tutto disponibile (contesto sicuro, Web Crypto, localStorage, appunti). **Da fare a mano** in Edge, Firefox, Safari e sui telefoni con la lista `docs/verifiche-browser-fase5.md` (compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel); i risultati vanno nella sezione "Browser e apertura da disco" della guida all'uso (`src/guides/uso/03-risultati-dati.html`, `id="uso-browser"`), oggi scritta con formulazioni prudenti.
-- `npm run e2e` in CI: da valutare in fase 7 (serve Chrome nel runner; `CHROME_PATH` già supportato).
-- Peso del file unico: controllo `npm run size` a ogni build (fase 6: 630.611 byte, 60,1%, di cui guide 126 KB; restano circa 405 KB).
-- Salvataggio di Safari: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore e nella guida all'uso (Memorizza i dati, Browser).
+- **Visibilità e Pages**: rendere pubblico il repository, attivare Pages con sorgente "GitHub Actions" e rilanciare il job `pages` (vedi Repository). Fino ad allora il job `pages` del primo giro fallisce: è atteso.
+- **Primo giro reale di GitHub Actions**: controllare che `test`, `e2e` e `release` siano verdi e che la Release v1.0.0 contenga il file unico e l'impronta. Il Chrome del runner può essere più recente di quello locale (153): se `e2e` fallisce solo lì, le schermate dell'artefatto `e2e-report` aiutano a capire.
+- **Da verificare su dispositivo**:
+  - **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata);
+  - Safari su iPhone e Android con Chrome. Le prove sono state fatte solo in Chrome desktop, con l'emulazione del telefono.
+- **Verifiche nei browser**:
+  - in Chrome da `file://` è tutto disponibile (contesto sicuro, Web Crypto, localStorage, appunti);
+  - **da fare a mano** in Edge, Firefox, Safari e sui telefoni, con la lista `docs/verifiche-browser-fase5.md`, compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel;
+  - i risultati vanno nella sezione "Browser e apertura da disco" della guida all'uso (`src/guides/uso/03-risultati-dati.html`, `id="uso-browser"`).
+- **Lettori di schermo reali** (NVDA, VoiceOver, TalkBack): mai provati; vedi anche C8.
+- **Peso del file unico**: `npm run size` a ogni build (fase 7: 635.192 byte, 60,6%; restano circa 400 KB).
+- **Safari**: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore e nella guida all'uso (Memorizza i dati, Browser).
 
 ## Prossima conversazione
-**Titolo:** Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1
+**Titolo:** Fase 8 · Revisione finale di Paolo su applicazione e guide
 **Modello:** Opus 5.5 · **Impegno:** Medio
 
 **Prompt da incollare:**
 
-> Iniziamo la fase 7: verifica finale (con revisione indipendente) e rilascio v1 del Calcolatore Subnet.
+> Iniziamo la fase 8: revisione finale di applicazione e guide del Calcolatore Subnet, con rilascio v1.1.0.
 >
-> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md e 02_specifica_tecnica_v1.md (soprattutto le sezioni 0, 2.4, 2.5, 9.7, 10.5 e 11). Poi conferma modello e impegno per questa fase.
+> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md, 02_specifica_tecnica_v1.md e, nel repository, docs/revisione-fase7.md e docs/verifica-requisiti-v1.md. Poi conferma modello e impegno per questa fase.
 >
-> Il codice della fase 6 è [nel repository GitHub `calcolatore-subnet`, collegato alla sessione / nell'archivio calcolatore-subnet-fase6.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
+> Il codice è nel repository GitHub `ppallavera66-web/calcolatore-subnet` (tag v1.0.0), collegato alla sessione: lavora lì, con un commit per passo, e pubblica su `main`. Se non puoi pubblicare, consegnami un archivio aggiornato.
 >
-> [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`, incollati qui; il mio nome utente GitHub per `REPO_URL`.]
+> Le mie note su applicazione e guide, con le etichette Errore, Chiarezza, Mancanza, Taglio, sono qui sotto. [Incolla le note.]
+>
+> [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`.]
 >
 > Obiettivo:
-> - revisione indipendente, fatta da un agente separato che non ha scritto il codice, su motore, interfaccia, export, sessione e busta cifrata, guide e test, con un elenco di difetti ordinato per gravità; correzione di quelli bloccanti per la v1, gli altri annotati per la fase 8;
-> - controllo dei requisiti della v1 (specifiche, sezioni 2–6; specifica tecnica, sezioni 0 e 9) con una tabella requisito → dove è fatto → come è verificato;
-> - se arrivano i risultati delle prove nei browser: aggiornamento della sezione "Browser e apertura da disco" della guida all'uso ed eventuali correzioni;
-> - `npm run e2e` in GitHub Actions (Chrome del runner, `CHROME_PATH`), con le schermate come artefatto;
-> - valutazione del manifest PWA (specifiche, sezione 2) e decisione;
-> - rilascio: versione 1.0.0 in `package.json`, `REPO_URL` se conosco il nome utente, CHANGELOG, nota di rilascio, tag `v1.0.0` e istruzioni per Release e GitHub Pages;
+> - un'unica lista di interventi che unisca le mie note, l'elenco "Per la fase 8" di docs/revisione-fase7.md e le "Segnalazioni da applicare nella revisione finale" di STATO_PROGETTO.md, raggruppata per area (motore e passaggi, interfaccia e accessibilità, dati, guida all'uso, guida al subnetting) e con la gravità;
+> - correzioni dell'applicazione e delle due guide, ognuna con un test o una prova nel browser quando si può; guida al subnetting portata alla v1.0 (senza "da revisionare");
+> - se arrivano i risultati delle prove nei browser: aggiornamento della sezione "Browser e apertura da disco" della guida all'uso;
+> - controllo del primo giro reale di GitHub Actions (test, e2e, Release v1.0.0, Pages) ed eventuali correzioni del workflow;
+> - rilascio v1.1.0: versione, CHANGELOG, nota di rilascio in docs/note-rilascio, tag;
 > - tutti i controlli verdi: test, copertura, oracolo, `npm run check`, `npm run size`, `npm run e2e`.
 >
-> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 8.
+> Prima di scrivere codice proponimi la lista unificata e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt della fase successiva (pianificazione della v2).
 
 ## Fasi successive
-- Fase 8 · Revisione finale di Paolo su applicazione e guide · Opus 5.5 · Impegno medio
+- Dopo la fase 8: pianificazione della v2 (F08 VLSM, F09 summarization, F13 allenamento, export XLSX, snippet avanzati), 2–3 conversazioni secondo la sezione 7 delle specifiche; eventuale manifest PWA solo per Pages (`docs/decisione-pwa.md`).
