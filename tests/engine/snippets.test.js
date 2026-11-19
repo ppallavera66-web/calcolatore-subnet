@@ -45,6 +45,9 @@ describe('10.2 K · wildcard e snippet (F10 base)', () => {
     ]);
     expect(errCode(snippets(x, 8, { acl: { name: 'con spazio' } }))).toBe('ACL_NAME_FORMAT');
     expect(errCode(snippets(x, 8, { acl: { name: 'x'.repeat(65) } }))).toBe('ACL_NAME_FORMAT');
+    // un nome che inizia con una cifra sarebbe letto da IOS come lista numerata (revisione A5)
+    for (const n of ['10', '150', '1-LAN']) expect(errCode(snippets(x, 8, { acl: { name: n } }))).toBe('ACL_NAME_FORMAT');
+    expect(snippets(x, 8, { acl: { name: 'A' + 'x'.repeat(63) } }).ok).toBe(true);
     expect(errCode(snippets(x, 8, { acl: { action: 'allow' } }))).toBe('ACL_ACTION_VALUE');
     expect(errCode(snippets(x, 8, { ospf: { process: 0 } }))).toBe('OSPF_PROCESS_RANGE');
     expect(errCode(snippets(x, 8, { ospf: { process: 65536 } }))).toBe('OSPF_PROCESS_RANGE');

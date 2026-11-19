@@ -396,7 +396,7 @@ router ospf 1
 ```
 
 - Casi particolari: /32 → `permit host 10.1.1.1` nelle ACL e wildcard `0.0.0.0` in OSPF; /0 → `permit any` nelle ACL e `network 0.0.0.0 255.255.255.255 area 0` in OSPF.
-- Il nome ACL accetta lettere, cifre, `_` e `-`, massimo 64 caratteri.
+- Il nome ACL inizia con una lettera e accetta lettere, cifre, `_` e `-`, massimo 64 caratteri (per Cisco IOS un nome che inizia con una cifra sarebbe ambiguo con le liste numerate; modifica della fase 7).
 - Errori: `ACL_NUMBER_RANGE`, `OSPF_PROCESS_RANGE`, `OSPF_AREA_FORMAT`.
 - v2: ACL estese, altri produttori (Juniper, MikroTik, nftables).
 

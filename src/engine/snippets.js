@@ -48,7 +48,8 @@ export function snippets(ip, prefix, options = {}) {
   const ospf = { ...DEFAULT_OPTIONS.ospf, ...(options.ospf ?? {}) };
 
   if (!validAclNumber(acl.number)) return fail(ERR.ACL_NUMBER_RANGE, 'aclNumber', { value: acl.number });
-  if (typeof acl.name !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(acl.name)) {
+  // il nome inizia con una lettera: per Cisco IOS un nome di sole cifre è una lista numerata (revisione A5)
+  if (typeof acl.name !== 'string' || !/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(acl.name)) {
     return fail(ERR.ACL_NAME_FORMAT, 'aclName', { text: String(acl.name) });
   }
   if (acl.action !== 'permit' && acl.action !== 'deny') return fail(ERR.ACL_ACTION_VALUE, 'aclAction', { value: String(acl.action) });
