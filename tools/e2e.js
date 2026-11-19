@@ -39,6 +39,8 @@ const CANDIDATES = [process.env.CHROME_PATH, '/usr/bin/google-chrome', '/usr/bin
 const results = [];
 /** @type {string[]} */
 const jsErrors = [];
+/** Richieste verso la rete: il file unico non deve caricare nulla da fuori (funziona offline). @type {string[]} */
+const netRequests = [];
 
 /**
  * @param {string} name
@@ -73,6 +75,9 @@ async function open(browser, opts = {}) {
     if (m.type() === 'error') jsErrors.push(`console: ${m.text()}`);
   });
   page.on('pageerror', (e) => jsErrors.push(`pageerror: ${e.message}`));
+  page.on('request', (r) => {
+    if (!/^(file|data|blob|about):/.test(r.url())) netRequests.push(r.url());
+  });
   return { ctx, page };
 }
 
@@ -1070,6 +1075,15 @@ async function main() {
 
   await check('nessun errore JavaScript in tutte le prove', async () => {
     assert(jsErrors.length === 0, jsErrors.join('\n'));
+  });
+
+  await check('nessuna richiesta di rete in tutte le prove (file unico, funziona offline)', async () => {
+    assert(netRequests.length === 0, [...new Set(netRequests)].slice(0, 10).join('\n'));
+    const { ctx, page } = await open(browser, { offline: true });
+    await go(page, '#/guide/subnetting/cap-9');
+    await go(page, '#/calcola/analisi?ip=172.16.45.200&p=20');
+    assert((await page.textContent('.kv-primary'))?.includes('172.16.32.0/20'), 'senza rete il risultato non compare');
+    await ctx.close();
   });
 
   await browser.close();
