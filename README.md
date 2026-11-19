@@ -2,7 +2,7 @@
 
 Calcolatore di subnet IPv4 in un **unico file HTML** autosufficiente, che funziona offline e si apre da disco o da qualunque web server. Serve per il calcolo rapido, la didattica (passaggi con il metodo binario, del numero magico o dei multipli) e il lavoro professionale.
 
-Stato: **fase 5 completata** (impostazioni salvate, export, sessione JSON, cifratura, piani salvati). Le guide integrate arrivano con la fase 6. Specifiche e stato del progetto sono in [`docs/`](docs/).
+Stato: **fase 6 completata** (guida all'uso e guida al subnetting integrate, collegamenti "Apri nel calcolatore"). Prossima: fase 7, verifica finale e rilascio v1. Specifiche e stato del progetto sono in [`docs/`](docs/).
 
 ## Requisiti
 
@@ -33,9 +33,10 @@ src/engine/   motore: funzioni pure, nessun DOM (F01–F07, F10 base, passaggi F
 src/i18n/     testi italiani indicizzati per codice: t(codice, parametri)
 src/ui/       interfaccia: main, router, state, theme, format, shell, views/, components/
 src/styles/   tokens (temi), fonts, base, layout, components, print
+src/guides/   guide integrate: uso/ e subnetting/ (frammenti HTML), guide.css
 src/assets/   font IBM Plex (WOFF2) con OFL.txt
 tests/        test a tabella, proprietà, oracolo, architettura, moduli puri dell'interfaccia
-tools/        oracle.py, size-check.js, demo.js, fonts.js, e2e.js
+tools/        oracle.py, size-check.js, demo.js, fonts.js, e2e.js, guides.js (plugin delle guide)
 docs/         specifiche, specifica tecnica, stato del progetto
 ```
 
@@ -46,11 +47,12 @@ La regola delle dipendenze tra i moduli (specifica tecnica, 2.3) è verificata d
 - **Navigazione con frammento** (`#/calcola/analisi?ip=172.16.45.200&p=20`): funziona da disco; `did=1` attiva i passaggi e `metodo=magic` sceglie il metodo per quella vista.
 - **Layout**: barra in basso sotto 720 px, schede in alto fino a 979 px, barra laterale da 980 px.
 - **Temi**: Automatico (segue sistema e contrasto elevato), Chiaro, Scuro, Alto contrasto, con le variabili della guida al subnetting; `tests/ui/contrast.test.js` verifica WCAG AA.
+- **Guide**: `#/guide/uso/<sezione>` e `#/guide/subnetting/<ancora>` (`cap-9`, `app-a`, `gl-acl`). Il contenuto sta in `src/guides/<guida>/*.html`, frammenti letti in ordine di nome; `tools/guides.js` li inserisce nella pagina come `<template data-guide>` (riga "Guide" di `npm run size`). Ogni pulsante "?" apre la sezione con il nome della scheda; i collegamenti "Apri nel calcolatore" usano `did=1` e `metodo=`. `tests/ui/guides.test.js` verifica i collegamenti nei due sensi e confronta cheat sheet e tabelle host → prefisso con il motore.
 - **Font**: IBM Plex Sans, Mono e Sans Condensed, sottoinsiemi Latin1 e Pi distribuiti da IBM senza modifiche (`tools/fonts.js`), licenza OFL in `src/assets/fonts/OFL.txt`.
 
 ## Prova nel browser
 
-`npm run e2e` fa la build e apre `dist/index.html` da disco in Chrome con `playwright-core`, senza scaricare browser: usa `CHROME_PATH` o i percorsi usuali di Chrome/Chromium. Verifica layout e aree di tocco, i quattro temi con axe-core (WCAG 2.2 AA), tastiera, frammento, cronologia, Suddivisione, stampa e PDF, assenza di errori JavaScript. Schermate e PDF in `e2e-report/`.
+`npm run e2e` fa la build e apre `dist/index.html` da disco in Chrome con `playwright-core`, senza scaricare browser: usa `CHROME_PATH` o i percorsi usuali di Chrome/Chromium. Verifica layout e aree di tocco, i quattro temi con axe-core (WCAG 2.2 AA), tastiera, frammento, cronologia, Suddivisione, persistenza, export, sessione e busta cifrata, piani, guide (ancore con focus, glossario da tastiera, tema, stampa), stampa e PDF, assenza di errori JavaScript. Schermate e PDF in `e2e-report/`.
 
 ## Uso del motore
 

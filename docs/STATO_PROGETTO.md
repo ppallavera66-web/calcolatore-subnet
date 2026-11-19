@@ -1,16 +1,16 @@
 # Stato del progetto: Calcolatore Subnet
 
-Ultimo aggiornamento: 19 novembre 2026
+Ultimo aggiornamento: 19 novembre 2026 (fase 6)
 
 ## Fase corrente
-**Fase 6 · Integrazione delle due guide e collegamenti con l'app**
-Modello consigliato: **Sonnet 5.5** · Impegno: **Medio**
-Contenuto: guida all'uso nuova e guida al subnetting v0.3 dentro l'app (`src/guides/`), stesso tema dell'app, collegamenti "Apri nel calcolatore" al posto dei widget interni (difetto n. 6), pulsanti "?" e collegamenti "Capitolo N" verso i paragrafi giusti, peso sotto 1 MB.
+**Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1**
+Modello consigliato: **Opus 5.5** · Impegno: **Medio**
+Contenuto: revisione indipendente di codice, guide e test; verifica dei criteri di accettazione della v1; prove nei browser; `npm run e2e` in CI; rilascio v1.0.0 (versione, tag, Release con il file unico, GitHub Pages).
 
-**Prima di iniziare (azione per Paolo):** allegare `calcolatore-subnet-fase5.zip` alla conversazione (oppure pubblicarlo su GitHub e collegare l'account GitHub in claude.ai, Connettori); se possibile, compilare la tabella di `docs/verifiche-browser-fase5.md` e incollarla nel prompt.
+**Prima di iniziare (azione per Paolo):** allegare `calcolatore-subnet-fase6.zip` alla conversazione (oppure pubblicarlo su GitHub e collegare l'account GitHub in claude.ai, Connettori); se possibile, compilare la tabella di `docs/verifiche-browser-fase5.md` e incollarla nel prompt: i risultati servono alla sezione "Browser e apertura da disco" della guida all'uso.
 
 ## Repository
-- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase5.zip` alla fine della fase 5 (comprende i commit delle fasi 3, 4 e 5): l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione. Insieme all'archivio c'è `calcolatore-subnet-fase5.html`, il file unico pronto da aprire.
+- Repository locale con storia git (un commit per passo, ramo `main`), consegnato come archivio `calcolatore-subnet-fase6.zip` alla fine della fase 6 (comprende i commit delle fasi 3, 4, 5 e 6): l'account GitHub non era collegato a Claude, quindi non è stato possibile pubblicarlo dalla sessione. Insieme all'archivio c'è `calcolatore-subnet-fase6.html`, il file unico pronto da aprire.
 - Per pubblicarlo nel repository pubblico vuoto `calcolatore-subnet`: estrarre l'archivio, entrare nella cartella ed eseguire `git remote add origin https://github.com/<utente>/calcolatore-subnet.git` e `git push -u origin main`.
 - Dopo il primo push: in GitHub, Settings → Pages → Source: **GitHub Actions**, per la pubblicazione HTTPS dal ramo `main`. Il primo giro reale della CI avviene con quel push (in locale tutti i passi del workflow, più `npm run e2e`, sono stati eseguiti su un clone pulito).
 - Da completare: in `src/ui/views/impostazioni.js` la costante `REPO_URL` è vuota finché non si conosce il nome utente GitHub; la sezione Informazioni mostra per ora il nome del repository senza collegamento.
@@ -88,6 +88,22 @@ Contenuto: guida all'uso nuova e guida al subnetting v0.3 dentro l'app (`src/gui
     - e2e 40/40 in Chrome 153.0.8010.12 (headless, Linux) da `file://`: le 27 prove della fase 4 più 13 nuove (persistenza, spegnimento con conferma, due schede, dati illeggibili, storage rifiutato, export in tutti i formati con passaggi, intervalli di F06, sessione con Sostituisci e Unisci, busta cifrata con passphrase errata e file manomesso, errori di import, Web Crypto assente, piani con etichette e ricaricamento, telefono a 390 px con aree di tocco); axe-core senza violazioni anche su finestre di export e import, intervallo di F06, Piani salvati e Suddivisione con un piano aperto;
     - da `file://` in Chrome: contesto sicuro, `crypto.subtle`, localStorage e appunti disponibili. Edge, Firefox, Safari e telefoni: lista di prove in `docs/verifiche-browser-fase5.md`, da compilare.
 
+- **Fase 6 · Integrazione delle due guide e collegamenti con l'app** (19 novembre 2026):
+  - **guide nella pagina**: contenuto in `src/guides/uso/*.html` e `src/guides/subnetting/*.html` (frammenti in ordine di nome); `tools/guides.js` è un plugin di Vite che li inserisce prima di `</body>` come `<template id="guide-<nome>" data-guide>` (anche con `npm run dev`, con ricarica quando cambia una guida). La vista clona il template: il contenuto non passa per il JavaScript e `npm run size` lo conta nella riga "Guide";
+  - **guida al subnetting v0.4** (dalla v0.3 del progetto): niente Google Fonts, selettore del tema interno e script; collegamenti scritti come rotte `#/guide/subnetting/<ancora>`; titolo della guida in `h2` e sottotitoli `h5` → `h4` (l'`h1` è il titolo della schermata); `:target` del glossario sostituito da una classe; intestazione vuota della tabella MAC/IP con testo per i lettori di schermo. Il testo è quello della v0.3, tranne: frase finale del sommario iniziale, legenda dei termini ("con il tasto Tab"), introduzione del glossario, ultimo punto delle "Decisioni prese" dell'appendice C, piè di pagina e versione;
+  - **difetto n. 6 chiuso**: i cinque widget (cap. 3, 7, 8, 11, 15) sono sostituiti da riquadri "Nel calcolatore" con collegamenti "Apri nel calcolatore" (`did=1` e `metodo=` del capitolo); altri collegamenti sugli esempi dei cap. 2, 4, 6, 9, 12, 13, 14, 16, 17, 18 e "Verifica nel calcolatore" nelle soluzioni degli esercizi 1–5 (45 collegamenti all'app). L'allenamento libero rimanda a F13 (v2). Con i widget è sparita la funzione `analyze()` della guida: la segnalazione sulla convenzione "1 · ottetto" è chiusa;
+  - **vista delle guide** (`src/ui/views/guide.js`, al posto del segnaposto): indice laterale da 1.180 px e richiudibile in alto sotto, con selettore del tema (cambia l'impostazione dell'app, quindi si salva con "Memorizza i dati"), collegamenti rapidi a Cheat sheet e Glossario, voce attiva mentre si legge; arrivo su un'ancora con scorrimento immediato e focus sul titolo (anche ripremendo lo stesso collegamento, e dopo il caricamento dei caratteri); ancora inesistente → avviso; tabelle e blocchi binari che scorrono in orizzontale raggiungibili da tastiera; stampa dell'intera guida (fondo chiaro, niente indice, intestazione e collegamenti all'app, soluzioni aperte con l'etichetta "Soluzione", una pagina nuova per ogni parte);
+  - **glossario** (`src/ui/guide-glossary.js`): parti pure provate in Node (ricerca dei termini, prima occorrenza per capitolo, parole intere anche accentate, maiuscole obbligatorie per le sigle); termini con `role="button"`, `aria-expanded` e `aria-describedby` verso la cella della definizione; riquadro inserito subito dopo il termine (Tab raggiunge i suoi collegamenti "Cap. N · titolo" e "Glossario"), Esc chiude e riporta il focus, il collegamento "Glossario" evidenzia la voce;
+  - **guida all'uso** (20 sezioni in 5 parti): per cominciare (apertura, schermate, tre modi di lavorare, tastiera e accessibilità); una sezione per ogni pulsante "?" (Analisi, Conversioni, Mask, Stessa subnet, Calcolo inverso, Suddivisione, Piani salvati, Impostazioni); passaggi, cronologia, export, Memorizza i dati, sessione, cifratura, temi, browser e apertura da disco (con quanto verificato in Chrome e formulazioni prudenti per gli altri browser, da aggiornare con le prove di Paolo);
+  - **collegamenti dall'app**: "?" anche in Impostazioni; "Capitolo N · titolo" dei passaggi e "?" arrivano al paragrafo con il focus sul titolo; il tasto indietro torna alla schermata di partenza con gli input;
+  - **correzioni**: titolo del cap. 11 in `strings.it.js` allineato alla guida ("Che mask mi serve? Il calcolo inverso"); nota della cronologia senza il riferimento alla fase 5; in `main.js` i template delle guide restano nella pagina quando si costruisce il guscio;
+  - **verifiche** (su un clone pulito con `npm ci`):
+    - 1.023 test in 29 file (erano 988): nuovi `tests/ui/guides.test.js` (23: template e peso, contenuto senza script né risorse esterne, id unici nelle due guide, nessun widget, ogni capitolo citato da motore/testi/interfaccia esiste, ogni metodo rimanda a un capitolo esistente, ogni "?" ha la sua sezione, titoli `ui.cap.*` = `h3` della guida e viceversa, ogni collegamento delle guide è una rotta canonica con ancora esistente, "Apri nel calcolatore" con input validi per il motore, `did=1` e metodo previsto, glossario a 32 voci, **cheat sheet e tabelle host → prefisso confrontate con il motore**) e `tests/ui/guide-glossary.test.js` (8);
+    - copertura di motore, testi, export, sessione e storage: 99,6% istruzioni, 97,1% rami, 99,8% funzioni;
+    - oracolo: fixture rigenerati identici; `npm run check` senza errori; test di architettura verde;
+    - `dist/index.html` di 630.611 byte (60,1% del limite di 1 MB): JavaScript 196 KB, CSS 49 KB, font 245 KB, **guide 126 KB**;
+    - e2e 48/48 in Chrome 153.0.8010.12 (headless, Linux) da `file://`: le 40 prove della fase 5 più 8 sulle guide (ancore con focus e voce attiva, indice e tasto indietro, telefono a 390 px con indice in alto e aree di tocco, "Capitolo N" e i sette "?" più Impostazioni, Apri nel calcolatore con impostazioni invariate, glossario da tastiera e mouse, tema dall'indice salvato e ricaricato, stampa con PDF di 38 pagine); axe-core WCAG 2.2 AA senza violazioni sulle due guide nei tre temi espliciti, con il riquadro del glossario aperto, e a 390 px in tema scuro con l'indice aperto.
+
 ## Decisioni di Paolo
 **Fase 1**
 - Alla chiusura di ogni fase va sempre fornito il **titolo** della conversazione successiva (`Fase N · Titolo`) e il **prompt** da incollare per avviarla (regola registrata nella sezione 7.1 delle specifiche).
@@ -114,6 +130,11 @@ Contenuto: guida all'uso nuova e guida al subnetting v0.3 dentro l'app (`src/gui
 
 **Fase 5**
 - Piano dei 13 interventi approvato, con le scelte a–f: riga "Compatibilità di questo browser" in Informazioni; Unisci toglie anche i doppioni per contenuto; si salvano impostazioni, tema, cronologia e piani (non il metodo per funzione né gli input delle viste); più schede come descritto sopra; nomi dei file con l'input principale per le funzioni senza rete; "Includi i passaggi" nei formati testuali come testo e nel JSON come dati strutturati.
+- Repository consegnato come archivio con storia git (account GitHub non collegato a Claude).
+
+**Fase 6**
+- Piano degli 11 interventi approvato, con le scelte a–d: guida al subnetting in **una pagina unica** (`cap-N` scorre al capitolo); **allenamento libero** sostituito dai collegamenti sugli esercizi 1–5, con rimando a F13 (v2); guida integrata come **v0.4**, con il repository come fonte (il file del progetto resta la v0.3); **note sui browser** con quanto verificato in Chrome e formulazioni prudenti per gli altri, da aggiornare con le prove. Aggiunto il pulsante "?" in Impostazioni.
+- Fase svolta con Opus 5.5 invece di Sonnet 5.5.
 - Repository consegnato come archivio con storia git (account GitHub non collegato a Claude).
 
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
@@ -151,8 +172,20 @@ Contenuto: guida all'uso nuova e guida al subnetting v0.3 dentro l'app (`src/gui
 - **Interfaccia**: nuove icone `import`, `save`, `edit`; `textField` accetta `type: "password"` e `autocomplete`; casella di spunta con l'etichetta come area di tocco da 44 px.
 - **Copertura**: estesa a `src/export`, `src/session` e `src/storage` (prima solo motore e testi).
 
+## Scelte tecniche della fase 6 (dove la specifica non decideva)
+- **Contenuto come template**: le guide sono frammenti HTML statici, non moduli JavaScript; `tools/guides.js` (plugin di Vite) li inserisce come `<template data-guide>`, che `size-check.js` misurava già dalla fase 3. Il contenuto è nostro (nessun dato dell'utente), quindi si clona così com'è.
+- **Ancore**: guida al subnetting = id dell'elemento (`cap-9`, `app-a`, `app-a-inv`, `cap-11-tabella`, `gl-acl`); guida all'uso = id con il prefisso `uso-` (`#/guide/uso/analisi` → `id="uso-analisi"`), per non confondersi con gli id dell'interfaccia (`src/ui/guide-anchors.js`). Le sezioni dei "?" hanno il nome della scheda; per Impostazioni il nome della sezione.
+- **Indice**: generato dal contenuto (un gruppo per `.part`, una voce per `section.chap`); laterale da 1.180 px (con la barra dell'app da 240 px, sotto quella larghezza il testo sarebbe troppo stretto), richiudibile in alto sotto.
+- **Arrivo su un'ancora**: scorrimento immediato (non animato), così il focus e la posizione sono certi; `scroll-margin-top` di 84 px sotto i 980 px per la barra in alto. `View.reveal` in `types.js` e `main.js`: una vista appena aperta con un'ancora gestisce da sé scorrimento e focus.
+- **Glossario**: definizione letta dal lettore di schermo tramite `aria-describedby` verso la cella della tabella (`gl-…-def`), sempre presente; riquadro in posizione fissa, ricalcolata allo scorrimento.
+- **Collegamenti "Apri nel calcolatore"**: testo completo e autonomo ("Apri nel calcolatore: 172.16.45.200/20 …"), dentro un riquadro con `role="group"`; la scheda Conversioni con il solo `pm` e Analisi senza input sono ammesse (il test accetta collegamenti senza input).
+- **Tabelle verificate**: attributo `data-check` su cheat sheet e tabelle host → prefisso, letto dai test.
+- **Stampa**: ogni parte della guida su una pagina nuova; i blocchi binari vanno a capo solo se non entrano nella riga.
+
 ## Segnalazioni da applicare nella revisione finale
-- Guida, widget del cap. 7 e 15: la funzione `analyze()` tratta /8, /16, /24 come "confine sull'ottetto" senza numero magico; l'app segue la convenzione "1 · ottetto". Si risolve in fase 6 con la sostituzione dei widget (difetto n. 6).
+- ~~Guida, widget del cap. 7 e 15: la funzione `analyze()` tratta /8, /16, /24 come "confine sull'ottetto"~~: **chiusa in fase 6** (widget sostituiti).
+- Guida al subnetting, telefono: i blocchi binari larghi (per esempio cap. 13, cap. 17) scorrono in orizzontale come nella v0.3; valutare una versione più stretta o a capo per gli schermi piccoli.
+- Guida all'uso: rileggerla tutta insieme ai testi dell'interfaccia (tono, nomi dei pulsanti, esempi) e aggiornare "Browser e apertura da disco" con le prove nei browser.
 - Guida, cap. 6 e cheat sheet: valutare l'aggiunta della convenzione per **/0** (M = 256 nel 1° ottetto, decisa in fase 2) e delle righe /0–/7 nella cheat sheet.
 - Guida, cap. 4: eventuali blocchi speciali aggiuntivi (per esempio 198.18.0.0/15, 192.0.0.0/24) solo insieme all'app (decisione m11).
 - Testi dei passaggi didattici (`strings.it.js`): rileggerli insieme alla guida, per tono e coerenza con i capitoli.
@@ -163,37 +196,36 @@ Contenuto: guida all'uso nuova e guida al subnetting v0.3 dentro l'app (`src/gui
 ## Problemi aperti
 - Primo giro reale di GitHub Actions al primo push; abilitare GitHub Pages con sorgente "GitHub Actions".
 - Nome utente GitHub da inserire in `REPO_URL` (`src/ui/views/impostazioni.js`) per il collegamento nella sezione Informazioni.
-- Difetto noto n. 6 della guida (widget interni da sostituire con collegamenti "Apri nel calcolatore"): **fase 6**.
 - Da verificare su dispositivo: **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata), Safari su iPhone e Android con Chrome. In fase 4 la prova è stata fatta solo in Chrome desktop, con emulazione del telefono.
-- Verifiche nei browser della fase 5: in Chrome da `file://` tutto disponibile (contesto sicuro, Web Crypto, localStorage, appunti). **Da fare a mano** in Edge, Firefox, Safari e sui telefoni con la lista `docs/verifiche-browser-fase5.md` (compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel); i risultati vanno nella guida all'uso (fase 6).
+- Verifiche nei browser della fase 5: in Chrome da `file://` tutto disponibile (contesto sicuro, Web Crypto, localStorage, appunti). **Da fare a mano** in Edge, Firefox, Safari e sui telefoni con la lista `docs/verifiche-browser-fase5.md` (compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel); i risultati vanno nella sezione "Browser e apertura da disco" della guida all'uso (`src/guides/uso/03-risultati-dati.html`, `id="uso-browser"`), oggi scritta con formulazioni prudenti.
 - `npm run e2e` in CI: da valutare in fase 7 (serve Chrome nel runner; `CHROME_PATH` già supportato).
-- Peso del file unico: controllo `npm run size` a ogni build (fase 5: 481.672 byte, 45,9%; restano circa 555 KB per le due guide). Il peso della guida v0.3 integrata va misurato in fase 6.
-- Salvataggio di Safari: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore; va ripresa nella guida all'uso.
+- Peso del file unico: controllo `npm run size` a ogni build (fase 6: 630.611 byte, 60,1%, di cui guide 126 KB; restano circa 405 KB).
+- Salvataggio di Safari: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore e nella guida all'uso (Memorizza i dati, Browser).
 
 ## Prossima conversazione
-**Titolo:** Fase 6 · Integrazione delle due guide e collegamenti con l'app
-**Modello:** Sonnet 5.5 · **Impegno:** Medio
+**Titolo:** Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1
+**Modello:** Opus 5.5 · **Impegno:** Medio
 
 **Prompt da incollare:**
 
-> Iniziamo la fase 6: integrazione delle due guide e collegamenti con l'app del Calcolatore Subnet.
+> Iniziamo la fase 7: verifica finale (con revisione indipendente) e rilascio v1 del Calcolatore Subnet.
 >
-> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md (sezione 6) e 02_specifica_tecnica_v1.md (soprattutto le sezioni 2.1, 2.4, 4.1, 9.1, 9.3, 9.4, 9.6, 9.7 e 11), più la guida al subnetting v0.3 (`guida-subnetting.html`) caricata nel progetto. Poi conferma modello e impegno per questa fase.
+> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md e 02_specifica_tecnica_v1.md (soprattutto le sezioni 0, 2.4, 2.5, 9.7, 10.5 e 11). Poi conferma modello e impegno per questa fase.
 >
-> Il codice della fase 5 è [nel repository GitHub `calcolatore-subnet`, collegato alla sessione / nell'archivio calcolatore-subnet-fase5.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
+> Il codice della fase 6 è [nel repository GitHub `calcolatore-subnet`, collegato alla sessione / nell'archivio calcolatore-subnet-fase6.zip che allego]: lavora lì, con un commit per passo; se non puoi pubblicare sul repository, consegnami un archivio aggiornato.
 >
-> [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`, incollati qui.]
+> [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`, incollati qui; il mio nome utente GitHub per `REPO_URL`.]
 >
 > Obiettivo:
-> - guida al subnetting v0.3 dentro l'app in `src/guides/` (rotte `#/guide/subnetting/cap-N`), con indice, glossario e popover, cheat sheet, pulsante "torna su" e stampa; stesso tema dell'app (variabili di `tokens.css`, il tema salvato vale anche per le guide);
-> - difetto n. 6: i widget interni della guida diventano collegamenti "Apri nel calcolatore" che precompilano la funzione vera con il frammento (`did=1`, `metodo=`), e la segnalazione su `analyze()` e la convenzione "1 · ottetto" si chiude;
-> - guida all'uso nuova, breve e orientata ai compiti (rotte `#/guide/uso/<sezione>`), con un paragrafo per ogni pulsante "?" e le sezioni su Memorizza i dati, export, sessione JSON, cifratura e piani salvati, con le note sui browser (file://, Safari, spazio condiviso) ricavate dalle prove;
-> - collegamenti "Capitolo N · titolo" dei passaggi e pulsanti "?" che arrivano al paragrafo giusto, con il focus sul titolo;
-> - test dei collegamenti (ogni ancora usata dall'app esiste nelle guide e viceversa) ed estensione di `npm run e2e` (navigazione nelle guide, popover da tastiera, temi, stampa, axe-core);
-> - `npm run size` sotto 1 MB, con il peso delle guide nella riga "Guide".
+> - revisione indipendente, fatta da un agente separato che non ha scritto il codice, su motore, interfaccia, export, sessione e busta cifrata, guide e test, con un elenco di difetti ordinato per gravità; correzione di quelli bloccanti per la v1, gli altri annotati per la fase 8;
+> - controllo dei requisiti della v1 (specifiche, sezioni 2–6; specifica tecnica, sezioni 0 e 9) con una tabella requisito → dove è fatto → come è verificato;
+> - se arrivano i risultati delle prove nei browser: aggiornamento della sezione "Browser e apertura da disco" della guida all'uso ed eventuali correzioni;
+> - `npm run e2e` in GitHub Actions (Chrome del runner, `CHROME_PATH`), con le schermate come artefatto;
+> - valutazione del manifest PWA (specifiche, sezione 2) e decisione;
+> - rilascio: versione 1.0.0 in `package.json`, `REPO_URL` se conosco il nome utente, CHANGELOG, nota di rilascio, tag `v1.0.0` e istruzioni per Release e GitHub Pages;
+> - tutti i controlli verdi: test, copertura, oracolo, `npm run check`, `npm run size`, `npm run e2e`.
 >
-> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 7.
+> Prima di scrivere codice proponimi l'elenco degli interventi e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt per la fase 8.
 
 ## Fasi successive
-- Fase 7 · Verifica finale (con revisione indipendente) e rilascio v1 · Opus 5.5 · Impegno medio
 - Fase 8 · Revisione finale di Paolo su applicazione e guide · Opus 5.5 · Impegno medio

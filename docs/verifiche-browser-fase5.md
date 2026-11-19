@@ -107,3 +107,7 @@ Ripeti P1, P2 e P8 aprendo l'indirizzo di GitHub Pages: atteso **sì** su tutte 
 | P10 stampa e PDF | sì | | | | | |
 
 Mandami le righe compilate: le uso per le note della guida all'uso (fase 6) e per eventuali correzioni (fase 7). Se una prova va storta, aggiungi una schermata di Impostazioni → Informazioni.
+
+## Dove finiscono i risultati (fase 6)
+
+La guida all'uso integrata ha la sezione **Browser e apertura da disco** (`src/guides/uso/03-risultati-dati.html`, `id="uso-browser"`, rotta `#/guide/uso/browser`). Oggi riporta quanto verificato in Chrome e formulazioni prudenti per gli altri browser; con le righe compilate qui sopra si aggiorna con i risultati reali (fase 7 o 8).
