@@ -103,6 +103,8 @@ export function openExportSession(ctx) {
   confirmF.input.addEventListener('input', () => confirmF.setError(null));
 
   let working = false;
+  // finestra chiusa (Esc, Annulla) mentre si cifra: niente download (revisione I6)
+  let closed = false;
   const wipe = () => {
     pass.setValue('');
     confirmF.setValue('');
@@ -135,6 +137,7 @@ export function openExportSession(ctx) {
         busy.replaceChildren(progress(t('ui.sx.working')));
         exportBtn.disabled = true;
         text = `${JSON.stringify(await encryptSession(session, p), null, 2)}\n`;
+        if (closed) return false;
       } else text = `${JSON.stringify(session, null, 2)}\n`;
       downloadText(text, sessionFileName(date, encrypted), MIME.json);
       wipe();
@@ -157,7 +160,7 @@ export function openExportSession(ctx) {
     h('footer', { class: 'dialog-actions' },
       h('button', { type: 'button', class: 'btn btn-ghost', onclick: () => dlg.close() }, t('ui.cancel')),
       exportBtn));
-  const dlg = openDialog({ title: t('ui.sx.title'), body: [form], onClose: wipe });
+  const dlg = openDialog({ title: t('ui.sx.title'), body: [form], onClose: () => { closed = true; wipe(); } });
   return dlg;
 }
 
@@ -202,6 +205,8 @@ function askPassphrase(ctx, envelope) {
   const err = errorBox();
   const busy = h('div');
   let working = false;
+  // finestra chiusa mentre si decifra: niente anteprima (revisione I6)
+  let closed = false;
   const btn = h('button', { type: 'submit', class: 'btn btn-primary' }, t('ui.si.decrypt'));
   async function run() {
     if (working) return;
@@ -211,6 +216,7 @@ function askPassphrase(ctx, envelope) {
     busy.replaceChildren(progress(t('ui.si.working')));
     const d = await decryptEnvelope(envelope, pass.value);
     working = false;
+    if (closed) return;
     btn.disabled = false;
     busy.replaceChildren();
     if (!d.ok) {
@@ -230,7 +236,7 @@ function askPassphrase(ctx, envelope) {
     h('footer', { class: 'dialog-actions' },
       h('button', { type: 'button', class: 'btn btn-ghost', onclick: () => dlg.close() }, t('ui.cancel')),
       btn));
-  const dlg = openDialog({ title: t('ui.si.title'), body: [form], onClose: () => pass.setValue('') });
+  const dlg = openDialog({ title: t('ui.si.title'), body: [form], onClose: () => { closed = true; pass.setValue(''); } });
   pass.focus();
 }
 

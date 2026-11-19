@@ -903,7 +903,16 @@ async function main() {
     // riapertura: la casella torna spenta e i campi vuoti
     await a.page.getByRole('button', { name: 'Esporta sessione' }).click();
     assert(!(await a.page.getByLabel('Cifra il file').isChecked()), 'casella ricordata');
+    // Esc mentre si cifra: la finestra si chiude e il file non viene scaricato (revisione I6)
+    await a.page.getByLabel('Cifra il file').check();
+    await a.page.getByLabel('Passphrase', { exact: true }).fill('cavallo batteria graffetta');
+    await a.page.getByLabel('Conferma la passphrase').fill('cavallo batteria graffetta');
+    let late = false;
+    a.page.on('download', () => { late = true; });
+    await a.page.click('dialog[open] button[type=submit]');
     await a.page.keyboard.press('Escape');
+    await a.page.waitForTimeout(2500);
+    assert(!late && !(await a.page.$('dialog[open]')), 'export annullato ma file scaricato');
     await a.ctx.close();
     const b = await open(browser);
     await go(b.page, '#/impostazioni');
@@ -912,8 +921,9 @@ async function main() {
     await b.page.click('dialog[open] button[type=submit]');
     await b.page.waitForFunction(() => document.querySelector('dialog[open] .form-error')?.textContent);
     assert((await b.page.textContent('dialog[open] .form-error')) === 'Passphrase errata o file danneggiato.', 'errore');
+    // Invio nel campo conferma la finestra (revisione M1, C7)
     await b.page.getByLabel('Passphrase', { exact: true }).fill('cavallo batteria graffetta');
-    await b.page.click('dialog[open] button[type=submit]');
+    await b.page.getByLabel('Passphrase', { exact: true }).press('Enter');
     await b.page.waitForFunction(() => document.querySelector('dialog[open]')?.textContent?.includes('Contiene'));
     await b.page.getByRole('button', { name: 'Unisci' }).click();
     await hashTo(b.page, '#/pianifica/piani');
