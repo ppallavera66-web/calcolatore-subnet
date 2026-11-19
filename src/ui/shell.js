@@ -124,13 +124,14 @@ export function createShell(ctx, o) {
    */
   function setRoute(route) {
     lastTab[route.section] = route.view;
+    root.dataset.section = route.section;
     for (const [section, nav] of Object.entries(subtabNavs)) nav.hidden = section !== route.section;
     subtabs.hidden = !subtabNavs[route.section];
     title.textContent = t(`ui.title.${route.view}`);
     lead.textContent = t(`ui.lead.${route.view}`);
     const withHistory = route.section === 'calcola' || route.section === 'pianifica';
     tools.replaceChildren(
-      ...(route.tab && route.section !== 'guide' ? [helpLink(ctx, t(`ui.title.${route.view}`), route.tab)] : []),
+      ...(route.section !== 'guide' ? [helpLink(ctx, t(`ui.title.${route.view}`), route.tab ?? route.section)] : []),
       ...(withHistory
         ? [h('button', { type: 'button', class: 'btn btn-ghost btn-sm history-btn', 'aria-haspopup': 'dialog', onclick: () => ctx.openHistory() },
             icon('history', { size: 18 }), h('span', {}, t('ui.history.open')))]
