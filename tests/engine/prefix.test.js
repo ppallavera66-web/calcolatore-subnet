@@ -101,7 +101,12 @@ describe('proprietà sulle mask', () => {
     }));
   });
   test('P4 · wildcard = NOT mask', () => {
-    fc.assert(fc.property(prefixArb, (p) => wildcardOf(p) === (~maskOf(p) >>> 0) && ((wildcardOf(p) + maskOf(p)) === 0xffffffff)));
+    // riferimento costruito bit per bit da una stringa, indipendente dall'aritmetica del motore (revisione A11)
+    fc.assert(fc.property(prefixArb, (p) => {
+      const maskRef = parseInt('1'.repeat(p).padEnd(32, '0'), 2);
+      const notMask = parseInt([...maskRef.toString(2).padStart(32, '0')].map((b) => (b === '1' ? '0' : '1')).join(''), 2);
+      return maskOf(p) === maskRef && wildcardOf(p) === notMask && wildcardOf(p) + maskOf(p) === 2 ** 32 - 1;
+    }));
   });
   test('P7 · maskToPrefix(prefixToMask(p)) = p', () => {
     fc.assert(fc.property(prefixArb, (p) => {

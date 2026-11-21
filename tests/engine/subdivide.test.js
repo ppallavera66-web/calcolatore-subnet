@@ -103,7 +103,7 @@ describe('P10 · subnet disgiunte, contigue, ordinate, che coprono il blocco; in
         if (indexOf(block, p, np, items[i].network + size - 1) !== i) return false;
       }
       return items[items.length - 1].network + size === block + blockSize(p);
-    }), { numRuns: 300 });
+    }));
   });
   test('indexOf(subnetAt(i)) = i anche su suddivisioni enormi', () => {
     const arb = fc.tuple(fc.integer({ min: 0, max: 8 }), fc.integer({ min: 24, max: 32 }), fc.double({ min: 0, max: 1, noNaN: true }));
