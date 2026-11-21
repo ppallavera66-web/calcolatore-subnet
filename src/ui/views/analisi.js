@@ -105,7 +105,9 @@ export function createAnalisi(ctx, route) {
     const p = live.params;
     const ipText = p.ip ?? '';
     const pText = p.p ?? '';
-    if (ipText.trim() === '' && pText.trim() === '') {
+    // senza IP (per esempio dopo "Apri in Analisi" dal Calcolo inverso, solo con il prefisso) nessun errore
+    // finché non si preme Invio: si mostrano gli esempi (revisione C6)
+    if (ipText.trim() === '' && (pText.trim() === '' || !opts.commit)) {
       routeError(null, { ip: ipf, prefix, mask: prefix }, 'ip', false);
       layout({ empty: h('div', { class: 'empty' }, examples(EXAMPLES.map((ex) => ({ label: ex, onPick: () => pick(ex) })))) });
       ctx.record(null);
@@ -197,6 +199,13 @@ export function createAnalisi(ctx, route) {
     live.commit();
   }
 
+  // f10=1 nel frammento apre la sezione F10; aprirla o chiuderla a mano aggiorna il frammento (revisione C9)
+  snip.el.open = p0.f10 === '1';
+  snip.el.addEventListener('toggle', () => {
+    if (snip.el.dataset.printOpen) return; // aperta solo per la stampa
+    if ((live.params.f10 === '1') !== snip.el.open) live.change({ f10: snip.el.open ? '1' : undefined });
+  });
+
   render({ initial: true, commit: false });
 
   return {
@@ -205,6 +214,7 @@ export function createAnalisi(ctx, route) {
       live.reset(r);
       ipf.setValue(r.params.ip ?? '');
       prefix.setValue(r.params.p ?? '');
+      snip.el.open = r.params.f10 === '1';
       render({ initial: true, commit: false });
     },
     destroy: () => live.cancel(),
