@@ -17,6 +17,20 @@ import { KEYS, isAppKey } from '../storage/storage.js';
 import { readSessionObject, applyImport } from '../session/session.js';
 import { SESSION_FORMAT, SESSION_VERSION, SESSION_SETTINGS, isIsoDate } from '../session/schema.js';
 
+/**
+ * Elementi salvati esclusi all'avvio: voci, piani e impostazioni non validi, più le etichette scartate
+ * e le liste illeggibili (cronologia o piani che non sono un elenco), che prima non si contavano (revisione M3).
+ * @param {{ historySkipped: number, plansSkipped: number, settingsIgnored: number, warnings: { code: string, params: Record<string, any> }[] }} report
+ */
+export function skippedCount(report) {
+  let n = report.historySkipped + report.plansSkipped + report.settingsIgnored;
+  for (const w of report.warnings) {
+    if (w.code === 'IMPORT_W_LABELS_DROPPED') n += Number(w.params.count) || 0;
+    else if (w.code === 'IMPORT_BAD_FIELD' && (w.params.field === 'history' || w.params.field === 'plans')) n += 1;
+  }
+  return n;
+}
+
 export const SAVE_DELAY = 300;
 export const QUOTA_HISTORY = 100;
 
@@ -87,7 +101,7 @@ export function createPersistence(o) {
       plans: plans.value ?? [],
     }, { allowEncrypted: false });
     if (!r.ok || r.kind !== 'session') return { status: r.ok === false && r.error.code === 'IMPORT_NEWER_VERSION' ? 'newer' : 'corrupt' };
-    const skipped = r.report.historySkipped + r.report.plansSkipped + r.report.settingsIgnored;
+    const skipped = skippedCount(r.report);
     return { status: 'loaded', data: r.data, skipped };
   }
 

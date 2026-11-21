@@ -128,6 +128,22 @@ describe('persistenza (8.3)', () => {
     expect(a.backend.getItem(KEYS.meta)).toBe(writes);
   });
 
+  test('revisione M3: all\'avvio si contano anche la cronologia illeggibile e le etichette scartate', async () => {
+    const backend = memoryBackend();
+    backend.setItem(KEYS.meta, JSON.stringify({ schema: 1, savedAt: NOW }));
+    backend.setItem(KEYS.settings, JSON.stringify({ theme: 'dark', persist: true }));
+    backend.setItem(KEYS.history, JSON.stringify({ non: 'un elenco' }));
+    backend.setItem(KEYS.plans, JSON.stringify([{
+      id: 'p1', type: 'subdivision', name: 'Sede', createdAt: NOW, updatedAt: NOW, notes: '',
+      input: { block: '10.0.0.0', prefix: 24, newPrefix: 26 }, labels: { 0: 'ok', 1: 'ok', 9: 'fuori intervallo', 50: 'anche' },
+    }]));
+    const { p, store } = setup({ backend });
+    expect(await p.start()).toBe('loaded');
+    // 1 cronologia illeggibile + 2 etichette oltre le 4 subnet del piano
+    expect(p.status().skipped).toBe(3);
+    expect(store.get().plans[0].labels).toEqual({ 0: 'ok', 1: 'ok' });
+  });
+
   test('avvio: voci non valide scartate e contate', async () => {
     const backend = memoryBackend();
     backend.setItem(KEYS.meta, JSON.stringify({ schema: 1, savedAt: NOW }));
