@@ -211,7 +211,7 @@ describe('Sostituisci e Unisci (6.4)', () => {
       history: [h('x', '2026-11-18T10:00:00Z', '10.0.0.1'), h('y', '2026-11-18T10:00:00.500Z', '10.0.0.2')],
       plans: [],
     };
-    const r = session(readSessionObject(body, META));
+    const r = session(readSessionObject(body));
     expect(r.data.history.map((/** @type {any} */ x) => x.id)).toEqual(['y', 'x']);
   });
 
