@@ -1,6 +1,6 @@
 # Stato del progetto: Calcolatore Subnet
 
-Ultimo aggiornamento: 19 novembre 2026 (fase 7, rilascio v1.0.0)
+Ultimo aggiornamento: 21 novembre 2026 (fase 7, rilascio v1.0.0 pubblicato)
 
 ## Fase corrente
 **Fase 8 · Revisione finale di Paolo su applicazione e guide**
@@ -14,20 +14,10 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
 
 ## Repository
 - **GitHub**: <https://github.com/ppallavera66-web/calcolatore-subnet>, ramo `main`, con tutta la storia delle fasi 3–7 (un commit per passo), unita al commit iniziale creato da GitHub.
-- **Tag `v1.0.0`**: creato nell'archivio della fase 7 sull'ultimo commit di `main`. Il proxy della sessione rifiuta il push dei tag (HTTP 403), quindi **va pubblicato da Paolo**, dal proprio computer:
-  ```
-  git clone https://github.com/ppallavera66-web/calcolatore-subnet.git
-  cd calcolatore-subnet
-  git tag -a v1.0.0 -m "Calcolatore Subnet v1.0.0"
-  git push origin v1.0.0
-  ```
-  Il push del tag avvia il workflow, che crea la Release. Per non creare la Release a mano dalla pagina di GitHub: il workflow la troverebbe già esistente e fallirebbe.
-- **Visibilità**: al momento del push il repository era **privato**. Paolo ha scelto di renderlo pubblico (decisione D4), ma il proxy della sessione non permette di cambiare le impostazioni del repository, quindi va fatto a mano:
-  - Settings → General → Danger Zone → Change visibility → **Public**;
-  - Settings → Pages → Source: **GitHub Actions**;
-  - Actions → ultimo giro "CI" su `main` → **Re-run failed jobs**, per pubblicare su Pages.
-- **Release**: la crea il workflow quando arriva il tag `v1.0.0`, con `calcolatore-subnet-v1.0.0.html`, la sua impronta `.sha256` e la nota `docs/note-rilascio/v1.0.0.md`.
-- **Indirizzo di Pages** (dopo l'attivazione): <https://ppallavera66-web.github.io/calcolatore-subnet/>.
+- **Tag `v1.0.0`**: pubblicato da Paolo il 21 novembre 2026 (il proxy della sessione rifiuta il push dei tag, HTTP 403). Il workflow ha creato la **Release v1.0.0** con `calcolatore-subnet-v1.0.0.html` (635.192 byte), la sua impronta `.sha256` e la nota `docs/note-rilascio/v1.0.0.md`: <https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.0.0>. L'impronta coincide con quella della build locale (`03708850…8f37`).
+- **Visibilità**: repository **pubblico** (decisione D4), reso tale da Paolo il 21 novembre 2026.
+- **GitHub Pages**: attivo con sorgente "GitHub Actions", pubblicato a ogni push su `main`: <https://ppallavera66-web.github.io/calcolatore-subnet/>.
+- **Nei rilasci successivi** il tag va pubblicato dal computer di Paolo, finché il proxy della sessione lo rifiuta: `git pull`, poi `git tag -a vX.Y.Z -m "Calcolatore Subnet vX.Y.Z"` e `git push origin vX.Y.Z` (in PowerShell, nella cartella del clone).
 - **Autore dei commit**: `Paolo Pallavera <paolo.pallavera@users.noreply.github.com>`, come nelle fasi precedenti. Per collegarli al profilo GitHub servirebbe l'indirizzo noreply dell'account (Settings → Emails); si può adottare dalla fase 8.
 
 ## Completato
@@ -218,7 +208,7 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
 - Nome utente GitHub: **ppallavera66-web**; account collegato a Claude durante la fase, push fatto dalla sessione.
 - Nessuna prova nei browser fatta finora: la sezione "Browser e apertura da disco" resta prudente, le prove passano alla fase 8.
 - Criterio di "bloccante" approvato: calcolo sbagliato, dati persi o corrotti, falla in import, busta o export, funzione inutilizzabile, violazione WCAG AA in un flusso principale, requisito v1 mancante.
-- Repository da rendere **pubblico** (D4); il cambio va fatto da Paolo, perché il proxy della sessione non lo permette.
+- Repository reso **pubblico** (D4) e Pages attivato da Paolo; tag v1.0.0 pubblicato da Paolo (il proxy della sessione non permette di cambiare le impostazioni né di pubblicare i tag).
 - Manifest PWA non incluso nella v1.
 
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
@@ -294,11 +284,7 @@ Contenuto: correzioni, bug e ampliamenti raccolti da Paolo in un'unica lista, pi
 
 
 ## Problemi aperti
-- **Visibilità e Pages**: rendere pubblico il repository, attivare Pages con sorgente "GitHub Actions" e rilanciare il job `pages` (vedi Repository). Fino ad allora il job `pages` del primo giro fallisce: è atteso.
-- **GitHub Actions**:
-  - primo giro reale fatto con il push di `main`: `test` è passato; `e2e` (Chrome 157 del runner) ha superato 51 prove su 52;
-  - la prova fallita aveva un difetto del test, che leggeva il risultato prima del cambio di vista. Dopo la correzione, nel secondo giro `test` ed `e2e` sono verdi; `pages` fallisce come previsto ("Ensure GitHub Pages has been enabled") finché il repository è privato e Pages non è attivo;
-  - Release solo dopo il push del tag da parte di Paolo (vedi Repository).
+- **GitHub Actions**: tutto verde. Su `main` girano `test`, `e2e` (Chrome 157 del runner) e `pages`; sul tag v1.0.0 girano `test`, `e2e` e `release`. Al primo giro una prova e2e era fallita per un difetto del test, poi corretto.
 - **Da verificare su dispositivo**:
   - **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata);
   - Safari su iPhone e Android con Chrome. Le prove sono state fatte solo in Chrome desktop, con l'emulazione del telefono.
