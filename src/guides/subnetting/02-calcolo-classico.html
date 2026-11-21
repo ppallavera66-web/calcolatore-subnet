@@ -52,14 +52,16 @@
 <div class="tbl"><table style="max-width:520px">
 <thead><tr><th>Prefisso</th><th>Ottetto interessante</th></tr></thead>
 <tbody>
-<tr><td class="mono">/1 – /8</td><td>primo</td></tr>
+<tr><td class="mono">/0 – /8</td><td>primo</td></tr>
 <tr><td class="mono">/9 – /16</td><td>secondo</td></tr>
 <tr><td class="mono">/17 – /24</td><td>terzo</td></tr>
 <tr><td class="mono">/25 – /32</td><td>quarto</td></tr>
 </tbody></table></div>
 <p>Se il prefisso è un multiplo di 8 (<code>/8</code>, <code>/16</code>, <code>/24</code>, <code>/32</code>), il confine cade esattamente tra due ottetti e il calcolo è immediato: si copiano gli ottetti di rete e si azzerano gli altri. Per non avere eccezioni, in questa guida l'ottetto interessante è in quel caso <strong>l'ultimo che vale 255</strong>, come indica la tabella: per <code>/24</code> è il terzo. Lì il numero magico (capitolo 9) vale 256 − 255 = <strong>1</strong>: le subnet avanzano di 1 in quell'ottetto (<code>10.0.0.0/24</code>, <code>10.0.1.0/24</code>, <code>10.0.2.0/24</code>…) e gli ottetti a destra vanno da 0 a 255.</p>
+<p>Resta <code>/0</code>, che non ha bit di rete: la mask è <code>0.0.0.0</code> e nessun ottetto vale 255. Anche qui c'è una convenzione: l'ottetto interessante è il <strong>primo</strong> e il numero magico vale <strong>256</strong>, cioè un unico blocco da 0 a 255 che contiene tutti gli indirizzi IPv4. <code>0.0.0.0/0</code> è la rotta di default (capitolo 4).</p>
 <div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
 <li><a href="#/calcola/analisi?ip=10.1.2.3&amp;p=24&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 10.1.2.3/24, confine sull'ottetto e numero magico 1</a></li>
+<li><a href="#/calcola/analisi?ip=203.0.113.10&amp;p=0&amp;did=1&amp;metodo=magic">Apri nel calcolatore: 203.0.113.10/0, un solo blocco con numero magico 256</a></li>
 </ul></div>
 
 <h4>La wildcard mask</h4>

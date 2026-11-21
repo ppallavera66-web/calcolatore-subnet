@@ -156,11 +156,19 @@ Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre
 <h3><span class="num">A</span>Cheat sheet</h3>
 <div class="prose">
 <p><strong>Procedura rapida:</strong> ottetto interessante → M = 2<sup>8−b</sup> → rete = multiplo di M ≤ valore → broadcast = rete + M − 1 e 255 a destra → host = 2<sup>32−n</sup> − 2 (fino a /30; /31 → 2 host punto-punto, /32 → 1 host).</p>
-<p class="mu small">La colonna M indica il numero magico e l'ottetto in cui si applica. Nelle righe /8, /16 e /24 il confine cade esattamente tra due ottetti: per convenzione l'ottetto interessante è l'ultimo che vale 255 e M = 1, cioè le subnet avanzano di 1 in quell'ottetto e gli ottetti a destra vanno da 0 a 255. Le righe evidenziate sono le più usate.</p>
+<p class="mu small">La colonna M indica il numero magico e l'ottetto in cui si applica. Nelle righe /8, /16, /24 e /32 il confine cade esattamente tra due ottetti: per convenzione l'ottetto interessante è l'ultimo che vale 255 e M = 1, cioè le subnet avanzano di 1 in quell'ottetto e gli ottetti a destra vanno da 0 a 255. La riga /0 non ha bit di rete: per convenzione M = 256 nel primo ottetto, un unico blocco (capitolo 6). Le righe evidenziate sono le più usate.</p>
 </div>
 <div class="tbl"><table data-check="cheat-sheet">
 <thead><tr><th>CIDR</th><th>Subnet mask</th><th>Wildcard</th><th>M · ottetto</th><th>Indirizzi</th><th>Host</th></tr></thead>
 <tbody>
+<tr><td class="mono"><strong>/0</strong></td><td class="mono">0.0.0.0</td><td class="mono">255.255.255.255</td><td class="mono">256 · 1°</td><td class="mono">4.294.967.296</td><td class="mono">4.294.967.294</td></tr>
+<tr><td class="mono"><strong>/1</strong></td><td class="mono">128.0.0.0</td><td class="mono">127.255.255.255</td><td class="mono">128 · 1°</td><td class="mono">2.147.483.648</td><td class="mono">2.147.483.646</td></tr>
+<tr><td class="mono"><strong>/2</strong></td><td class="mono">192.0.0.0</td><td class="mono">63.255.255.255</td><td class="mono">64 · 1°</td><td class="mono">1.073.741.824</td><td class="mono">1.073.741.822</td></tr>
+<tr><td class="mono"><strong>/3</strong></td><td class="mono">224.0.0.0</td><td class="mono">31.255.255.255</td><td class="mono">32 · 1°</td><td class="mono">536.870.912</td><td class="mono">536.870.910</td></tr>
+<tr><td class="mono"><strong>/4</strong></td><td class="mono">240.0.0.0</td><td class="mono">15.255.255.255</td><td class="mono">16 · 1°</td><td class="mono">268.435.456</td><td class="mono">268.435.454</td></tr>
+<tr><td class="mono"><strong>/5</strong></td><td class="mono">248.0.0.0</td><td class="mono">7.255.255.255</td><td class="mono">8 · 1°</td><td class="mono">134.217.728</td><td class="mono">134.217.726</td></tr>
+<tr><td class="mono"><strong>/6</strong></td><td class="mono">252.0.0.0</td><td class="mono">3.255.255.255</td><td class="mono">4 · 1°</td><td class="mono">67.108.864</td><td class="mono">67.108.862</td></tr>
+<tr><td class="mono"><strong>/7</strong></td><td class="mono">254.0.0.0</td><td class="mono">1.255.255.255</td><td class="mono">2 · 1°</td><td class="mono">33.554.432</td><td class="mono">33.554.430</td></tr>
 <tr><td class="mono"><strong>/8</strong></td><td class="mono">255.0.0.0</td><td class="mono">0.255.255.255</td><td class="mono">1 · 1°</td><td class="mono">16.777.216</td><td class="mono">16.777.214</td></tr>
 <tr><td class="mono"><strong>/9</strong></td><td class="mono">255.128.0.0</td><td class="mono">0.127.255.255</td><td class="mono">128 · 2°</td><td class="mono">8.388.608</td><td class="mono">8.388.606</td></tr>
 <tr><td class="mono"><strong>/10</strong></td><td class="mono">255.192.0.0</td><td class="mono">0.63.255.255</td><td class="mono">64 · 2°</td><td class="mono">4.194.304</td><td class="mono">4.194.302</td></tr>
@@ -292,5 +300,5 @@ Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre
 </section>
 
 <footer class="guide-foot">
-<p>Guida al subnetting IPv4 · versione 0.4 di studio, integrata nel Calcolatore Subnet, da revisionare. Gli esempi usano indirizzi privati o di documentazione; tutti i calcoli sono stati verificati con uno script.</p>
+<p>Guida al subnetting IPv4 · v0.4, versione di studio, integrata nel Calcolatore Subnet. Gli esempi usano indirizzi privati o di documentazione; tutti i calcoli sono stati verificati con uno script.</p>
 </footer>

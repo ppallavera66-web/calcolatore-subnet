@@ -107,6 +107,12 @@ describe('contenuto delle guide', () => {
     expect(GUIDES.subnetting).not.toMatch(/w-bits|w-sub|w-train|w-inv|w-same|function analyze/);
     expect(GUIDES.subnetting).not.toMatch(/saranno sostituiti/);
   });
+
+  test('revisione C16: la guida al subnetting è una "versione di studio", senza "da revisionare"', () => {
+    expect(GUIDES.subnetting).not.toMatch(/revisionare/i);
+    expect(GUIDES.subnetting).toMatch(/v0\.4 · VERSIONE DI STUDIO/);
+    expect(GUIDES.subnetting).toMatch(/v0\.4, versione di studio/);
+  });
 });
 
 describe('collegamenti dall\'app verso le guide', () => {
@@ -223,9 +229,10 @@ describe('tabelle della guida uguali ai risultati del motore', () => {
     .flatMap((m) => [...m[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((r) => [...r[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((c) => text(c[1]))))
     .filter((r) => r.length);
 
-  test('cheat sheet: mask, wildcard, M · ottetto, indirizzi e host da /8 a /32', () => {
+  test('cheat sheet: mask, wildcard, M · ottetto, indirizzi e host da /0 a /32', () => {
     const rows = tableRows('cheat-sheet');
-    expect(rows.length).toBe(25);
+    // dalla v1.1 anche /0–/7, con la convenzione di /0 (M = 256 nel 1° ottetto)
+    expect(rows.map((r) => r[0])).toEqual(Array.from({ length: 33 }, (_, p) => `/${p}`));
     for (const [cidr, mask, wild, m, addrs, hosts] of rows) {
       const p = Number(cidr.slice(1));
       const a = an(p);
