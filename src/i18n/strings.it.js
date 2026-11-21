@@ -137,6 +137,8 @@ export const STRINGS = {
   'block.LOOPBACK': "Loopback: l'host stesso",
   'block.LINK_LOCAL': 'Link-local / APIPA',
   'block.DOCUMENTATION': 'Riservato alla documentazione',
+  'block.IETF_PROTOCOL': 'Assegnazioni di protocollo IETF',
+  'block.BENCHMARKING': 'Test di prestazioni tra reti (benchmark)',
   'block.MULTICAST': 'Multicast (classe D)',
   'block.RESERVED': 'Riservato (classe E)',
   'block.LIMITED_BROADCAST': 'Broadcast limitato',

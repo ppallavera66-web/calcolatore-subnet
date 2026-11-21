@@ -1,6 +1,7 @@
 // @ts-check
 /**
  * Blocchi speciali del cap. 4 della guida, più le classi D ed E (m11).
+ * Dalla v1.1: 192.0.0.0/24 (RFC 6890) e 198.18.0.0/15 (RFC 2544), decisi nella revisione finale.
  * Ordine indifferente: classify() ordina dal più specifico.
  */
 
@@ -17,8 +18,10 @@ const TABLE = [
   ['127.0.0.0/8', 'LOOPBACK', 'special', 'RFC 1122'],
   ['169.254.0.0/16', 'LINK_LOCAL', 'special', 'RFC 3927'],
   ['172.16.0.0/12', 'PRIVATE', 'private', 'RFC 1918'],
+  ['192.0.0.0/24', 'IETF_PROTOCOL', 'special', 'RFC 6890'],
   ['192.0.2.0/24', 'DOCUMENTATION', 'special', 'RFC 5737'],
   ['192.168.0.0/16', 'PRIVATE', 'private', 'RFC 1918'],
+  ['198.18.0.0/15', 'BENCHMARKING', 'special', 'RFC 2544'],
   ['198.51.100.0/24', 'DOCUMENTATION', 'special', 'RFC 5737'],
   ['203.0.113.0/24', 'DOCUMENTATION', 'special', 'RFC 5737'],
   ['224.0.0.0/4', 'MULTICAST', 'special', 'RFC 5771'],

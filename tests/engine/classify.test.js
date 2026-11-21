@@ -16,6 +16,13 @@ describe('10.2 G · tipo di indirizzo (F04)', () => {
     ['0.1.2.3', 'A', true, 'special', 'THIS_NETWORK'],
     ['169.254.10.10', 'B', false, 'special', 'LINK_LOCAL'],
     ['192.0.2.1', 'C', false, 'special', 'DOCUMENTATION'],
+    ['192.0.0.0', 'C', false, 'special', 'IETF_PROTOCOL'],
+    ['192.0.0.255', 'C', false, 'special', 'IETF_PROTOCOL'],
+    ['192.0.1.0', 'C', false, 'public', null],
+    ['198.18.0.1', 'C', false, 'special', 'BENCHMARKING'],
+    ['198.19.255.255', 'C', false, 'special', 'BENCHMARKING'],
+    ['198.17.255.255', 'C', false, 'public', null],
+    ['198.20.0.0', 'C', false, 'public', null],
     ['198.51.100.7', 'C', false, 'special', 'DOCUMENTATION'],
     ['203.0.113.200', 'C', false, 'special', 'DOCUMENTATION'],
     ['224.0.0.5', 'D', false, 'special', 'MULTICAST'],
@@ -50,8 +57,8 @@ describe('10.2 G · tipo di indirizzo (F04)', () => {
     expect(errCode(classifyText('192.168.1'))).toBe('IP_FORMAT');
   });
 
-  test('tabella dei blocchi: 13 righe, 9 codici', () => {
-    expect(SPECIAL_BLOCKS).toHaveLength(13);
-    expect(BLOCK_CODES).toHaveLength(9);
+  test('tabella dei blocchi: 15 righe, 11 codici (v1.1: IETF_PROTOCOL, BENCHMARKING)', () => {
+    expect(SPECIAL_BLOCKS).toHaveLength(15);
+    expect(BLOCK_CODES).toHaveLength(11);
   });
 });
