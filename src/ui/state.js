@@ -255,7 +255,21 @@ export function setPlanLabel(state, id, index, text, now) {
  * @returns {AppState}
  */
 export function removePlan(state, id) {
-  return state.plans.some((p) => p.id === id) ? { ...state, plans: state.plans.filter((p) => p.id !== id) } : state;
+  return state.plans.some((p) => p.id === id) ? dropMissingPlan({ ...state, plans: state.plans.filter((p) => p.id !== id) }) : state;
+}
+
+/**
+ * Toglie dagli input ricordati di Suddivisione il `piano` che non esiste più (eliminato, import con
+ * Sostituisci, Cancella tutti i dati, altra scheda): i collegamenti della barra non lo riaprono (revisione C13).
+ * @param {AppState} state
+ * @returns {AppState}
+ */
+export function dropMissingPlan(state) {
+  const view = 'pianifica/suddivisione';
+  const id = state.inputs[view]?.piano;
+  if (id === undefined || state.plans.some((p) => p.id === id)) return state;
+  const { piano, ...rest } = state.inputs[view];
+  return { ...state, inputs: { ...state.inputs, [view]: rest } };
 }
 
 const ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';

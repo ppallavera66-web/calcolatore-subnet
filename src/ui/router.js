@@ -23,7 +23,8 @@ export const SECTIONS = Object.freeze({
 
 /** Parametri di ogni vista, nell'ordine in cui compaiono nel frammento (9.3). */
 export const VIEW_PARAMS = Object.freeze({
-  'calcola/analisi': ['ip', 'p'],
+  // f10=1 apre la sezione "Wildcard e configurazione" (collegamenti del cap. 14, revisione C9)
+  'calcola/analisi': ['ip', 'p', 'f10'],
   'calcola/conversioni': ['n', 'b', 'w', 'a', 'pm'],
   'calcola/mask': ['m'],
   'calcola/stessa': ['a', 'pa', 'b', 'pb', 'gw'],
@@ -150,7 +151,8 @@ export function buildHash(route) {
   const params = { ...route.params };
   if (route.view === 'pianifica/inverso' && params.caso !== undefined) {
     const { caso, ...others } = params;
-    if (inverseCase(others) === caso) delete params.caso;
+    // un caso sconosciuto si toglie: vale quello dedotto dagli altri parametri (revisione C12)
+    if (!['a', 'b', 'c'].includes(caso) || inverseCase(others) === caso) delete params.caso;
   }
   let path = `#/${route.view}`;
   if (route.anchor) path += `/${route.anchor.split('/').map(encodeURIComponent).join('/')}`;

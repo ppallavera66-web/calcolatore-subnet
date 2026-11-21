@@ -23,6 +23,18 @@ import { subdivideText, subdivide, indexOf, parseIPv4, toDotted, maskOf } from '
 import { t } from '../../i18n/strings.it.js';
 
 const VIEW = 'pianifica/suddivisione';
+/**
+ * Prefisso per l'intestazione di stampa: "24" diventa "/24", una mask resta com'è (revisione C17).
+ * @param {string} v testo del campo
+ * @param {boolean} after va scritto dopo l'indirizzo del blocco
+ */
+function printPrefix(v, after) {
+  const x = v.trim();
+  if (x === '') return '';
+  const shown = /^\d+$/.test(x) ? `/${x}` : x;
+  return after ? (shown.startsWith('/') ? shown : ` ${shown}`) : shown;
+}
+
 export const PAGE_SIZE = 256;
 const EXAMPLES = [
   { label: '10.0.0.0/16 → /19', params: { b: '10.0.0.0', p: '/16', np: '/19' } },
@@ -185,6 +197,9 @@ export function createSuddivisione(ctx, route) {
     routeError(null, fields, 'block', false);
     const count = first.value.count;
     const page = clampPage(p.pg, count);
+    // pagina fuori intervallo o non numerica nel frammento: si riscrive con quella mostrata (revisione C12)
+    const pgShown = page === 0 ? undefined : String(page);
+    if (pgShown !== p.pg) live.change({ pg: pgShown });
     const r = subdivide(first.value.block.network, first.value.block.prefix, first.value.newPrefix, { offset: page * PAGE_SIZE, limit: PAGE_SIZE });
     if (!r.ok) return; // non accade: pagina già nei limiti
     const v = r.value;
@@ -325,6 +340,12 @@ export function createSuddivisione(ctx, route) {
     const { network, prefix } = first.value.block;
     const idx = indexOf(network, prefix, first.value.newPrefix, q.value);
     if (idx === null) {
+      // la riga trovata prima non va lasciata evidenziata (revisione C19)
+      highlight = null;
+      for (const tr of tableHost.querySelectorAll('tr.hl')) {
+        tr.classList.remove('hl');
+        tr.removeAttribute('aria-current');
+      }
       findMsg.textContent = t('ui.sub.find.outside', { ip: toDotted(q.value), block: cidr(network, prefix) });
       findMsg.className = 'find-msg w-c';
       return;
@@ -377,7 +398,7 @@ export function createSuddivisione(ctx, route) {
       live.cancel();
       unsubscribe();
     },
-    printInputs: () => [plan() ? `${t('ui.plans.current')}: ${plan()?.name}` : '', `${t('ui.sub.block')}: ${bf.value}${pf.value ? ` ${pf.value}` : ''}`, npf.value && `${t('ui.sub.newPrefix')}: ${npf.value}`].filter(Boolean),
+    printInputs: () => [plan() ? `${t('ui.plans.current')}: ${plan()?.name}` : '', `${t('ui.sub.block')}: ${bf.value}${printPrefix(pf.value, true)}`, npf.value && `${t('ui.sub.newPrefix')}: ${printPrefix(npf.value, false)}`].filter(Boolean),
   };
 }
 

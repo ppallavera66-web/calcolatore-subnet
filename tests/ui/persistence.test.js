@@ -7,7 +7,7 @@
 import { describe, test, expect } from 'vitest';
 import { createPersistence, SAVE_DELAY } from '../../src/ui/persistence.js';
 import { createStorage, memoryBackend, KEYS } from '../../src/storage/storage.js';
-import { createStore, initialState, setSetting, addHistory, addPlan, setPlanLabel, updatePlan, removePlan, cleanPlanText } from '../../src/ui/state.js';
+import { createStore, initialState, setSetting, addHistory, addPlan, setPlanLabel, updatePlan, removePlan, cleanPlanText, setInputs, dropMissingPlan } from '../../src/ui/state.js';
 
 const NOW = '2026-11-19T10:00:00.000Z';
 
@@ -315,6 +315,19 @@ describe('piani nello stato', () => {
     s = removePlan(s, 'b');
     expect(s.plans.map((x) => x.id)).toEqual(['a']);
     expect(removePlan(s, 'b')).toBe(s);
+  });
+
+  test('revisione C13: eliminato il piano, il suo id non resta negli input ricordati di Suddivisione', () => {
+    let s = addPlan(initialState(), plan('a'));
+    s = setInputs(s, 'pianifica/suddivisione', { b: '10.0.0.0', p: '/24', np: '/26', piano: 'a' });
+    s = removePlan(s, 'a');
+    expect(s.inputs['pianifica/suddivisione']).toEqual({ b: '10.0.0.0', p: '/24', np: '/26' });
+    // piani sostituiti da un import: dropMissingPlan fa lo stesso
+    let r = addPlan(initialState(), plan('x'));
+    r = setInputs(r, 'pianifica/suddivisione', { b: '10.0.0.0', piano: 'x' });
+    const replaced = { ...r, plans: [] };
+    expect(dropMissingPlan(replaced).inputs['pianifica/suddivisione']).toEqual({ b: '10.0.0.0' });
+    expect(dropMissingPlan(r)).toBe(r);
   });
 
   test('al massimo 100 piani e 4.096 etichette', () => {

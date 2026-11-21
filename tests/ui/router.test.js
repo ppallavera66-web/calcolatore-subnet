@@ -119,6 +119,9 @@ describe('lettura e scrittura del frammento (9.3)', () => {
     expect(inverseCase({ caso: 'x', s: '2' })).toBe('b');
     // caso scritto solo se non si deduce
     expect(buildHash(routeTo('pianifica/inverso', { caso: 'b', p: '16', s: '6' }))).toBe('#/pianifica/inverso?p=16&s=6');
+    // revisione C12: un caso sconosciuto non resta nel frammento
+    expect(buildHash(routeTo('pianifica/inverso', { caso: 'x', h: '50' }))).toBe('#/pianifica/inverso?h=50');
+    expect(parseHash('#/pianifica/inverso?caso=x&h=50').canonical).toBe(false);
     expect(buildHash(routeTo('pianifica/inverso', { caso: 'c' }))).toBe('#/pianifica/inverso?caso=c');
     expect(buildHash(routeTo('pianifica/inverso', { caso: 'b', p: '24' }))).toBe('#/pianifica/inverso?caso=b&p=24');
   });
