@@ -1324,7 +1324,7 @@ async function main() {
     const st = await page.evaluate(() => [...document.querySelectorAll('.guide-body pre.bin')].map((p) => ({
       len: Math.max(...(p.textContent ?? '').split('\n').map((l) => l.length)),
       scrolls: p.scrollWidth > p.clientWidth + 1,
-      keyboard: p.tabIndex >= 0,
+      keyboard: /** @type {HTMLElement} */ (p).tabIndex >= 0,
       font: parseFloat(getComputedStyle(p).fontSize),
     })));
     const shortScroll = st.filter((x) => x.len <= 40 && x.scrolls).length;
