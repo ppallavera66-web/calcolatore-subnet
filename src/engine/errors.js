@@ -15,6 +15,8 @@ export const ERR = Object.freeze({
   PREFIX_FORMAT: 'PREFIX_FORMAT',
   PREFIX_RANGE: 'PREFIX_RANGE',
   MASK_FORMAT: 'MASK_FORMAT',
+  // Aggiunto nella v1.1 (revisione A9): mask scritta con zeri iniziali (255.255.255.000).
+  MASK_LEADING_ZERO: 'MASK_LEADING_ZERO',
   // Mask non valida dentro un input "IP mask" o "IP/mask": stessi codici e
   // parametri del motivo di F03 (decisione della fase 3).
   MASK_OCTET_VALUE: 'MASK_OCTET_VALUE',

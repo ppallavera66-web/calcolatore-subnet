@@ -236,6 +236,7 @@ Errori (`ok: false`):
 | `PREFIX_FORMAT` | prefisso non numerico | `text` |
 | `PREFIX_RANGE` | prefisso fuori da 0–32 | `value` |
 | `MASK_FORMAT` | mask non in forma a quattro ottetti | `text` |
+| `MASK_LEADING_ZERO` | mask con zeri iniziali in un ottetto (`255.255.255.000`), dalla v1.1 | `index`, `value` |
 | `NUMBER_FORMAT` | numero non valido nella base indicata | `text`, `base` |
 | `NUMBER_RANGE` | numero fuori da 0–4.294.967.295 | `value` |
 | `BASE_UNSUPPORTED` | base diversa da 2, 10, 16 | `base` |
@@ -276,7 +277,7 @@ Avvisi (`warnings`, il risultato resta valido):
 
 **`parseAddressInput(testo)`**: riconosce le forme `a.b.c.d`, `a.b.c.d/n`, `a.b.c.d / n`, `a.b.c.d/m.m.m.m` e `a.b.c.d m.m.m.m` (uno o più spazi). Restituisce `{ ip, prefix | null, prefixSource: "cidr" | "mask" | null }`. Una mask non valida restituisce l'errore di F03 sul campo `mask`.
 
-**`parsePrefix(testo)`**: accetta `n` o `/n`, da 0 a 32; ammessi zeri iniziali (`/08`), che non hanno ambiguità.
+**`parsePrefix(testo)`**: accetta `n` o `/n`, da 0 a 32; ammessi zeri iniziali (`/08`), che non hanno ambiguità. Il campo del prefisso accetta anche la mask, con o senza la barra davanti (`/255.255.255.0`, dalla v1.1).
 
 ### 3.6 Schede delle funzioni
 

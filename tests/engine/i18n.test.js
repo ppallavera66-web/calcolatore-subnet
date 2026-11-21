@@ -16,7 +16,7 @@ const clean = (/** @type {string} */ s) => s.length > 0 && !/undefined|NaN|\[obj
 const ERROR_CASES = [
   parseAddressInput(''), parseAddressInput('1.2.3'), parseAddressInput('1.2.3.256'), parseAddressInput('1.2.03.4'),
   parseAddressInput('1.2.3.4/5/6'), parseAddressInput('1.2.3.4/'), parseAddressInput('1.2.3.4/x'), parseAddressInput('1.2.3.4/40'),
-  parseAddressInput('1.2.3.4/255.0'), parseAddressInput('1.2.3.4 255.250.0.0'), parseAddressInput('1.2.3.4 255.0.255.0'),
+  parseAddressInput('1.2.3.4/255.0'), parseAddressInput('1.2.3.4 255.250.0.0'), parseAddressInput('1.2.3.4 255.0.255.0'), parseAddressInput('1.2.3.4 255.255.255.000'),
   convertNumber('12', 2), convertNumber('fg', 16), convertNumber('1a', 10), convertNumber('99999999999', 10), convertNumber('1', 7),
   prefixForHosts(0), prefixForSubnets(24, 0), prefixForSubnets(32, 4), subdivide(0, 24, 16), subdivide(0, 24, 26, { offset: 9 }),
   snippets(0, 8, { acl: { number: 100 } }), snippets(0, 8, { acl: { name: '?' } }), snippets(0, 8, { acl: { action: 'x' } }),

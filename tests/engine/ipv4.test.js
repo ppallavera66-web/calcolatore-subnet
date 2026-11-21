@@ -3,7 +3,7 @@ import { describe, test, expect } from 'vitest';
 import fc from 'fast-check';
 import {
   parseIPv4, parsePrefix, parseMask, parsePrefixOrMask, parseAddressInput, parseAddressWithPrefix, parseCount,
-  toDotted, toBinaryDotted, octetToBinary, toHexDotted, toHex32, sameSubnetText, subdivideText, analyzeText, snippetsText,
+  toDotted, toBinaryDotted, octetToBinary, toHexDotted, toHex32, sameSubnetText, subdivideText, analyzeText, snippetsText, validateMask,
 } from '../../src/engine/index.js';
 import { ip, errCode, val } from '../helpers.js';
 
@@ -82,6 +82,17 @@ describe('10.2 E · parsing degli indirizzi', () => {
       ok: false,
       error: { code: 'MASK_NONCONTIGUOUS', field: 'mask', params: { index: 3 } },
     });
+  });
+
+  test('revisione A9: mask con zeri iniziali e mask con la barra nel campo del prefisso', () => {
+    expect(parseMask('255.255.255.000')).toEqual({ ok: false, error: { code: 'MASK_LEADING_ZERO', field: 'mask', params: { index: 3, value: '000' } } });
+    expect(parsePrefixOrMask('255.255.00.0')).toMatchObject({ error: { code: 'MASK_LEADING_ZERO', field: 'prefix', params: { index: 2 } } });
+    expect(val(parsePrefixOrMask('/255.255.255.0'))).toEqual({ prefix: 24, source: 'mask' });
+    expect(val(parsePrefixOrMask('/ 255.255.240.0'))).toEqual({ prefix: 20, source: 'mask' });
+    expect(parsePrefixOrMask('/255.255.250.0')).toMatchObject({ error: { code: 'MASK_OCTET_VALUE' } });
+    expect(errCode(parseMask('255.255.256.0'))).toBe('MASK_FORMAT');
+    expect(validateMask('255.255.255.000')).toMatchObject({ error: { code: 'MASK_LEADING_ZERO', field: 'mask' } });
+    expect(analyzeText('10.0.0.1', '/255.255.255.0')).toMatchObject({ ok: true, value: { prefix: 24 } });
   });
 
   test('revisione A3: la mask non valida è segnalata sul campo che contiene il testo', () => {

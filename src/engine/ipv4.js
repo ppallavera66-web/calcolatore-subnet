@@ -116,6 +116,18 @@ export function parsePrefix(text, field = 'prefix') {
 }
 
 /**
+ * Errore per una mask che non si legge come indirizzo: gli zeri iniziali hanno un messaggio
+ * proprio con l'ottetto (revisione A9), gli altri casi MASK_FORMAT.
+ * @param {{ code: string, params: Record<string, any> }} ipError errore di parseIPv4
+ * @param {string} raw testo scritto
+ * @param {string} field
+ */
+export function maskTextError(ipError, raw, field) {
+  if (ipError.code === ERR.IP_LEADING_ZERO) return fail(ERR.MASK_LEADING_ZERO, field, { ...ipError.params });
+  return fail(ERR.MASK_FORMAT, field, { text: raw });
+}
+
+/**
  * Parsing di una mask in notazione puntata, valida e contigua.
  * Forma non riconosciuta → MASK_FORMAT; mask non valida → codice del motivo di F03.
  * @param {unknown} text
@@ -125,7 +137,7 @@ export function parsePrefix(text, field = 'prefix') {
 export function parseMask(text, field = 'mask') {
   const raw = asText(text).trim();
   const parsed = parseIPv4(raw, field);
-  if (!parsed.ok) return fail(ERR.MASK_FORMAT, field, { text: raw });
+  if (!parsed.ok) return maskTextError(parsed.error, raw, field);
   const check = checkMask(parsed.value);
   if (!check.valid) {
     const reason = /** @type {{ code: string, params: Record<string, any> }} */ (check.reason);
@@ -143,7 +155,8 @@ export function parseMask(text, field = 'mask') {
 export function parsePrefixOrMask(text, field = 'prefix') {
   const raw = typeof text === 'number' ? text : asText(text).trim().replace(/,/g, '.');
   if (typeof raw === 'string' && raw.includes('.')) {
-    const m = parseMask(raw, field);
+    // "/255.255.255.0": la barra davanti alla mask è ammessa come davanti al prefisso (revisione A9)
+    const m = parseMask(raw.replace(/^\/\s*/, ''), field);
     return m.ok ? ok({ prefix: m.value, source: 'mask' }) : m;
   }
   const p = parsePrefix(raw, field);

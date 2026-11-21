@@ -79,6 +79,8 @@ export const STRINGS = {
   PREFIX_FORMAT: (p) => `"${p.text}" non è un prefisso: scrivi un numero da 0 a 32, con o senza la barra (/24).`,
   PREFIX_RANGE: (p) => `Il prefisso /${p.value} non esiste: va da /0 a /32.`,
   MASK_FORMAT: (p) => `"${p.text}" non è una mask: servono quattro numeri da 0 a 255 separati da punti, per esempio 255.255.255.0.`,
+  MASK_LEADING_ZERO: (p) =>
+    `Il ${ord(p.index)} ottetto della mask ha zeri iniziali (${p.value}): scrivi ${Number(p.value)}.`,
   MASK_OCTET_VALUE: (p) =>
     `Il ${ord(p.index)} ottetto della mask vale ${p.value} (${p.binary}): non è uno dei 9 valori ammessi (0, 128, 192, 224, 240, 248, 252, 254, 255).`,
   MASK_NONCONTIGUOUS: (p) =>

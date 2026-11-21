@@ -31,7 +31,7 @@ describe('10.2 F · validazione della mask (F03)', () => {
   test('testo senza forma di indirizzo → MASK_FORMAT', () => {
     expect(validateMask('255.255.0')).toEqual({ ok: false, error: { code: 'MASK_FORMAT', field: 'mask', params: { text: '255.255.0' } } });
     expect(errCode(validateMask(undefined))).toBe('MASK_FORMAT');
-    expect(errCode(validateMask('255.255.255.000'))).toBe('MASK_FORMAT');
+    expect(errCode(validateMask('255.255.255.000'))).toBe('MASK_LEADING_ZERO'); // revisione A9
   });
   test('le 33 mask valide restituiscono il prefisso giusto', () => {
     for (let p = 0; p <= 32; p++) {

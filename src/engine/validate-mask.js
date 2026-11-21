@@ -3,9 +3,9 @@
  * F03 · Validazione della mask (specifica tecnica, 3.6; cap. 6).
  * Una mask non valida è un risultato (`valid: false`), non un errore.
  */
-import { ok, fail, warn } from './result.js';
-import { ERR, WARN } from './errors.js';
-import { parseIPv4, octetToBinary } from './ipv4.js';
+import { ok, warn } from './result.js';
+import { WARN } from './errors.js';
+import { parseIPv4, octetToBinary, maskTextError } from './ipv4.js';
 import { MASK_OCTET_VALUES, checkMask, leadingOnes, maskOf, octetsOf } from './prefix.js';
 
 /**
@@ -41,6 +41,6 @@ export function validateMaskValue(m) {
 export function validateMask(text) {
   const raw = text === null || text === undefined ? '' : String(text).trim();
   const parsed = parseIPv4(raw, 'mask');
-  if (!parsed.ok) return fail(ERR.MASK_FORMAT, 'mask', { text: raw });
+  if (!parsed.ok) return maskTextError(parsed.error, raw, 'mask');
   return validateMaskValue(parsed.value);
 }
