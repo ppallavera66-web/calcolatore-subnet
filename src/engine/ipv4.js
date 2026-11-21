@@ -149,14 +149,17 @@ export function parsePrefixOrMask(text, field = 'prefix') {
 
 /**
  * Riconosce `a.b.c.d`, `a.b.c.d/n`, `a.b.c.d / n`, `a.b.c.d/m.m.m.m`, `a.b.c.d m.m.m.m`.
+ * Una mask non valida scritta nello stesso testo dà l'errore sul campo `maskField`
+ * (predefinito `mask`; le funzioni con più campi indicano il campo che contiene il testo, revisione A3).
  * @param {unknown} text
- * @param {{ ipField?: string, prefixField?: string }} [fields]
+ * @param {{ ipField?: string, prefixField?: string, maskField?: string }} [fields]
  * @returns {import('./result.js').Result<{ ip: number, prefix: number | null,
  *   prefixSource: 'cidr' | 'mask' | null }>}
  */
 export function parseAddressInput(text, fields = {}) {
   const ipField = fields.ipField ?? 'ip';
   const prefixField = fields.prefixField ?? 'prefix';
+  const maskField = fields.maskField ?? 'mask';
   const raw = asText(text).trim();
   if (raw === '') return fail(ERR.IP_EMPTY, ipField);
 
@@ -187,7 +190,7 @@ export function parseAddressInput(text, fields = {}) {
   if (!ip.ok) return ip;
   if (rest === null) return ok({ ip: ip.value, prefix: null, prefixSource: null });
   if (kind === 'mask') {
-    const m = parseMask(rest.replace(/,/g, '.'), 'mask');
+    const m = parseMask(rest.replace(/,/g, '.'), maskField);
     if (!m.ok) return m;
     return ok({ ip: ip.value, prefix: m.value, prefixSource: 'mask' });
   }
@@ -201,13 +204,13 @@ export function parseAddressInput(text, fields = {}) {
  * da due testi (indirizzo e prefisso o mask). Il secondo, se presente, prevale.
  * @param {unknown} addressText
  * @param {unknown} [prefixText]
- * @param {{ ipField?: string, prefixField?: string }} [fields]
+ * @param {{ ipField?: string, prefixField?: string, maskField?: string }} [fields]
  * @returns {import('./result.js').Result<{ ip: number, prefix: number }>}
  */
 export function parseAddressWithPrefix(addressText, prefixText, fields = {}) {
   const ipField = fields.ipField ?? 'ip';
   const prefixField = fields.prefixField ?? 'prefix';
-  const addr = parseAddressInput(addressText, { ipField, prefixField });
+  const addr = parseAddressInput(addressText, { ipField, prefixField, maskField: fields.maskField });
   if (!addr.ok) return addr;
   const hasSecond = prefixText !== undefined && prefixText !== null && asText(prefixText).trim() !== '';
   if (hasSecond) {

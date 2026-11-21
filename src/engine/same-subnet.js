@@ -112,7 +112,7 @@ export function sameSubnet({ a, prefixA, b, prefixB = null, gateway = null }) {
  */
 export function sameSubnetText({ a, prefixA, b, prefixB, gateway }) {
   const filled = (/** @type {unknown} */ v) => v !== undefined && v !== null && String(v).trim() !== '';
-  const pa = parseAddressInput(a, { ipField: 'a', prefixField: 'prefixA' });
+  const pa = parseAddressInput(a, { ipField: 'a', prefixField: 'prefixA', maskField: 'a' });
   if (!pa.ok) return pa;
   let pA = pa.value.prefix;
   if (filled(prefixA)) {
@@ -121,7 +121,7 @@ export function sameSubnetText({ a, prefixA, b, prefixB, gateway }) {
     pA = p.value.prefix;
   }
   if (pA === null) return fail(ERR.PREFIX_EMPTY, 'prefixA');
-  const pb = parseAddressInput(b, { ipField: 'b', prefixField: 'prefixB' });
+  const pb = parseAddressInput(b, { ipField: 'b', prefixField: 'prefixB', maskField: 'b' });
   if (!pb.ok) return pb;
   let pB = pb.value.prefix;
   if (filled(prefixB)) {

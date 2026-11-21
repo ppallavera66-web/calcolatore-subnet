@@ -3,7 +3,7 @@ import { describe, test, expect } from 'vitest';
 import fc from 'fast-check';
 import {
   parseIPv4, parsePrefix, parseMask, parsePrefixOrMask, parseAddressInput, parseAddressWithPrefix, parseCount,
-  toDotted, toBinaryDotted, octetToBinary, toHexDotted, toHex32,
+  toDotted, toBinaryDotted, octetToBinary, toHexDotted, toHex32, sameSubnetText, subdivideText, analyzeText, snippetsText,
 } from '../../src/engine/index.js';
 import { ip, errCode, val } from '../helpers.js';
 
@@ -82,6 +82,15 @@ describe('10.2 E · parsing degli indirizzi', () => {
       ok: false,
       error: { code: 'MASK_NONCONTIGUOUS', field: 'mask', params: { index: 3 } },
     });
+  });
+
+  test('revisione A3: la mask non valida è segnalata sul campo che contiene il testo', () => {
+    expect(parseAddressInput('10.0.0.1/255.255.250.0', { ipField: 'b', maskField: 'b' })).toMatchObject({ error: { code: 'MASK_OCTET_VALUE', field: 'b' } });
+    expect(sameSubnetText({ a: '10.0.0.1/24', b: '10.0.0.2 255.255.0.255' })).toMatchObject({ error: { code: 'MASK_NONCONTIGUOUS', field: 'b' } });
+    expect(sameSubnetText({ a: '10.0.0.1 255.0.255.0', b: '10.0.0.2/24' })).toMatchObject({ error: { field: 'a' } });
+    expect(subdivideText('10.0.0.0 255.255.0.255', '', '24')).toMatchObject({ error: { code: 'MASK_NONCONTIGUOUS', field: 'block' } });
+    expect(analyzeText('10.0.0.1 255.255.0.255')).toMatchObject({ error: { field: 'ip' } });
+    expect(snippetsText('10.0.0.0 255.0.255.0')).toMatchObject({ error: { field: 'network' } });
   });
 });
 

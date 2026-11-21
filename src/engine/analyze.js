@@ -88,6 +88,6 @@ export function analyze(ip, prefix) {
  * @param {unknown} [prefixText] `n`, `/n` o mask; se presente prevale su quello nel primo campo
  */
 export function analyzeText(ipText, prefixText) {
-  const input = parseAddressWithPrefix(ipText, prefixText);
+  const input = parseAddressWithPrefix(ipText, prefixText, { maskField: 'ip' });
   return input.ok ? analyze(input.value.ip, input.value.prefix) : input;
 }

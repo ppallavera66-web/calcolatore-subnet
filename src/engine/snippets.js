@@ -91,6 +91,6 @@ export function snippets(ip, prefix, options = {}) {
  * @param {Parameters<typeof snippets>[2]} [options]
  */
 export function snippetsText(networkText, prefixText, options) {
-  const input = parseAddressWithPrefix(networkText, prefixText, { ipField: 'network', prefixField: 'prefix' });
+  const input = parseAddressWithPrefix(networkText, prefixText, { ipField: 'network', prefixField: 'prefix', maskField: 'network' });
   return input.ok ? snippets(input.value.ip, input.value.prefix, options) : input;
 }

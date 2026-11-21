@@ -112,7 +112,7 @@ export function subdivide(ip, blockPrefix, newPrefix, page = {}) {
  * @param {{ offset?: number, limit?: number }} [page]
  */
 export function subdivideText(blockText, blockPrefixText, newPrefixText, page) {
-  const block = parseAddressWithPrefix(blockText, blockPrefixText, { ipField: 'block', prefixField: 'prefix' });
+  const block = parseAddressWithPrefix(blockText, blockPrefixText, { ipField: 'block', prefixField: 'prefix', maskField: 'block' });
   if (!block.ok) return block;
   const np = parsePrefixOrMask(newPrefixText, 'newPrefix');
   if (!np.ok) return np;
