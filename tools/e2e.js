@@ -1317,6 +1317,23 @@ async function main() {
     await ctx.close();
   });
 
+  await check('guida al subnetting a 390 px: blocchi binari stretti (fino a 40 caratteri senza scorrere, anche negli esercizi), gli altri scorrono da tastiera (S-bin)', async () => {
+    const { ctx, page } = await open(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await go(page, '#/guide/subnetting');
+    await page.waitForTimeout(300);
+    const st = await page.evaluate(() => [...document.querySelectorAll('.guide-body pre.bin')].map((p) => ({
+      len: Math.max(...(p.textContent ?? '').split('\n').map((l) => l.length)),
+      scrolls: p.scrollWidth > p.clientWidth + 1,
+      keyboard: p.tabIndex >= 0,
+      font: parseFloat(getComputedStyle(p).fontSize),
+    })));
+    const shortScroll = st.filter((x) => x.len <= 40 && x.scrolls).length;
+    assert(shortScroll === 0, `${shortScroll} blocchi corti scorrono ancora`);
+    assert(st.filter((x) => x.scrolls).every((x) => x.keyboard), 'blocco che scorre non raggiungibile da tastiera');
+    assert(st.every((x) => x.font >= 12), 'carattere sotto i 12 px');
+    await ctx.close();
+  });
+
   await check('stampa di Suddivisione: il prefisso del blocco con la barra (C17)', async () => {
     const { ctx, page } = await open(browser);
     await go(page, '#/pianifica/suddivisione?b=192.168.0.0&p=24&np=26');

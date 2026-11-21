@@ -138,6 +138,18 @@
 .guide-body dl.facts dt{font-weight:600;color:var(--strong)}
 .guide-body dl.facts dd{margin:0}
 @media (max-width:560px){ .guide-body dl.facts{grid-template-columns:1fr} .guide-body dl.facts dd{margin-bottom:6px} }
+/* telefono: blocchi binari più stretti, così la maggior parte entra senza scorrere; l'allineamento in colonna
+   resta (andare a capo lo romperebbe), i più lunghi scorrono in orizzontale anche da tastiera (segnalazione S-bin) */
+@media (max-width:560px){
+  .guide-body pre.bin{font-size:12px;line-height:1.6;padding:10px 10px 10px 12px;
+    /* ombra sul bordo che ha ancora testo nascosto: si vede che il blocco scorre (tecnica con background-attachment) */
+    background:
+      linear-gradient(to right,var(--surface) 30%,transparent) left center/24px 100% no-repeat local,
+      linear-gradient(to left,var(--surface) 30%,transparent) right center/24px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%,var(--line-strong),transparent) left center/10px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%,var(--line-strong),transparent) right center/10px 100% no-repeat scroll,
+      var(--surface)}
+}
 
 /* ---------- termini del glossario e riquadro ---------- */
 .guide-body .gl-term{border-bottom:1px dotted var(--host);cursor:help;border-radius:2px}
