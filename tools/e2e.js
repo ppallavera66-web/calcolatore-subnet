@@ -1143,6 +1143,200 @@ async function main() {
     await ctx.close();
   });
 
+  console.log('\nRevisione finale (v1.1)');
+  await check('mask non valida nel campo B di Stessa subnet e nel Blocco di Suddivisione: errore sotto quel campo (A3)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/stessa?a=10.0.0.1&pa=24&b=10.0.0.2%20255.255.0.255');
+    await page.waitForTimeout(300);
+    const inv = await page.evaluate(() => [...document.querySelectorAll('input[aria-invalid="true"]')].map((i) => document.querySelector(`label[for="${i.id}"]`)?.textContent?.trim()));
+    assert(inv.length === 1 && inv[0]?.startsWith('Host B'), `campi con errore: ${JSON.stringify(inv)}`);
+    await go(page, '#/pianifica/suddivisione?b=10.0.0.0%20255.255.0.255&np=24');
+    await page.waitForTimeout(300);
+    const inv2 = await page.evaluate(() => [...document.querySelectorAll('input[aria-invalid="true"]')].map((i) => document.querySelector(`label[for="${i.id}"]`)?.textContent?.trim()));
+    assert(inv2.length === 1 && inv2[0]?.startsWith('Blocco'), `campi con errore: ${JSON.stringify(inv2)}`);
+    await ctx.close();
+  });
+
+  await check('messaggi brevi solo dopo la chiusura della finestra: piano salvato, sessione esportata (C8)', async () => {
+    const { ctx, page } = await open(browser, { acceptDownloads: true });
+    await go(page, '#/pianifica/suddivisione?b=10.40.0.0&p=16&np=24');
+    await page.evaluate(() => {
+      // @ts-ignore registro di prova
+      window.__toasts = [];
+      const el = /** @type {Element} */ (document.querySelector('.toast'));
+      new MutationObserver(() => {
+        // @ts-ignore
+        window.__toasts.push({ text: el.textContent, modal: !!document.querySelector('dialog[open]') });
+      }).observe(el, { childList: true, characterData: true, subtree: true });
+    });
+    await page.getByRole('button', { name: 'Salva come piano' }).click();
+    await page.click('dialog[open] .btn-primary');
+    await page.waitForSelector('.plan-current');
+    await hashTo(page, '#/impostazioni');
+    await page.getByRole('button', { name: 'Esporta sessione' }).click();
+    const file = await download(page, 'dialog[open] button[type=submit]');
+    await page.waitForTimeout(300);
+    await page.setInputFiles('input[type=file]', { name: file.name, mimeType: 'application/json', buffer: Buffer.from(file.text) });
+    await page.waitForSelector('dialog[open]');
+    await page.getByRole('button', { name: 'Unisci' }).click();
+    await page.waitForTimeout(600);
+    // @ts-ignore
+    const log = /** @type {{ text: string, modal: boolean }[]} */ (await page.evaluate(() => window.__toasts));
+    assert(log.some((x) => x.text === 'Piano salvato') && log.some((x) => x.text?.startsWith('Sessione esportata')) && log.some((x) => x.text?.startsWith('Importat')), `messaggi: ${JSON.stringify(log)}`);
+    assert(log.every((x) => !x.modal), `messaggio con la finestra aperta: ${JSON.stringify(log)}`);
+    await ctx.close();
+  });
+
+  await check('barra di export: un solo pulsante nell\'ordine di Tab, frecce, Inizio e Fine (C18)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/impostazioni');
+    await page.getByRole('switch', { name: 'Export' }).click();
+    await hashTo(page, '#/calcola/analisi?ip=192.168.10.75&p=26');
+    await page.waitForSelector('.export-toolbar button');
+    const tabbable = await page.evaluate(() => [...document.querySelectorAll('.export-toolbar button')].filter((b) => /** @type {HTMLElement} */ (b).tabIndex === 0).length);
+    assert(tabbable === 1, `${tabbable} pulsanti nell'ordine di Tab`);
+    await page.focus('.export-toolbar button');
+    const fmt = () => page.evaluate(() => /** @type {HTMLElement} */ (document.activeElement).dataset.format);
+    await page.keyboard.press('ArrowRight');
+    assert((await fmt()) === 'csv', `freccia destra: ${await fmt()}`);
+    await page.keyboard.press('End');
+    assert((await fmt()) === 'print', `Fine: ${await fmt()}`);
+    await page.keyboard.press('ArrowRight');
+    assert((await fmt()) === 'copy', `dopo l'ultimo si torna al primo: ${await fmt()}`);
+    await page.keyboard.press('ArrowLeft');
+    assert((await fmt()) === 'print', `freccia sinistra: ${await fmt()}`);
+    await page.keyboard.press('Home');
+    assert((await fmt()) === 'copy', `Inizio: ${await fmt()}`);
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Tab');
+    assert(!(await page.evaluate(() => !!document.activeElement?.closest('.export-toolbar'))), 'Tab resta nella barra');
+    await page.keyboard.press('Shift+Tab');
+    assert((await fmt()) === 'csv', `Maiusc+Tab torna sull'ultimo usato: ${await fmt()}`);
+    await ctx.close();
+  });
+
+  await check('guide a 390 px: selettore del tema, collegamenti rapidi e riquadro del glossario da 44 px (C11)', async () => {
+    const { ctx, page } = await open(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await go(page, '#/guide/subnetting/cap-7');
+    await page.click('.guide-toc-mobile > summary');
+    const sizes = await page.evaluate(() => [...document.querySelectorAll('.guide-toc-mobile .guide-theme, .guide-toc-mobile .guide-quick a')].map((e) => Math.round(e.getBoundingClientRect().height)));
+    assert(sizes.length >= 3 && sizes.every((x) => x >= 44), `altezze: ${sizes}`);
+    await page.click('.guide-toc-mobile > summary');
+    await page.locator('#cap-7 .gl-term').first().focus();
+    await page.waitForSelector('.gl-pop:not([hidden])');
+    const pop = await page.evaluate(() => [...document.querySelectorAll('.gl-pop:not([hidden]) a')].map((e) => Math.round(e.getBoundingClientRect().height)));
+    assert(pop.length >= 1 && pop.every((x) => x >= 44), `riquadro del glossario: ${pop}`);
+    await ctx.close();
+  });
+
+  await check('frammento normalizzato: pagina fuori intervallo e caso sconosciuto (C12)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=24&pg=999');
+    await page.waitForTimeout(500);
+    assert((await page.evaluate(() => location.hash)) === '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=24', `frammento: ${await page.evaluate(() => location.hash)}`);
+    await go(page, '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=30&pg=xyz');
+    await page.waitForTimeout(500);
+    assert(!(await page.evaluate(() => location.hash)).includes('pg='), `frammento: ${await page.evaluate(() => location.hash)}`);
+    await go(page, '#/pianifica/inverso?caso=zz&h=50');
+    await page.waitForTimeout(300);
+    assert((await page.evaluate(() => location.hash)) === '#/pianifica/inverso?h=50', `frammento: ${await page.evaluate(() => location.hash)}`);
+    await ctx.close();
+  });
+
+  await check('piano eliminato: il collegamento di Suddivisione nella barra non lo riapre (C13)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/suddivisione?b=10.40.0.0&p=16&np=24');
+    await page.getByRole('button', { name: 'Salva come piano' }).click();
+    await page.click('dialog[open] .btn-primary');
+    await page.waitForSelector('.plan-current');
+    await page.click('.side-tab[href^="#/pianifica/piani"]');
+    await page.getByRole('button', { name: 'Elimina' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Elimina' }).click();
+    await page.waitForSelector('.empty-card');
+    await page.waitForTimeout(100);
+    const href = await page.getAttribute('.side-tab[href^="#/pianifica/suddivisione"]', 'href');
+    assert(href === '#/pianifica/suddivisione?b=10.40.0.0&p=16&np=24', `collegamento: ${href}`);
+    await ctx.close();
+  });
+
+  await check('annunci senza ripetizioni: cambio di metodo e "Trova" (C14); "Trova" fuori dal blocco toglie l\'evidenziazione (C19)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/analisi?ip=172.16.45.200&p=20&did=1');
+    await page.waitForTimeout(1000);
+    const liveText = () => page.evaluate(() => document.querySelector('[aria-live="polite"].sr-only')?.textContent ?? '');
+    const before = await liveText();
+    await page.evaluate(() => {
+      // @ts-ignore
+      window.__live = 0;
+      new MutationObserver(() => {
+        // @ts-ignore
+        window.__live++;
+      }).observe(/** @type {Element} */ (document.querySelector('[aria-live="polite"].sr-only')), { childList: true, characterData: true, subtree: true });
+    });
+    await page.getByRole('radio', { name: 'Numero magico' }).click();
+    await page.waitForTimeout(1000);
+    // @ts-ignore
+    assert((await page.evaluate(() => window.__live)) === 0 && (await liveText()) === before, 'il cambio di metodo ripete il risultato');
+    await go(page, '#/pianifica/suddivisione?b=10.0.0.0&p=16&np=24');
+    await page.getByLabel("Vai alla subnet che contiene l'IP").fill('10.0.5.9');
+    await page.getByRole('button', { name: 'Trova' }).click();
+    await page.waitForSelector('tr.hl');
+    await page.getByLabel("Vai alla subnet che contiene l'IP").fill('192.168.1.1');
+    await page.getByRole('button', { name: 'Trova' }).click();
+    await page.waitForTimeout(200);
+    assert((await page.locator('tr.hl, tr[aria-current]').count()) === 0, 'riga ancora evidenziata');
+    assert((await page.textContent('.find-msg'))?.includes('non appartiene al blocco'), 'messaggio assente');
+    await ctx.close();
+  });
+
+  await check('cap. 14: "wildcard e ACL" apre Analisi con la sezione F10 aperta; f10 segue apertura e chiusura (C9)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/guide/subnetting/cap-14');
+    await page.click('a[href*="ip=192.168.10.64"][href*="f10=1"]');
+    await page.waitForSelector('.view-analisi details.snip');
+    await page.waitForTimeout(300);
+    assert(await page.evaluate(() => /** @type {HTMLDetailsElement} */ (document.querySelector('details.snip')).open), 'sezione F10 chiusa');
+    assert((await page.textContent('details.snip'))?.includes('access-list 10 permit 192.168.10.64 0.0.0.63'), 'ACL assente');
+    await page.click('details.snip > summary');
+    await page.waitForTimeout(300);
+    assert(!(await page.evaluate(() => location.hash)).includes('f10='), 'f10 resta dopo la chiusura');
+    await ctx.close();
+  });
+
+  await check('"Apri in Analisi" senza un IP: nessun errore finché non si preme Invio (C6)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/inverso?h=50');
+    await page.getByRole('button', { name: 'Apri in Analisi' }).click();
+    await page.waitForSelector('.view-analisi');
+    await page.waitForTimeout(700);
+    assert((await page.locator('.view-analisi input[aria-invalid="true"]').count()) === 0, 'errore mostrato subito');
+    assert(await page.isVisible('.view-analisi .examples'), 'esempi assenti');
+    await page.getByLabel('Indirizzo IP').press('Enter');
+    await page.waitForTimeout(200);
+    assert((await page.locator('.view-analisi input[aria-invalid="true"]').count()) === 1, 'Invio senza IP non mostra l\'errore');
+    await ctx.close();
+  });
+
+  await check('stampa di Suddivisione: il prefisso del blocco con la barra (C17)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/suddivisione?b=192.168.0.0&p=24&np=26');
+    await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+    const head = await page.textContent('.print-head');
+    assert(head?.includes('Blocco: 192.168.0.0/24') && head.includes('Nuovo prefisso: /26'), `intestazione: ${head}`);
+    await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+    await ctx.close();
+  });
+
+  await check('Mask: con una mask non valida la riga binaria dei passaggi è bit per bit (F03)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/calcola/mask?m=255.255.0.255&did=1');
+    await page.waitForSelector('.steps-panel .bitrow');
+    const kinds = await page.evaluate(() => [...document.querySelectorAll('.steps-panel .bitrow .bits span')].map((s) => `${s.className}:${s.textContent}`).join(' '));
+    assert(kinds.endsWith('b-host:00000000 b-sep:. b-net:11111111'), `segmenti: ${kinds}`);
+    assert((await page.textContent('.steps-panel .bitrow .sr-only'))?.includes('bit per bit'), 'testo per i lettori di schermo');
+    await ctx.close();
+  });
+
   console.log('\nStampa (9.9)');
   await check('stampa: fondo chiaro, navigazione nascosta, intestazione, F10 aperto, PDF', async () => {
     const { ctx, page } = await open(browser, { colorScheme: 'dark' });
