@@ -86,3 +86,33 @@ Durante la fase sono state aggiunte anche due prove e2e che non vengono dalla re
 - **C18**: la barra di export ha `role="toolbar"` ma non si naviga con le frecce.
 - **C19**: "Trova" con un IP fuori dal blocco lascia evidenziata la riga precedente.
 - **C6 (resto)**: senza IP in Analisi, "Apri in Analisi" mostra subito l'errore; il pulsante c'è solo nel caso A (la guida all'uso ne parla in generale).
+
+## Esito nella fase 8 (v1.1.0)
+
+Tutte le segnalazioni "Per la fase 8" sono state chiuse il 21 novembre 2026, ognuna con un test o una prova nel browser (`CHANGELOG.md`, sezione 1.1.0).
+
+| ID | Esito | Prova |
+|---|---|---|
+| A3 | `maskField` in `parseAddressInput`: l'errore va sotto il campo che contiene la mask (B, Blocco, IP, rete dello snippet) | `ipv4.test.js`; e2e "mask non valida nel campo B…" |
+| A4 | `parseCount` oltre 2^32 → NUMBER_RANGE con il testo scritto | `ipv4.test.js` |
+| A7 | frasi corrette ai bordi (binario, numero magico, wildcard, F06 con 2 subnet) | `steps.test.js` (proprietà sui testi) |
+| A8 | plurali, maiuscole, "ma ne servono", migliaia, caso C, ottetto nella mask non valida | `i18n.test.js` |
+| A9 | MASK_LEADING_ZERO; "/255.255.255.0" nel campo del prefisso | `ipv4.test.js`, `validate-mask.test.js` |
+| A10 | `subnetAt`, `indexOf` e `iterateSubnets` robusti fuori contratto | `subdivide.test.js` |
+| A11 | P4 con un riferimento indipendente; P10 a 1.000 esecuzioni; oracolo esteso a F04 (ambito, principale), F03 (motivo, suggerimenti, wildcard), F01 (offset, ruolo, adiacenti) | `prefix.test.js`, `subdivide.test.js`, `oracle.test.js` (82.575 casi, 0 differenze) |
+| A12 | specifica 4.1 aggiornata | — |
+| M2 | ordinamento con `Date.parse` | `session.test.js` |
+| M3 | conteggio di cronologia illeggibile ed etichette scartate all'avvio | `persistence.test.js` |
+| M4 | campi in più nell'intestazione della busta rifiutati (decisione di Paolo) | `envelope.test.js` |
+| C6 | senza IP nessun errore prima di Invio; guida all'uso precisata | e2e "Apri in Analisi senza un IP" |
+| C8 | messaggi brevi rimandati alla chiusura della finestra modale. Nelle prove il caso non si è presentato (le finestre si chiudono già prima del messaggio): la correzione è una garanzia | e2e "messaggi brevi solo dopo la chiusura" |
+| C9 | parametro `f10=1` nei collegamenti del cap. 14 | e2e "cap. 14" |
+| C11 | 44 px per selettore del tema, collegamenti rapidi e riquadro del glossario | e2e "guide a 390 px…" |
+| C12 | `pg` e `caso` riscritti nel frammento | `router.test.js`; e2e "frammento normalizzato" |
+| C13 | `dropMissingPlan` | `persistence.test.js`; e2e "piano eliminato" |
+| C14 | lo stesso annuncio non si ripete | e2e "annunci senza ripetizioni" |
+| C15 | guida all'uso allineata all'app; test sui nomi dei pulsanti | `guides.test.js` |
+| C16 | "v0.4 · versione di studio" (decisione di Paolo) | `guides.test.js` |
+| C17 | "/24" nell'intestazione di stampa | e2e "stampa di Suddivisione" |
+| C18 | modello ARIA della toolbar (tabindex mobile, frecce, Inizio, Fine) | e2e "barra di export…" |
+| C19 | "Trova" fuori dal blocco toglie l'evidenziazione | e2e "annunci senza ripetizioni…" |

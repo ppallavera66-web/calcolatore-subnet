@@ -1,15 +1,15 @@
 # Verifica dei requisiti della v1
 
-Versione 1.0.0 · fase 7 · 19 novembre 2026
+Versione 1.1.0 · fase 8 · 21 novembre 2026 (prima stesura: 1.0.0, fase 7)
 
 Requisiti presi da `01_specifiche_progetto.md` (sezioni 2–6) e da `02_specifica_tecnica_v1.md` (sezioni 0 e 9). Per ogni requisito: dove è fatto, come è verificato, esito.
 
 **Verifiche:**
 - **T** = test di Vitest (`npm test`, file in `tests/`);
-- **O** = oracolo Python (`tools/oracle.py`, 74.535 casi);
+- **O** = oracolo Python (`tools/oracle.py`, 82.575 casi dalla v1.1; 74.535 nella v1.0);
 - **E** = prova nel browser (`npm run e2e`, prove in `tools/e2e.js`, Chrome da `file://`);
 - **A** = axe-core WCAG 2.2 AA dentro le prove E;
-- **R** = revisione indipendente della fase 7 (`docs/revisione-fase7.md`);
+- **R** = revisione indipendente della fase 7 (`docs/revisione-fase7.md`), con le segnalazioni chiuse nella fase 8;
 - **M** = prova manuale.
 
 **Esito:**
@@ -64,7 +64,7 @@ Requisiti presi da `01_specifiche_progetto.md` (sezioni 2–6) e da `02_specific
 | F01 | Analisi subnet | `engine/analyze.js`, `views/analisi.js` | T `analyze.test.js` (casi A–D della 10.2, proprietà P1–P6, P13); O; E | ✓ |
 | F02 | Conversioni decimale/binario/esadecimale, CIDR/mask | `engine/convert.js`, `views/conversioni.js` | T `convert.test.js`, `prefix.test.js` (P7, P8); O; E "Conversioni" | ✓ |
 | F03 | Validazione della mask con motivazione | `engine/validate-mask.js`, `views/mask.js` | T `validate-mask.test.js` (33 mask, 256 valori); O | ✓ |
-| F04 | Tipo di indirizzo | `engine/classify.js`, `special-blocks.js`, Analisi | T `classify.test.js` (caso G); O (blocchi speciali) | ✓ |
+| F04 | Tipo di indirizzo | `engine/classify.js`, `special-blocks.js`, Analisi | T `classify.test.js` (caso G, con 192.0.0.0/24 e 198.18.0.0/15 dalla v1.1); O (blocchi speciali, ambito e blocco principale) | ✓ |
 | F05 | Calcolo inverso | `engine/inverse.js`, `views/inverso.js` | T `inverse.test.js` (caso H, P9); O; E "Calcolo inverso" | ✓ |
 | F06 | Suddivisione ed elenco delle subnet | `engine/subdivide.js`, `views/suddivisione.js` | T `subdivide.test.js` (caso I, P10); O; E "vai alla subnet che contiene l'IP", intervalli di export | ✓ |
 | F07 | Stessa subnet, anche con prefissi diversi | `engine/same-subnet.js`, `views/stessa.js` | T `same-subnet.test.js` (caso J, P11); O | ✓ |
@@ -108,7 +108,7 @@ Requisiti presi da `01_specifiche_progetto.md` (sezioni 2–6) e da `02_specific
 |---|---|---|---|---|
 | 9.1 | Mappa delle schermate: Calcola (4 schede), Pianifica (3), Guide (2), Impostazioni; F04 e F10 in Analisi; cronologia; piani salvati | `ui/views/index.js`, viste | T `router.test.js` ("ogni vista dichiarata ha una sezione"); E schede, cronologia, piani | ✓ |
 | 9.2 | Layout: barra in basso < 720 px con aree sicure, schede in alto 720–979, barra laterale ≥ 980; "torna su" | `styles/layout.css`, `ui/shell.js` | E layout a 390, 800, 1280 px senza scorrimento orizzontale | ✓ |
-| 9.3 | Navigazione con frammento: rotte, `did=1`, `metodo=`, parametri validati dal motore, sostituzione mentre si scrive, nuova voce al cambio di scheda, indirizzo sconosciuto → Analisi | `ui/router.js` | T `router.test.js`; E "schede, tasto indietro", "collegamento con input non validi", piano con parametri diversi (R: I3, C5) | ✓ · ◐ frammento non normalizzato con `pg` fuori intervallo (C12, fase 8) |
+| 9.3 | Navigazione con frammento: rotte, `did=1`, `metodo=`, parametri validati dal motore, sostituzione mentre si scrive, nuova voce al cambio di scheda, indirizzo sconosciuto → Analisi | `ui/router.js` | T `router.test.js`; E "schede, tasto indietro", "collegamento con input non validi", piano con parametri diversi (R: I3, C5) | ✓ (C12 chiusa nella v1.1: `pg` fuori intervallo e `caso` sconosciuto riscritti, E "frammento normalizzato") |
 | 9.4 | Componenti: campo IP (virgola, incolla `IP/n` e `IP mask`, errore dopo 400 ms), prefisso o mask con cursore e − / +, calcolo dal vivo, scheda risultato con copia, pannello dei passaggi, barra di export (pannello dal basso su telefono), "?", interruttori `role="switch"`, `<dialog>`, `aria-live`, esempi cliccabili | `ui/components/**` | E "calcolo dal vivo", "incolla IP mask", "copia", "telefono: Esporta", "interruttori"; A | ✓ |
 | 9.5 | Impostazioni: didattica, metodo, export, memorizza, tema; Dati sempre visibili; Informazioni con versione, data di build, licenze e repository | `views/impostazioni.js` | E Impostazioni; T `strings-ui.test.js` | ✓ |
 | 9.6 | Temi con le variabili della guida, `data-theme`, stampa su fondo chiaro, tema salvato solo con Memorizza i dati e condiviso con le guide | `styles/tokens.css`, `ui/theme.js` | T `contrast.test.js`; E temi, stampa, "tema dall'indice" | ✓ |

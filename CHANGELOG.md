@@ -2,6 +2,46 @@
 
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); versioni secondo [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.1.0] · 21 novembre 2026
+
+Revisione finale tecnica: le segnalazioni "Per la fase 8" della revisione indipendente ([`docs/revisione-fase7.md`](docs/revisione-fase7.md)) e quelle raccolte nello stato del progetto. Nessuna funzione nuova, nessun cambiamento ai formati dei file, tranne la busta cifrata, che rifiuta i campi in più.
+
+### Calcoli e passaggi
+- **Tipo di indirizzo**: due blocchi speciali in più, 192.0.0.0/24 (assegnazioni IETF, RFC 6890) e 198.18.0.0/15 (benchmark, RFC 2544), anche nella tabella del cap. 4.
+- **Errori sul campo giusto**: una mask non valida scritta insieme all'indirizzo (per esempio nel campo B di Stessa subnet o nel Blocco di Suddivisione) dà l'errore sotto quel campo.
+- **Conteggi enormi**: oltre 2^32 host o subnet il messaggio dice che il numero è troppo grande, con il testo scritto, invece di un valore arrotondato.
+- **Mask**: con zeri iniziali (255.255.255.000) un messaggio che indica l'ottetto; "/255.255.255.0" accettata nel campo del prefisso.
+- **Passaggi didattici**:
+  - frasi vere anche ai bordi: niente "255 a destra" senza ottetti a destra, niente "scavalca" nell'ultimo blocco dello spazio IPv4, sequenza con 2 subnet;
+  - plurali, maiuscole e formulazioni ("1 bit preso in prestito", "ne avanza 1", "ma ne servono 3", caso C senza "al massimo/almeno");
+  - con una mask non valida la riga binaria mostra 1 e 0 bit per bit, senza un confine rete/host.
+
+### Dati
+- Cronologia e piani ordinati per istante, anche con i millisecondi facoltativi.
+- All'avvio l'avviso degli elementi esclusi conta anche la cronologia illeggibile e le etichette scartate.
+- **Busta cifrata**: un campo in più nell'intestazione (non autenticato) fa rifiutare il file prima della passphrase.
+
+### Interfaccia e accessibilità
+- Barra di export navigabile con le frecce (modello ARIA della toolbar).
+- Messaggi brevi emessi dopo la chiusura delle finestre, così i lettori di schermo li leggono; lo stesso annuncio non si ripete.
+- Guide a 390 px: selettore del tema, collegamenti rapidi e riquadro del glossario da 44 px.
+- Frammento riscritto con una pagina fuori intervallo o un caso sconosciuto; un piano eliminato non resta nei collegamenti.
+- Suddivisione: "Trova" fuori dal blocco toglie l'evidenziazione; stampa con "/24".
+- Analisi: `f10=1` apre "Wildcard e configurazione" (collegamenti del cap. 14); senza IP nessun errore finché non si preme Invio.
+
+### Guide
+- **Guida al subnetting v0.4, versione di studio** (non più "da revisionare"): convenzione di /0 nel cap. 6, righe /0–/7 nella cheat sheet, nuovi blocchi nel cap. 4, blocchi binari più stretti sul telefono.
+- **Guida all'uso**: ordine dei pulsanti di export, "Vai alla validazione della mask", "Apri in Analisi", frecce nella barra; ogni nome di pulsante citato è verificato contro l'interfaccia.
+
+### Verifica
+- 1.072 test (erano 1.037), anche con altri tre semi per le proprietà; copertura 99,6% istruzioni, 97,2% rami, 99,8% funzioni.
+- Oracolo esteso: ambito e blocco principale di F04, motivo e suggerimenti di F03, offset, ruolo e reti adiacenti di F01 (82.575 casi, 0 differenze).
+- 64 prove nel browser (erano 52), in Chrome da `file://`.
+
+### Ancora da fare
+- Prove in Edge, Firefox, Safari e sui telefoni ([`docs/verifiche-browser-fase5.md`](docs/verifiche-browser-fase5.md)); lettori di schermo reali.
+- Revisione dei contenuti delle due guide e dei testi con le note di Paolo: v1.2.
+
 ## [1.0.0] · 19 novembre 2026
 
 Prima versione pubblica: un unico file HTML che funziona offline, da disco o da un web server.
@@ -58,4 +98,5 @@ Prima versione pubblica: un unico file HTML che funziona offline, da disco o da 
 - Manifest PWA: non nella v1 ([`docs/decisione-pwa.md`](docs/decisione-pwa.md)).
 - Prove in Edge, Firefox, Safari e sui telefoni: da fare ([`docs/verifiche-browser-fase5.md`](docs/verifiche-browser-fase5.md)).
 
+[1.1.0]: https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.1.0
 [1.0.0]: https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.0.0
