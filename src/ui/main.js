@@ -13,7 +13,7 @@ import '../guides/guide.css';
 
 import { h, replace, debounce, reducedMotion } from './dom.js';
 import { icon } from './icons.js';
-import { createStore, initialState, setInputs, addHistory, newId } from './state.js';
+import { createStore, initialState, setInputs, addHistory, newId, dropMissingPlan } from './state.js';
 import { createPersistence } from './persistence.js';
 import { createStorage } from '../storage/storage.js';
 import { createRouter, routeTo, buildHash } from './router.js';
@@ -33,15 +33,46 @@ const store = createStore(initialState());
 const live = h('div', { class: 'sr-only', 'aria-live': 'polite', 'aria-atomic': 'true' });
 const toastEl = h('div', { class: 'toast', role: 'status', 'aria-live': 'polite' });
 /** L'ultimo annuncio vince: mentre si scrive non si legge ogni risultato intermedio. */
-const announce = debounce((/** @type {string} */ text) => {
+const announceNow = debounce((/** @type {string} */ text) => {
+  if (text === lastAnnounced) return;
+  lastAnnounced = text;
   live.textContent = '';
   setTimeout(() => {
     live.textContent = text;
   }, 40);
 }, 700);
+/**
+ * Lo stesso testo di prima non si ripete (cambio di metodo, "Trova" sulla stessa suddivisione:
+ * il risultato non è cambiato, revisione C14). Cambiando schermata si riparte da zero.
+ */
+let lastAnnounced = '';
+window.addEventListener('hashchange', () => {
+  lastAnnounced = '';
+});
+const announce = (/** @type {string} */ text) => announceNow(text);
 /** @type {ReturnType<typeof setTimeout> | undefined} */
 let toastTimer;
+/**
+ * Finestra modale aperta, se c'è. Con una modale aperta il resto della pagina è inerte e i lettori
+ * di schermo non leggono il messaggio: si aspetta la chiusura (revisione C8).
+ * @returns {HTMLDialogElement | null}
+ */
+function openModal() {
+  for (const d of document.querySelectorAll('dialog[open]')) {
+    try {
+      if (d.matches(':modal')) return /** @type {HTMLDialogElement} */ (d);
+    } catch {
+      return /** @type {HTMLDialogElement} */ (d);
+    }
+  }
+  return null;
+}
 function toast(/** @type {string} */ text) {
+  if (openModal()) {
+    // si riprova finché la finestra non è chiusa (con close() o tolta dalla pagina)
+    setTimeout(() => toast(text), 150);
+    return;
+  }
   toastEl.textContent = text;
   toastEl.classList.add('show');
   clearTimeout(toastTimer);
@@ -165,6 +196,8 @@ applyTheme(document.documentElement, store.get().settings.theme);
 store.subscribe((s, prev) => {
   if (s.settings.theme !== prev.settings.theme) applyTheme(document.documentElement, s.settings.theme);
   if (s.inputs !== prev.inputs) shell.refreshLinks();
+  // piani cambiati da import, cancellazione o altra scheda: niente collegamenti a un piano che non c'è
+  if (s.plans !== prev.plans && dropMissingPlan(s) !== s) queueMicrotask(() => store.set(dropMissingPlan));
 });
 
 // ---------------------------------------------------------------- stampa (9.9): intestazione con vista, input e data
