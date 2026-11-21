@@ -83,6 +83,31 @@ describe('oracolo · altre funzioni', () => {
     });
   });
 
+  test('F03 · motivo, suggerimenti e avviso di wildcard (revisione A11)', () => {
+    compare('F03 motivo e suggerimenti', MISC.masks, ([m, , reason, suggested, wildcardPrefix]) => {
+      const r = validateMaskValue(m);
+      const v = r.value;
+      const gotReason = v.reason ? [v.reason.code, v.reason.params.index] : null;
+      const gotSuggested = v.suggestions.map((s) => s.prefix);
+      const w = r.warnings.find((x) => x.code === 'W_LOOKS_LIKE_WILDCARD');
+      const gotWildcard = w ? w.params.prefix : null;
+      const got = [gotReason, gotSuggested, gotWildcard];
+      const exp = [reason, suggested, wildcardPrefix];
+      return JSON.stringify(got) === JSON.stringify(exp) ? null : `${toDotted(m)}: ${JSON.stringify(got)} ≠ ${JSON.stringify(exp)}`;
+    });
+  });
+
+  test('F01 · offset, ruolo e reti adiacenti (revisione A11)', () => {
+    compare('F01 offset, ruolo, adiacenti', MISC.f01extra, ([ipv, p, offset, role, prev, next]) => {
+      const r = analyze(ipv, p);
+      if (!r.ok) return `${toDotted(ipv)}/${p}: errore`;
+      const v = r.value;
+      const got = [v.offset, v.role, v.previousNetwork, v.nextNetwork];
+      const exp = [offset, role, prev, next];
+      return JSON.stringify(got) === JSON.stringify(exp) ? null : `${toDotted(ipv)}/${p}: ${JSON.stringify(got)} ≠ ${JSON.stringify(exp)}`;
+    });
+  });
+
   test('F05 · host richiesti → prefisso', () => {
     compare('F05 host → prefisso', MISC.hosts, ([n, p]) => {
       const r = prefixForHosts(n);
@@ -126,6 +151,14 @@ describe('oracolo · altre funzioni', () => {
       const codes = new Set(classify(ip).value.blocks.map((b) => b.code));
       const bad = Object.entries(flags).filter(([code, expected]) => codes.has(code) !== expected);
       return bad.length ? `${toDotted(ip)}: ${bad.map(([c]) => c).join(', ')}` : null;
+    });
+  });
+
+  test('F04 · ambito e blocco principale (revisione A11)', () => {
+    compare('F04 ambito e principale', MISC.classify, ([ip, , scope, primary]) => {
+      const v = classify(ip).value;
+      const got = [v.scope, v.primary ? v.primary.code : null];
+      return JSON.stringify(got) === JSON.stringify([scope, primary]) ? null : `${toDotted(ip)}: ${JSON.stringify(got)} ≠ ${scope}/${primary}`;
     });
   });
 

@@ -94,7 +94,65 @@ SPECIAL = {
     "PRIVATE": [Net("10.0.0.0/8"), Net("172.16.0.0/12"), Net("192.168.0.0/16")],
     "CGNAT": [Net("100.64.0.0/10")],
     "DOCUMENTATION": [Net("192.0.2.0/24"), Net("198.51.100.0/24"), Net("203.0.113.0/24")],
+    "IETF_PROTOCOL": [Net("192.0.0.0/24")],
+    "BENCHMARKING": [Net("198.18.0.0/15")],
 }
+
+# Blocchi per l'ambito e il blocco principale (scheda F04): le reti di ipaddress dove esistono.
+LOOKUP_BLOCKS = [(code, n) for code, nets in SPECIAL.items() for n in nets] + [
+    ("LOOPBACK", Net("127.0.0.0/8")), ("LINK_LOCAL", Net("169.254.0.0/16")),
+    ("MULTICAST", Net("224.0.0.0/4")), ("RESERVED", Net("240.0.0.0/4")),
+    ("LIMITED_BROADCAST", Net("255.255.255.255/32")),
+]
+
+
+def classify_scope(ip: int) -> list:
+    """[ambito, blocco principale | None]: privato se uno dei blocchi è RFC 1918, poi il più specifico."""
+    a = IPv4(ip)
+    hits = sorted(((n.prefixlen, code) for code, n in LOOKUP_BLOCKS if a in n), reverse=True)
+    scope = "private" if a in Net("10.0.0.0/8") or a in Net("172.16.0.0/12") or a in Net("192.168.0.0/16") \
+        else "special" if hits else "public"
+    return [scope, hits[0][1] if hits else None]
+
+
+MASK_OCTETS = {0, 128, 192, 224, 240, 248, 252, 254, 255}
+
+
+def mask_reason(m: int):
+    """Motivo di F03 secondo l'ordine della scheda: prima i 9 valori, poi la contiguità."""
+    octets = list(IPv4(m).packed)
+    for i, o in enumerate(octets):
+        if o not in MASK_OCTETS:
+            return ["MASK_OCTET_VALUE", i]
+    partial = False
+    for i, o in enumerate(octets):
+        if partial and o != 0:
+            return ["MASK_NONCONTIGUOUS", i]
+        if o != 255:
+            partial = True
+    return None
+
+
+def leading_ones(m: int) -> int:
+    return len(format(m, "032b")) - len(format(m, "032b").lstrip("1"))
+
+
+def mask_details(m: int) -> list:
+    """[motivo | None, prefissi suggeriti, prefisso se l'inverso è una mask valida | None]."""
+    if mask_prefix(m) is not None:
+        return [None, [], None]
+    q = leading_ones(m)
+    return [mask_reason(m), [q, q + 1], mask_prefix(~m & 0xFFFFFFFF)]
+
+
+def f01_extra(ip: int, p: int) -> list:
+    """[offset, ruolo, rete precedente | None, rete successiva | None] (scheda F01)."""
+    net = Net((ip, p), strict=False)
+    n, b, size = int(net.network_address), int(net.broadcast_address), net.num_addresses
+    role = "single" if p == 32 else "p2p" if p == 31 else "network" if ip == n else "broadcast" if ip == b else "host"
+    prev = n - size if n - size >= 0 else None
+    nxt = n + size if n + size <= 0xFFFFFFFF else None
+    return [ip - n, role, prev, nxt]
 
 
 def classify_flags(ip: int) -> dict:
@@ -157,7 +215,7 @@ def main() -> None:
             near.append(m ^ (1 << rnd.randrange(32)))
         near.append(~m & 0xFFFFFFFF)
     candidates = mask_values + near + [rand32() for _ in range(1000)]
-    masks = [[m, mask_prefix(m)] for m in candidates]
+    masks = [[m, mask_prefix(m)] + mask_details(m) for m in candidates]
 
     # ---------------------------------------------------------- F05: host → prefisso, subnet → prefisso
     host_values = set()
@@ -216,14 +274,21 @@ def main() -> None:
 
     # ---------------------------------------------------------- F04: appartenenza ai blocchi speciali
     probe = [u(x) for x in FIXED_IPS] + [rand32() for _ in range(2000)]
-    all_blocks = [n for nets in SPECIAL.values() for n in nets] + [
-        Net("127.0.0.0/8"), Net("169.254.0.0/16"), Net("224.0.0.0/4"), Net("240.0.0.0/4"),
-    ]
+    all_blocks = [n for _, n in LOOKUP_BLOCKS]
     for n in all_blocks:
         lo, hi = int(n.network_address), int(n.broadcast_address)
         probe += [x for x in (lo - 1, lo, lo + 1, hi - 1, hi, hi + 1) if 0 <= x <= 0xFFFFFFFF]
         probe += [rnd.randint(lo, hi) for _ in range(40)]
-    classify = [[ip, classify_flags(ip)] for ip in probe]
+    classify = [[ip, classify_flags(ip)] + classify_scope(ip) for ip in probe]
+
+    # ---------------------------------------------------------- F01: offset, ruolo, reti adiacenti
+    f01x = []
+    for ip in [u(x) for x in FIXED_IPS]:
+        for p in range(33):
+            f01x.append([ip, p] + f01_extra(ip, p))
+    for _ in range(3000):
+        ip, p = rand32(), rnd.randint(0, 32)
+        f01x.append([ip, p] + f01_extra(ip, p))
 
     size_misc = dump("oracle-misc.json", {
         "generator": "tools/oracle.py",
@@ -235,13 +300,14 @@ def main() -> None:
         "subdivisions": subdivisions,
         "same": same,
         "classify": classify,
+        "f01extra": f01x,
     })
 
     print(f"oracle-f01.json   {len(rows)} IP × 33 prefissi = {len(rows) * 33} casi, {size_f01:,} byte")
     print(
         f"oracle-misc.json  {len(addresses)} indirizzi, {len(masks)} mask, {len(hosts)} host, "
         f"{len(subnets)} subnet, {len(subdivisions)} suddivisioni, {len(same)} coppie, "
-        f"{len(classify)} classificazioni, {size_misc:,} byte"
+        f"{len(classify)} classificazioni, {len(f01x)} casi F01 aggiuntivi, {size_misc:,} byte"
     )
 
 
