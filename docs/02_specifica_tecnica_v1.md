@@ -740,6 +740,7 @@ La barra in basso rispetta le aree sicure dei telefoni (`env(safe-area-inset-bot
 | `#/guide/uso/<sezione>` · `#/guide/subnetting/cap-9` | Guide (fase 6) |
 | `#/impostazioni` | Impostazioni |
 
+- Analisi accetta anche `f10=1`, che apre la sezione "Wildcard e configurazione" (dalla v1.1, collegamenti del cap. 14).
 - Parametri facoltativi per la guida: `did=1` attiva la modalità didattica per quella vista e `metodo=magic` sceglie il metodo, senza cambiare le impostazioni salvate (collegamenti "Apri nel calcolatore", fase 6).
 - I parametri passano per il parsing del motore: se non validi, il modulo si apre precompilato con l'errore visibile.
 - Mentre si scrive, il frammento si aggiorna senza creare voci nella cronologia del browser; il cambio di scheda invece crea una voce, così il tasto "indietro" torna alla scheda precedente.
