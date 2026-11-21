@@ -466,8 +466,8 @@ Valori attesi, verificati con lo script; le righe /8–/32 coincidono con la che
 }
 ```
 
-- `id` identifica il modello di testo in `strings.it.js`; `values` contiene solo numeri e stringhe tecniche.
-- Un passaggio può avere `bits: { rows: [{ label, value, prefix }] }` per le righe binarie colorate (ambra = rete, verde acqua = host, come nella guida).
+- `id` identifica il modello di testo in `strings.it.js`; `values` contiene valori serializzabili: numeri, stringhe tecniche, booleani (per esempio `carry`, `boundary`, `valid`), `null`, array e oggetti semplici di questi (per esempio `octets`, `suggestions`, `rows` dei pesi). Nessun testo per l'utente.
+- Un passaggio può avere `bits: { rows: [{ label, value, prefix }] }` per le righe binarie colorate (ambra = rete, verde acqua = host, come nella guida). Dalla v1.1 una riga può avere `bitwise: true` e `prefix: null` (mask non valida in F03): ogni 1 e ogni 0 si mostra per quello che è, senza confine tra rete e host.
 - `chapter` è l'ancora della guida (`cap-9`), usata per il collegamento "Capitolo 9".
 - I passaggi non ricalcolano nulla di diverso dal risultato: un test verifica che ogni valore finale dei passaggi coincida con il campo corrispondente del risultato.
 
