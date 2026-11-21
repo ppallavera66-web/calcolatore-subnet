@@ -50,6 +50,11 @@ describe('format.js', () => {
     expect(bitSegments('00101101', 4)).toEqual([{ text: '0010', kind: 'net' }, { text: '1101', kind: 'host' }]);
     expect(bitSegments('00101101', 0)).toEqual([{ text: '00101101', kind: 'host' }]);
     expect(bitSegments('00101101', 8)).toEqual([{ text: '00101101', kind: 'net' }]);
+    // mask non valida: bit per bit (segnalazione F03 della revisione finale)
+    expect(bitSegments('11111010.0', 0, true)).toEqual([
+      { text: '11111', kind: 'net' }, { text: '0', kind: 'host' }, { text: '1', kind: 'net' }, { text: '0', kind: 'host' },
+      { text: '.', kind: 'sep' }, { text: '0', kind: 'host' },
+    ]);
     // il testo ricomposto è sempre uguale all'originale
     const v = '11000000.10101000.00001010.01001011';
     for (let p = 0; p <= 32; p++) {

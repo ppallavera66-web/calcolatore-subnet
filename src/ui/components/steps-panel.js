@@ -12,14 +12,16 @@ import { t } from '../../i18n/strings.it.js';
 
 /**
  * Riga binaria colorata.
- * @param {{ label: string, value: string, prefix: number }} row
+ * @param {{ label: string, value: string, prefix: number | null, bitwise?: boolean }} row
  */
 export function bitRow(row) {
-  const segs = bitSegments(row.value, row.prefix);
+  const segs = bitSegments(row.value, row.prefix ?? 0, row.bitwise === true);
   const net = segs.filter((s) => s.kind === 'net').map((s) => s.text).join('');
   const host = segs.filter((s) => s.kind === 'host').map((s) => s.text).join('');
   const label = t(`ui.bits.${row.label}`) === `ui.bits.${row.label}` ? row.label : t(`ui.bits.${row.label}`);
-  const sr = [net ? `${t('ui.bits.net')} ${net}` : null, host ? `${t('ui.bits.host')} ${host}` : null].filter(Boolean).join(', ');
+  const sr = row.bitwise
+    ? `${t('ui.bits.bitwise')} ${row.value}`
+    : [net ? `${t('ui.bits.net')} ${net}` : null, host ? `${t('ui.bits.host')} ${host}` : null].filter(Boolean).join(', ');
   return h(
     'div',
     { class: 'bitrow' },

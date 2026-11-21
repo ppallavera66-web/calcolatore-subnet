@@ -345,6 +345,7 @@ export const STRINGS = {
   'ui.steps.chapter': (p) => `Capitolo ${String(p.chapter).replace(/^cap-/, '')} · ${p.title}`,
   'ui.bits.net': 'bit di rete',
   'ui.bits.host': 'bit di host',
+  'ui.bits.bitwise': 'bit per bit, senza confine tra rete e host:',
   'ui.bits.ip': 'IP',
   'ui.bits.mask': 'Mask',
   'ui.bits.network': 'Rete',

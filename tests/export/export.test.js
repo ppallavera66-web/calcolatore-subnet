@@ -221,6 +221,13 @@ describe('passaggi ("Includi i passaggi")', () => {
     expect(bin).toContain('a sinistra della barra i bit di rete');
   });
 
+  test('F03 con una mask non valida: riga binaria intera, senza barra rete | host', () => {
+    const r = validateMask('255.255.0.255');
+    const s = stepsBlock({ fn: 'F03', value: val(r), method: 'binary', warnings: r.ok ? r.warnings : [] });
+    expect(s.items[0].bits[0]).toMatchObject({ net: '11111111.11111111.00000000.11111111', host: '' });
+    expect(stepsText(s).join('\n')).toMatch(/Mask +11111111\.11111111\.00000000\.11111111$/m);
+  });
+
   test('passaggi senza righe binarie', () => {
     const s = stepsBlock({ fn: 'F05', value: val(prefixForHostsText('50')), method: 'rules', title: 'Passi' });
     expect(stepsText(s)[0]).toBe('Passi · metodo regole');

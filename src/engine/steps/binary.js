@@ -86,7 +86,10 @@ export function validateMaskBinary(r, warnings = []) {
   const steps = [
     step('mask-octets', 'cap-6', {
       octets: o.map((value) => ({ value, binary: octetToBinary(value), allowed: allowed.includes(value) })),
-    }, [{ label: 'mask', value: binaryDotted(o), prefix: Math.clz32(~r.mask >>> 0) }]),
+    }, [r.valid
+      ? { label: 'mask', value: binaryDotted(o), prefix: Math.clz32(~r.mask >>> 0) }
+      // mask non valida: nessun confine rete/host, la riga mostra 1 e 0 bit per bit (segnalazione F03)
+      : { label: 'mask', value: binaryDotted(o), prefix: null, bitwise: true }]),
   ];
   const bad = o.findIndex((v) => !allowed.includes(v));
   const bits = toBinaryDotted(r.mask).replace(/\./g, '');

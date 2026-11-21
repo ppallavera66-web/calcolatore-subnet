@@ -7,7 +7,9 @@
 import { octetToBinary } from '../ipv4.js';
 
 /**
- * @typedef {{ label: string, value: string, prefix: number }} BitRow
+ * Riga binaria: i primi `prefix` bit sono di rete, gli altri di host. Con `bitwise` (mask non valida, F03)
+ * non c'è un confine: ogni 1 e ogni 0 si mostra per quello che è e `prefix` vale null.
+ * @typedef {{ label: string, value: string, prefix: number | null, bitwise?: boolean }} BitRow
  * @typedef {{ id: string, chapter: string, values: Record<string, any>, bits?: { rows: BitRow[] } }} Step
  */
 

@@ -68,15 +68,16 @@ export const range = (first, last) => (first === last ? toDotted(first) : `${toD
  * `netBits` è il numero di bit di rete contati da sinistra, punti esclusi.
  * @param {string} value
  * @param {number} netBits
+ * @param {boolean} [bitwise] ogni 1 come rete e ogni 0 come host, senza confine (mask non valida)
  * @returns {BitSegment[]}
  */
-export function bitSegments(value, netBits) {
+export function bitSegments(value, netBits, bitwise = false) {
   /** @type {BitSegment[]} */
   const out = [];
   let bit = 0;
   for (const ch of value) {
     /** @type {BitSegment['kind']} */
-    const kind = ch === '.' || ch === ' ' ? 'sep' : bit++ < netBits ? 'net' : 'host';
+    const kind = ch === '.' || ch === ' ' ? 'sep' : bitwise ? (ch === '1' ? 'net' : 'host') : bit++ < netBits ? 'net' : 'host';
     const last = out[out.length - 1];
     if (last && last.kind === kind) last.text += ch;
     else out.push({ text: ch, kind });

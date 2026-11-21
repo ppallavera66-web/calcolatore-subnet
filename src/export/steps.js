@@ -51,10 +51,11 @@ export function stepsBlock(s) {
     method: t(`method.${ex.method}`),
     items: ex.steps.map((st) => ({
       text: t(`step.${st.id}`, st.values),
-      bits: (st.bits?.rows ?? []).map((/** @type {{ label: string, value: string, prefix: number }} */ r) => ({
+      bits: (st.bits?.rows ?? []).map((/** @type {{ label: string, value: string, prefix: number | null, bitwise?: boolean }} */ r) => ({
         label: bitLabel(r.label),
         value: r.value,
-        ...splitBits(r.value, r.prefix),
+        // riga bit per bit (mask non valida): nessuna divisione tra rete e host
+        ...(r.bitwise ? { net: r.value, host: '' } : splitBits(r.value, r.prefix ?? 0)),
       })),
     })),
     chapters: [...new Set([ex.chapter, ...ex.steps.map((st) => st.chapter)])].map((c) => `${t('chapter', { chapter: c })} · ${t(`ui.cap.${c}`)}`),

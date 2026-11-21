@@ -145,6 +145,12 @@ describe('convenzioni nei passaggi (10.2 C)', () => {
     const steps = explain('F06', { block: { network: 3232238080, prefix: 23 }, newPrefix: 26 }).steps;
     expect(steps.find((s) => s.id === 'carry')?.values).toMatchObject({ before: '192.168.10.192', after: '192.168.11.0', subnetIndex: 4 });
   });
+  test('F03: con una mask non valida la riga binaria è bit per bit, senza confine rete/host', () => {
+    const bad = explain('F03', val(validateMask('255.255.0.255')), 'binary').steps[0].bits?.rows[0];
+    expect(bad).toEqual({ label: 'mask', value: '11111111.11111111.00000000.11111111', prefix: null, bitwise: true });
+    const good = explain('F03', val(validateMask('255.255.240.0')), 'binary').steps[0].bits?.rows[0];
+    expect(good).toEqual({ label: 'mask', value: '11111111.11111111.11110000.00000000', prefix: 20 });
+  });
   test('F03: suggerimenti e indizio di wildcard', () => {
     const r = validateMask('0.0.0.255');
     const ids = explain('F03', val(r), 'binary', r.ok ? r.warnings : []).steps.map((s) => s.id);
