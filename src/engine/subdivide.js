@@ -10,13 +10,15 @@ import { maskOf, blockSize, blockInfo, interestingOctet, hostRule, assertPrefix,
 export const MAX_PAGE = 65536;
 
 /**
- * Subnet di indice `index` (da 0) di un blocco già allineato. `null` fuori intervallo.
+ * Subnet di indice `index` (da 0) di un blocco già allineato. `null` fuori intervallo,
+ * e anche con un nuovo prefisso più corto del blocco (revisione A10).
  * @param {number} blockNetwork
  * @param {number} blockPrefix
  * @param {number} newPrefix
  * @param {number} index
  */
 export function subnetAt(blockNetwork, blockPrefix, newPrefix, index) {
+  if (!validPair(blockPrefix, newPrefix)) return null;
   const count = 2 ** (newPrefix - blockPrefix);
   if (!Number.isInteger(index) || index < 0 || index >= count) return null;
   const network = blockNetwork + index * blockSize(newPrefix);
@@ -40,12 +42,24 @@ export function subnetAt(blockNetwork, blockPrefix, newPrefix, index) {
  * @param {number} ip
  */
 export function indexOf(blockNetwork, blockPrefix, newPrefix, ip) {
+  if (!validPair(blockPrefix, newPrefix)) return null;
   if (((ip & maskOf(blockPrefix)) >>> 0) !== blockNetwork) return null;
   return Math.floor((ip - blockNetwork) / blockSize(newPrefix));
 }
 
 /**
+ * @param {unknown} blockPrefix
+ * @param {unknown} newPrefix
+ * @returns {boolean} due prefissi interi 0–32 con il nuovo non più corto del blocco
+ */
+function validPair(blockPrefix, newPrefix) {
+  const isPrefix = (/** @type {unknown} */ p) => Number.isInteger(p) && /** @type {number} */ (p) >= 0 && /** @type {number} */ (p) <= 32;
+  return isPrefix(blockPrefix) && isPrefix(newPrefix) && /** @type {number} */ (newPrefix) >= /** @type {number} */ (blockPrefix);
+}
+
+/**
  * Generatore delle subnet da `start` (incluso) a `end` (escluso), per l'export.
+ * Estremi non interi arrotondati verso l'interno; niente subnet se i prefissi non sono validi (revisione A10).
  * @param {number} blockNetwork
  * @param {number} blockPrefix
  * @param {number} newPrefix
@@ -53,8 +67,9 @@ export function indexOf(blockNetwork, blockPrefix, newPrefix, ip) {
  * @param {number} [end]
  */
 export function* iterateSubnets(blockNetwork, blockPrefix, newPrefix, start = 0, end = 2 ** (newPrefix - blockPrefix)) {
-  const last = Math.min(end, 2 ** (newPrefix - blockPrefix));
-  for (let i = Math.max(0, start); i < last; i++) {
+  if (!validPair(blockPrefix, newPrefix) || Number.isNaN(start) || Number.isNaN(end)) return;
+  const last = Math.min(Math.floor(end), 2 ** (newPrefix - blockPrefix));
+  for (let i = Math.max(0, Math.ceil(start)); i < last; i++) {
     yield /** @type {NonNullable<ReturnType<typeof subnetAt>>} */ (subnetAt(blockNetwork, blockPrefix, newPrefix, i));
   }
 }

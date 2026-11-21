@@ -84,6 +84,22 @@ describe('10.2 I · suddivisione (F06)', () => {
   });
 });
 
+describe('revisione A10 · robustezza fuori contratto', () => {
+  test('subnetAt e indexOf con un nuovo prefisso più corto del blocco → null', () => {
+    expect(subnetAt(0, 24, 16, 0)).toBeNull();
+    expect(subnetAt(0, 24, 33, 0)).toBeNull();
+    expect(indexOf(0, 24, 16, 5)).toBeNull();
+  });
+  test('iterateSubnets con estremi non interi, NaN o prefissi non validi', () => {
+    const nets = (/** @type {Iterable<any>} */ it) => [...it].map((s) => s.network);
+    expect(nets(iterateSubnets(0, 24, 26, 1.5, 3.7))).toEqual([128]);
+    expect(nets(iterateSubnets(0, 24, 26, -2, 2))).toEqual([0, 64]);
+    expect(nets(iterateSubnets(0, 24, 26, NaN, 2))).toEqual([]);
+    expect(nets(iterateSubnets(0, 24, 16))).toEqual([]);
+    expect([...iterateSubnets(0, 24, 26, 0.2, 4)].every((s) => s !== null)).toBe(true);
+  });
+});
+
 describe('P10 · subnet disgiunte, contigue, ordinate, che coprono il blocco; indexOf(subnetAt(i)) = i', () => {
   test('su blocchi e prefissi casuali (fino a 4.096 subnet)', () => {
     const arb = fc
