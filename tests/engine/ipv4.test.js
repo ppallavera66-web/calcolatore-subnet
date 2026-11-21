@@ -131,8 +131,15 @@ describe('parsePrefix, parseMask, parsePrefixOrMask', () => {
     // separatore delle migliaia solo a gruppi di tre cifre (revisione A2)
     expect(val(parseCount('1 000 000', 'hosts'))).toBe(1000000);
     expect(val(parseCount('65.534', 'hosts'))).toBe(65534);
-    for (const bad of ['100.0', '2.5', '1.00', '1 0', '1.0000', '.500', '500.', '1..000', '12345678901234567']) expect(errCode(parseCount(bad, 'hosts'))).toBe('NUMBER_FORMAT');
+    for (const bad of ['100.0', '2.5', '1.00', '1 0', '1.0000', '.500', '500.', '1..000']) expect(errCode(parseCount(bad, 'hosts'))).toBe('NUMBER_FORMAT');
     expect(errCode(parseCount(1.5, 'hosts'))).toBe('NUMBER_FORMAT');
+    // revisione A4: oltre 2^32 → NUMBER_RANGE con il testo scritto, mai un valore arrotondato
+    expect(val(parseCount('4.294.967.296', 'subnets'))).toBe(2 ** 32);
+    expect(val(parseCount('0004', 'hosts'))).toBe(4);
+    for (const big of ['4294967297', '9999999999999999', '12345678901234567', '99.999.999.999.999.999']) {
+      expect(parseCount(big, 'subnets')).toEqual({ ok: false, error: { code: 'NUMBER_RANGE', field: 'subnets', params: { value: big, max: 2 ** 32 } } });
+    }
+    expect(errCode(parseCount(2 ** 53, 'hosts'))).toBe('NUMBER_RANGE');
     expect(errCode(parseCount('', 'hosts'))).toBe('NUMBER_FORMAT');
     expect(errCode(parseCount(null, 'hosts'))).toBe('NUMBER_FORMAT');
   });

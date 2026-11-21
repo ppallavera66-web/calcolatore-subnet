@@ -89,7 +89,10 @@ export const STRINGS = {
       : p.base === 16
         ? `"${p.text}" non è un numero esadecimale: usa le cifre 0–9 e A–F.`
         : `"${p.text}" non è un numero intero: usa solo cifre.`,
-  NUMBER_RANGE: (p) => `"${p.value}" è troppo grande: il massimo è 4.294.967.295 (32 bit).`,
+  NUMBER_RANGE: (p) =>
+    p.max === undefined
+      ? `"${p.value}" è troppo grande: il massimo è 4.294.967.295 (32 bit).`
+      : `"${p.value}" è troppo grande: un conteggio di host o subnet non supera ${fmtNumber(p.max)}, cioè tutto lo spazio IPv4.`,
   BASE_UNSUPPORTED: (p) => `Base ${p.base} non prevista: scegli 2, 10 o 16.`,
   HOSTS_RANGE: (p) => `Gli host richiesti vanno da 1 a 4.294.967.294 (hai scritto ${p.value}).`,
   SUBNETS_RANGE: (p) => `Serve almeno una subnet (hai scritto ${p.value}).`,

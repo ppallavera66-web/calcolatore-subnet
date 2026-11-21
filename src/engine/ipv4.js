@@ -8,6 +8,9 @@ import { checkMask, octetsOf } from './prefix.js';
 
 export const MAX_UINT32 = 0xffffffff;
 
+/** Massimo conteggio di host o subnet accettato da parseCount: 2^32. */
+export const COUNT_MAX = 2 ** 32;
+
 /**
  * @param {unknown} text
  * @returns {string}
@@ -230,13 +233,16 @@ export function parseAddressWithPrefix(addressText, prefixText, fields = {}) {
  */
 export function parseCount(text, field) {
   if (typeof text === 'number') {
-    return Number.isSafeInteger(text) ? ok(text) : fail(ERR.NUMBER_FORMAT, field, { text: String(text), base: 10 });
+    if (!Number.isInteger(text)) return fail(ERR.NUMBER_FORMAT, field, { text: String(text), base: 10 });
+    return text >= 0 && text <= COUNT_MAX ? ok(text) : fail(ERR.NUMBER_RANGE, field, { value: String(text), max: COUNT_MAX });
   }
   // separatore delle migliaia (punto o spazio) ammesso solo a gruppi di tre cifre:
   // "1.000" e "1 000 000" sì, "100.0" o "2.5" no (sarebbero letti come 1000 e 25, revisione A2)
   const trimmed = asText(text).trim();
   if (!/^(?:[0-9]+|[0-9]{1,3}(?:[.\s][0-9]{3})+)$/.test(trimmed)) return fail(ERR.NUMBER_FORMAT, field, { text: trimmed, base: 10 });
-  const raw = trimmed.replace(/[.\s]/g, '');
-  if (raw.length > 16) return fail(ERR.NUMBER_FORMAT, field, { text: trimmed, base: 10 });
+  const raw = trimmed.replace(/[.\s]/g, '').replace(/^0+(?=[0-9])/, '');
+  // Nessun conteggio utile supera 2^32 (tutti i /32 di un /0). Oltre, il numero sarebbe anche
+  // arrotondato da JavaScript: si risponde NUMBER_RANGE con il testo scritto (revisione A4).
+  if (raw.length > 10 || Number(raw) > COUNT_MAX) return fail(ERR.NUMBER_RANGE, field, { value: trimmed, max: COUNT_MAX });
   return ok(Number(raw));
 }
