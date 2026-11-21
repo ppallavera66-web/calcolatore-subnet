@@ -141,6 +141,36 @@ export async function runExport(ctx, src, format) {
 }
 
 /**
+ * Barra con `role="toolbar"` secondo il modello ARIA (revisione C18): un solo pulsante nell'ordine
+ * di Tab, le frecce sinistra/destra (e su/giù) spostano il focus, Inizio e Fine vanno agli estremi.
+ * @param {HTMLElement} bar
+ */
+export function rovingToolbar(bar) {
+  const items = () => /** @type {HTMLButtonElement[]} */ ([...bar.querySelectorAll('button')]);
+  const setCurrent = (/** @type {HTMLButtonElement} */ b) => {
+    for (const x of items()) x.tabIndex = x === b ? 0 : -1;
+  };
+  const list = items();
+  if (list.length) setCurrent(list[0]);
+  bar.addEventListener('focusin', (e) => {
+    const b = /** @type {HTMLElement} */ (e.target).closest('button');
+    if (b && bar.contains(b)) setCurrent(/** @type {HTMLButtonElement} */ (b));
+  });
+  bar.addEventListener('keydown', (e) => {
+    const all = items();
+    const i = all.indexOf(/** @type {HTMLButtonElement} */ (document.activeElement));
+    if (i < 0) return;
+    const next = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: all.length - 1 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    const b = all[(next + all.length) % all.length];
+    setCurrent(b);
+    b.focus();
+  });
+  return bar;
+}
+
+/**
  * @param {import('../types.js').Ctx} ctx
  * @param {() => ExportSource | null} getSource
  * @param {{ snippet?: boolean }} [o]
@@ -183,7 +213,7 @@ export function exportBar(ctx, getSource, o = {}) {
   return h(
     'div',
     { class: 'export-bar' },
-    h('div', { class: 'export-toolbar', role: 'toolbar', 'aria-label': t('ui.export.title') }, buttons()),
+    rovingToolbar(h('div', { class: 'export-toolbar', role: 'toolbar', 'aria-label': t('ui.export.title') }, buttons())),
     hasSteps ? h('div', { class: 'export-options' }, stepsCheck()) : null,
     sheetButton,
   );

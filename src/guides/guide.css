@@ -19,10 +19,10 @@
 .guide-toc-mobile .guide-toc-list a{min-height:var(--touch-min)}
 .guide-theme-row{display:flex;align-items:center;gap:10px;margin:var(--sp-2) 0 var(--sp-3)}
 .guide-theme-row label{font-family:var(--font-display);letter-spacing:.08em;text-transform:uppercase;font-size:12px;font-weight:600;color:var(--muted)}
-.guide-theme{flex:1;min-width:0;min-height:40px;padding:6px 8px;font-size:15px;background:var(--bg);color:var(--strong);
+.guide-theme{flex:1;min-width:0;min-height:44px;padding:6px 8px;font-size:15px;background:var(--bg);color:var(--strong);
   border:1px solid var(--line-strong);border-radius:var(--r-md)}
 .guide-quick{display:flex;gap:8px;margin:0 0 var(--sp-2)}
-.guide-quick a{flex:1;display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid var(--line-strong);
+.guide-quick a{flex:1;display:flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--line-strong);
   border-radius:var(--r-md);color:var(--text);text-decoration:none;font-size:14px;padding:4px 8px;text-align:center}
 .guide-quick a:hover{background:var(--surface-2)}
 .guide-toc-group{font-family:var(--font-display);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
@@ -151,7 +151,7 @@
   font-weight:700;margin-bottom:3px}
 .gl-pop .gl-pop-def{display:block;margin:0 0 4px;color:var(--text)}
 .gl-pop .gl-pop-links{display:flex;gap:4px 14px;flex-wrap:wrap;font-size:13.5px}
-.gl-pop .gl-pop-links a{display:inline-flex;align-items:center;min-height:32px}
+.gl-pop .gl-pop-links a{display:inline-flex;align-items:center;min-height:44px} /* aree di tocco di 44 px (revisione C11) */
 
 /* ---------- stampa: tutta la guida, su fondo chiaro, senza indice e senza collegamenti all'app ---------- */
 @media print{
