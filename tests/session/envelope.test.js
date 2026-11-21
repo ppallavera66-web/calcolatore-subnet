@@ -151,6 +151,25 @@ describe('busta cifrata: decifratura (7.3)', () => {
     expect(await decryptEnvelope(bad, PASS)).toEqual({ ok: false, error: { code: 'IMPORT_BAD_ENVELOPE', params: { field } } });
   });
 
+  test.each([
+    ['hint', (/** @type {any} */ e) => { e.hint = 'la passphrase è il nome del gatto'; }],
+    ['kdf.memory', (/** @type {any} */ e) => { e.kdf.memory = 65536; }],
+    ['cipher.tagLength', (/** @type {any} */ e) => { e.cipher.tagLength = 96; }],
+    ['__proto__', (/** @type {any} */ e) => { Object.defineProperty(e, '__proto__', { value: 1, enumerable: true }); }],
+  ])('revisione M4: campo in più non autenticato (%s) → IMPORT_BAD_ENVELOPE senza chiedere la passphrase', async (field, fn) => {
+    const bad = tamper(fn);
+    const expected = { ok: false, error: { code: 'IMPORT_BAD_ENVELOPE', params: { field, unexpected: true } } };
+    expect(checkEnvelope(bad)).toEqual(expected);
+    expect(await decryptEnvelope(bad, PASS)).toEqual(expected);
+    // la stessa busta senza il campo in più si decifra
+    expect((await decryptEnvelope(env, PASS)).ok).toBe(true);
+  });
+
+  test('revisione M4: anche dal testo del file (JSON.parse), con un campo in più alla radice', async () => {
+    const text = JSON.stringify({ ...env, note: 'x' });
+    expect(checkEnvelope(JSON.parse(text))).toMatchObject({ ok: false, error: { params: { field: 'note', unexpected: true } } });
+  });
+
   test('busta non oggetto', () => {
     expect(checkEnvelope(null)).toMatchObject({ ok: false, error: { params: { field: 'format' } } });
     expect(checkEnvelope([env])).toMatchObject({ ok: false });

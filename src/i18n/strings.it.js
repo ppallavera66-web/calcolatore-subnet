@@ -833,7 +833,10 @@ export const STRINGS = {
     p.format ? `Il file è nel formato "${p.format}": non è una sessione del Calcolatore Subnet.` : 'Il file non è una sessione del Calcolatore Subnet.',
   IMPORT_NEWER_VERSION: (p) => `Il file usa la versione ${p.version} del formato, questa app legge fino alla ${p.supported}: aggiorna l'app per importarlo.`,
   IMPORT_BAD_FIELD: (p) => `Il campo "${p.field}" del file non è valido.`,
-  IMPORT_BAD_ENVELOPE: (p) => `Il file cifrato è danneggiato o incompleto (campo "${p.field}").`,
+  IMPORT_BAD_ENVELOPE: (p) =>
+    p.unexpected
+      ? `Il file cifrato contiene un campo non previsto ("${p.field}"): non è un file di questa app o è stato modificato.`
+      : `Il file cifrato è danneggiato o incompleto (campo "${p.field}").`,
   IMPORT_DECRYPT_FAILED: 'Passphrase errata o file danneggiato.',
   IMPORT_NESTED_ENVELOPE: 'Il contenuto decifrato è a sua volta un file cifrato: non viene importato.',
   IMPORT_CRYPTO_UNAVAILABLE:

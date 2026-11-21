@@ -655,7 +655,7 @@ Quello della sezione 4.1 delle specifiche, invariato:
 
 ### 7.3 Decifratura all'import
 
-1. Controlli sull'intestazione: `version` = 1; `kdf.name` e `cipher.name` esatti; `iterations` intero tra 600.000 e 10.000.000; `salt` decodificato di 16 byte; `iv` di 12 byte; `data` di almeno 16 byte. Altrimenti `IMPORT_BAD_ENVELOPE`.
+1. Controlli sull'intestazione: `version` = 1; `kdf.name` e `cipher.name` esatti; `iterations` intero tra 600.000 e 10.000.000; `salt` decodificato di 16 byte; `iv` di 12 byte; `data` di almeno 16 byte; nessun campo oltre a quelli della 7.1 (dalla v1.1: un campo in più non sarebbe autenticato dall'AAD). Altrimenti `IMPORT_BAD_ENVELOPE`.
 2. Richiesta della passphrase, solo a questo punto.
 3. Decifratura con la stessa AAD. Se fallisce → `IMPORT_DECRYPT_FAILED`: "Passphrase errata o file danneggiato" (GCM non permette di distinguere i due casi, ed è giusto così).
 4. Il contenuto decifrato passa per la validazione 6.3 e deve essere `subnetcalc-session` (nessuna busta annidata).

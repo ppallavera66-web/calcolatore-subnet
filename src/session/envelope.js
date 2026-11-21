@@ -109,6 +109,25 @@ export async function encryptSession(session, passphrase, o = {}) {
   return { ...header, data: toBase64(data) };
 }
 
+/** Campi ammessi nella busta v1 (sezione 7.1): nessun altro. */
+const ENVELOPE_KEYS = Object.freeze({
+  root: ['format', 'version', 'kdf', 'cipher', 'data'],
+  kdf: ['name', 'iterations', 'salt'],
+  cipher: ['name', 'iv'],
+});
+
+/**
+ * Primo campo non previsto, con il percorso (per esempio `kdf.hint`), oppure null.
+ * @param {Record<string, any>} obj
+ * @param {ReadonlyArray<string>} allowed
+ * @param {string} prefix
+ * @returns {string | null}
+ */
+function extraKey(obj, allowed, prefix) {
+  const k = Object.keys(obj).find((key) => !allowed.includes(key));
+  return k === undefined ? null : `${prefix}${k.slice(0, 40)}`;
+}
+
 /**
  * Controlli sull'intestazione (7.3 punto 1), prima di chiedere la passphrase.
  * @param {unknown} env
@@ -130,6 +149,9 @@ export function checkEnvelope(env) {
   if (!iv || iv.length !== IV_BYTES) return bad('cipher.iv');
   const data = fromBase64(e.data);
   if (!data || data.length < TAG_BYTES) return bad('data');
+  // Campi in più non sarebbero autenticati dall'AAD: il formato v1 è chiuso e li rifiuta (revisione M4).
+  const extra = extraKey(e, ENVELOPE_KEYS.root, '') ?? extraKey(e.kdf, ENVELOPE_KEYS.kdf, 'kdf.') ?? extraKey(e.cipher, ENVELOPE_KEYS.cipher, 'cipher.');
+  if (extra) return { ok: false, error: { code: IMPORT_ERR.IMPORT_BAD_ENVELOPE, params: { field: extra, unexpected: true } } };
   const header = { format: e.format, version: e.version, kdf: { name: e.kdf.name, iterations: it, salt: e.kdf.salt }, cipher: { name: e.cipher.name, iv: e.cipher.iv } };
   return { ok: true, value: { header, salt, iv, data } };
 }
