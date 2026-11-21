@@ -108,6 +108,16 @@ describe('contenuto delle guide', () => {
     expect(GUIDES.subnetting).not.toMatch(/saranno sostituiti/);
   });
 
+  test('guida all\'uso: ogni nome di pulsante, campo o scheda citato esiste tale e quale nell\'interfaccia', () => {
+    // eccezioni: il pulsante "?" è un'icona, "Indietro" è il tasto del browser, "Capitolo N" è un modello
+    const allowed = new Set(['?', 'Indietro', 'Capitolo N']);
+    const texts = new Set(Object.values(STRINGS).filter((v) => typeof v === 'string'));
+    const names = [...GUIDES.uso.matchAll(/<span class="ui">([\s\S]*?)<\/span>/g)].map((m) => text(m[1]));
+    expect(names.length).toBeGreaterThan(30);
+    const missing = [...new Set(names)].filter((n) => !allowed.has(n) && !n.split(' · ').every((part) => texts.has(part)));
+    expect(missing).toEqual([]);
+  });
+
   test('revisione C16: la guida al subnetting è una "versione di studio", senza "da revisionare"', () => {
     expect(GUIDES.subnetting).not.toMatch(/revisionare/i);
     expect(GUIDES.subnetting).toMatch(/v0\.4 · VERSIONE DI STUDIO/);
