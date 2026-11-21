@@ -6,7 +6,7 @@
  */
 import { SESSION_FORMAT, ENVELOPE_FORMAT, SESSION_VERSION, SESSION_SETTINGS, LIMITS, IMPORT_ERR, IMPORT_WARN, isPlainObject } from './schema.js';
 import { migrate, MIGRATIONS } from './migrate.js';
-import { validateSessionBody, emptyReport } from './validate.js';
+import { validateSessionBody, emptyReport, newerFirst } from './validate.js';
 
 /**
  * @typedef {import('./validate.js').SessionData} SessionData
@@ -146,7 +146,7 @@ export function applyImport(current, incoming, o) {
   let duplicates = incoming.history.length - added.length;
   // unione, poi doppioni per contenuto: resta la voce più recente (a parità, quella già presente)
   const all = [...current.history.map((h, i) => ({ h, i, mine: true })), ...added.map((h, i) => ({ h, i: i + current.history.length, mine: false }))]
-    .sort((x, y) => (x.h.at < y.h.at ? 1 : x.h.at > y.h.at ? -1 : x.i - y.i));
+    .sort((x, y) => newerFirst(x.h.at, y.h.at) || x.i - y.i);
   const seen = new Set();
   /** @type {HistoryEntry[]} */
   const history = [];

@@ -15,6 +15,18 @@ import {
 import { validateInput, subnetCount } from './inputs.js';
 
 /**
+ * Confronto di due date ISO per ordinare dalla più recente. Si confrontano gli istanti (Date.parse):
+ * con i millisecondi facoltativi il confronto tra stringhe sbaglia, per esempio
+ * "2026-11-18T10:00:00Z" > "2026-11-18T10:00:00.500Z" (revisione M2).
+ * @param {string} a
+ * @param {string} b
+ * @returns {number} negativo se a è più recente di b, 0 se coincidono
+ */
+export function newerFirst(a, b) {
+  return Date.parse(b) - Date.parse(a);
+}
+
+/**
  * @typedef {{ theme?: string, didactic?: boolean, didacticMethod?: string, exportBar?: boolean }} SessionSettings
  * @typedef {{ id: string, at: string, fn: string, input: Record<string, any> }} HistoryEntry
  * @typedef {{ id: string, type: 'subdivision', name: string, createdAt: string, updatedAt: string, notes: string,
@@ -112,7 +124,7 @@ function readHistory(raw, report) {
   }
   if (duplicates) report.warnings.push({ code: IMPORT_WARN.IMPORT_W_DUPLICATE_ID, params: { count: duplicates } });
   // dalla più recente; a parità di data resta l'ordine del file
-  const sorted = valid.map((e, i) => ({ e, i })).sort((x, y) => (x.e.at < y.e.at ? 1 : x.e.at > y.e.at ? -1 : x.i - y.i)).map((x) => x.e);
+  const sorted = valid.map((e, i) => ({ e, i })).sort((x, y) => newerFirst(x.e.at, y.e.at) || x.i - y.i).map((x) => x.e);
   if (sorted.length > LIMITS.history) {
     const dropped = sorted.length - LIMITS.history;
     report.historySkipped += dropped;
@@ -181,7 +193,7 @@ function readPlans(raw, report) {
   if (valid.length > LIMITS.plans) {
     const dropped = valid.length - LIMITS.plans;
     const keep = new Set(
-      valid.map((p, i) => ({ p, i })).sort((x, y) => (x.p.updatedAt < y.p.updatedAt ? 1 : x.p.updatedAt > y.p.updatedAt ? -1 : x.i - y.i)).slice(0, LIMITS.plans).map((x) => x.p),
+      valid.map((p, i) => ({ p, i })).sort((x, y) => newerFirst(x.p.updatedAt, y.p.updatedAt) || x.i - y.i).slice(0, LIMITS.plans).map((x) => x.p),
     );
     report.plansSkipped += dropped;
     report.warnings.push({ code: IMPORT_WARN.IMPORT_W_PLANS_TRUNCATED, params: { dropped, max: LIMITS.plans } });

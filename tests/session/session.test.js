@@ -12,7 +12,7 @@ import fc from 'fast-check';
 import { readSessionText, readSessionObject, buildSession, applyImport, checkImportSize, utf8Length } from '../../src/session/session.js';
 import { migrate, MIGRATIONS } from '../../src/session/migrate.js';
 import { validateInput, INPUT_KEYS, subnetCount } from '../../src/session/inputs.js';
-import { readPlan, readLabels } from '../../src/session/validate.js';
+import { readPlan, readLabels, newerFirst } from '../../src/session/validate.js';
 import { LIMITS, isIsoDate, isCleanText, charLength, HISTORY_FNS, THEMES, DIDACTIC_METHODS } from '../../src/session/schema.js';
 import * as uiState from '../../src/ui/state.js';
 
@@ -194,6 +194,25 @@ describe('Sostituisci e Unisci (6.4)', () => {
   test('Unisci: un doppione per contenuto più recente prende il posto di quello presente', () => {
     const r = applyImport(current, { settings: {}, history: [h('e', '2026-11-18T23:00:00.000Z', '10.0.0.2')], plans: [] }, { mode: 'merge' });
     expect(r.history.map((x) => x.id)).toEqual(['e', 'a']);
+  });
+
+  test('revisione M2: ordine per istante, anche con i millisecondi facoltativi', () => {
+    // come stringhe "…10:00:00Z" > "…10:00:00.500Z", ma come istanti la seconda è più recente
+    const cur = { settings: {}, history: [h('x', '2026-11-18T10:00:00Z', '10.0.0.1')], plans: [] };
+    const inc = { settings: {}, history: [h('y', '2026-11-18T10:00:00.500Z', '10.0.0.2')], plans: [] };
+    expect(applyImport(cur, inc, { mode: 'merge' }).history.map((x) => x.id)).toEqual(['y', 'x']);
+    expect(newerFirst('2026-11-18T10:00:00Z', '2026-11-18T10:00:00.500Z')).toBeGreaterThan(0);
+    expect(newerFirst('2026-11-18T10:00:00.000Z', '2026-11-18T10:00:00Z')).toBe(0);
+  });
+
+  test('revisione M2: la validazione ordina la cronologia del file per istante', () => {
+    const body = {
+      format: 'subnetcalc-session', version: 1, exportedAt: NOW,
+      history: [h('x', '2026-11-18T10:00:00Z', '10.0.0.1'), h('y', '2026-11-18T10:00:00.500Z', '10.0.0.2')],
+      plans: [],
+    };
+    const r = session(readSessionObject(body, META));
+    expect(r.data.history.map((/** @type {any} */ x) => x.id)).toEqual(['y', 'x']);
   });
 
   test('impostazioni applicate solo su scelta, mai "Memorizza i dati"', () => {
