@@ -63,6 +63,24 @@ export const magicLabel = (magic, index) => `${magic} · ${ordShort(index)}`;
  */
 export const plural = (n, one, many) => `${fmtNumber(n)} ${n === 1 ? one : many}`;
 
+/**
+ * "ne avanzano 3", "ne avanza 1", "non ne avanza nessuno" (revisione A8).
+ * @param {number} n
+ */
+export const spareText = (n) => (n === 0 ? 'non ne avanza nessuno' : n === 1 ? 'ne avanza 1' : `ne avanzano ${fmtNumber(n)}`);
+
+/**
+ * Bit presi in prestito con l'accordo giusto (revisione A8).
+ * @param {number} n
+ */
+const borrowedText = (n) => (n === 0 ? 'nessun bit preso in prestito' : n === 1 ? '1 bit preso in prestito' : `${n} bit presi in prestito`);
+
+/**
+ * Iniziale maiuscola, per le frasi che cominciano con un ordinale ("Terzo ottetto…").
+ * @param {string} s
+ */
+const capFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const hostName = (/** @type {string} */ h) => (h === 'a' ? 'A' : h === 'b' ? 'B' : h);
 const yesNo = (/** @type {boolean} */ b) => (b ? 'sì' : 'no');
 
@@ -96,9 +114,9 @@ export const STRINGS = {
       ? `"${p.value}" è troppo grande: il massimo è 4.294.967.295 (32 bit).`
       : `"${p.value}" è troppo grande: un conteggio di host o subnet non supera ${fmtNumber(p.max)}, cioè tutto lo spazio IPv4.`,
   BASE_UNSUPPORTED: (p) => `Base ${p.base} non prevista: scegli 2, 10 o 16.`,
-  HOSTS_RANGE: (p) => `Gli host richiesti vanno da 1 a 4.294.967.294 (hai scritto ${p.value}).`,
-  SUBNETS_RANGE: (p) => `Serve almeno una subnet (hai scritto ${p.value}).`,
-  SUBNETS_TOO_MANY: (p) => `Il blocco contiene al massimo ${fmtNumber(p.max)} subnet: non ne bastano ${fmtNumber(p.requested)}.`,
+  HOSTS_RANGE: (p) => `Gli host richiesti vanno da 1 a 4.294.967.294 (hai scritto ${typeof p.value === 'number' ? fmtNumber(p.value) : p.value}).`,
+  SUBNETS_RANGE: (p) => `Serve almeno una subnet (hai scritto ${typeof p.value === 'number' ? fmtNumber(p.value) : p.value}).`,
+  SUBNETS_TOO_MANY: (p) => `Il blocco contiene al massimo ${plural(p.max, 'subnet', 'subnet')}, ma ne servono ${fmtNumber(p.requested)}.`,
   PREFIX_SHORTER: (p) => `Il nuovo prefisso /${p.requested} è più corto del blocco /${p.block}: per suddividere serve un prefisso uguale o più lungo.`,
   PAGE_RANGE: (p) => `Pagina non valida (inizio ${p.offset}, righe ${p.limit}).`,
   ACL_NUMBER_RANGE: (p) => `L'ACL standard numerata va da 1 a 99 o da 1300 a 1999 (hai scritto ${p.value}).`,
@@ -131,7 +149,7 @@ export const STRINGS = {
 
   // ---------------------------------------------------------------- motivi (F05 caso C)
   BOTH_BLOCK_TOO_SMALL: (p) =>
-    `Per ${fmtNumber(p.hosts)} host serve almeno un /${p.hostsPrefix}, più grande dell'intero blocco /${p.blockPrefix}: serve un blocco più grande.`,
+    `Per ${fmtNumber(p.hosts)} host serve una subnet grande almeno come un /${p.hostsPrefix}, più grande dell'intero blocco /${p.blockPrefix}: serve un blocco più grande.`,
   BOTH_CONFLICT: (p) =>
     `Con subnet da /${p.hostsPrefix} (per ${fmtNumber(p.hosts)} host) il blocco /${p.blockPrefix} ne contiene ${fmtNumber(p.maxSubnets)}, ma ne servono ${fmtNumber(p.subnets)}: serve un blocco più grande o il VLSM.`,
 
@@ -572,13 +590,13 @@ export const STRINGS = {
   'step.number-weights': (p) => `${fmtNumber(p.value)} con la sottrazione dei pesi: ${p.rows.filter((/** @type {any} */ r) => r.fits).map((/** @type {any} */ r) => fmtNumber(r.weight)).join(' + ') || '0'} → ${p.binary}.`,
   'step.number-divisions': (p) => `${fmtNumber(p.value)} con le divisioni successive per 2, leggendo i resti dal basso: ${p.binary}.`,
   'step.number-hex': (p) => `Ogni gruppo di 4 bit è una cifra esadecimale: ${p.nibbles.map((/** @type {any} */ n) => `${n.bits} = ${n.hex}`).join(', ')} → ${p.hex}.`,
-  'step.octet-weights': (p) => `${ord(p.index)} ottetto, ${p.value}: ${p.rows.filter((/** @type {any} */ r) => r.fits).map((/** @type {any} */ r) => r.weight).join(' + ') || '0'} → ${p.binary}.`,
-  'step.octet-divisions': (p) => `${ord(p.index)} ottetto, ${p.value}: resti delle divisioni per 2 letti dal basso → ${p.binary}.`,
+  'step.octet-weights': (p) => `${capFirst(ord(p.index))} ottetto, ${p.value}: ${p.rows.filter((/** @type {any} */ r) => r.fits).map((/** @type {any} */ r) => r.weight).join(' + ') || '0'} → ${p.binary}.`,
+  'step.octet-divisions': (p) => `${capFirst(ord(p.index))} ottetto, ${p.value}: resti delle divisioni per 2 letti dal basso → ${p.binary}.`,
   'step.address-result': (p) => `In binario ${p.binaryDotted}; in esadecimale ${p.hexDotted}.`,
 
   // ---------------------------------------------------------------- passaggi: F03 (cap. 6)
   'step.mask-octets': (p) => `Gli ottetti in binario: ${p.octets.map((/** @type {any} */ o) => `${o.value} = ${o.binary}`).join(' · ')}.`,
-  'step.mask-octet-invalid': (p) => `${p.value} (${p.binary}) non è uno dei 9 valori ammessi: la mask non è valida.`,
+  'step.mask-octet-invalid': (p) => `${capFirst(ord(p.index))} ottetto: ${p.value} (${p.binary}) non è uno dei 9 valori ammessi, quindi la mask non è valida.`,
   'step.mask-noncontiguous': (p) => `Dopo un ottetto diverso da 255 deve esserci solo 0, ma il ${ord(p.index)} ottetto no: gli 1 non sono consecutivi.`,
   'step.mask-valid': (p) => `Gli 1 sono tutti consecutivi da sinistra: ${p.prefix} bit, quindi /${p.prefix}.`,
   'step.mask-suggestions': (p) => `Le mask valide più vicine: ${p.suggestions.map((/** @type {any} */ s) => `${s.mask} (/${s.prefix})`).join(' e ')}.`,
@@ -597,25 +615,28 @@ export const STRINGS = {
   'step.hosts-needed': (p) => `Agli host si aggiungono rete e broadcast: ${fmtNumber(p.hosts)} + 2 = ${fmtNumber(p.needed)}.`,
   'step.hosts-power': (p) => `La più piccola potenza di 2 che sia almeno ${fmtNumber(p.needed)} è 2${sup(p.hostBits)} = ${fmtNumber(p.power)}.`,
   'step.hosts-prefix': (p) => `h = ${p.hostBits} bit di host → /${p.prefix} (32 − ${p.hostBits}), mask ${p.mask}.`,
-  'step.hosts-spare': (p) => `Host disponibili ${fmtNumber(p.usableHosts)}: ne avanzano ${fmtNumber(p.spare)}.`,
+  'step.hosts-spare': (p) => `Host disponibili ${fmtNumber(p.usableHosts)}: ${spareText(p.spare)}.`,
   'step.hosts-alt': (p) => (p.altPrefix === 31 ? 'Per un collegamento punto-punto basta anche un /31 (cap. 18).' : 'Per un solo host si può usare anche un /32 (cap. 18).'),
   'step.subnets-power': (p) => `La più piccola potenza di 2 che sia almeno ${fmtNumber(p.subnets)} è 2${sup(p.borrowedBits)} = ${fmtNumber(p.power)}.`,
-  'step.subnets-prefix': (p) => `Si prendono in prestito ${p.borrowedBits} bit: /${p.blockPrefix} + ${p.borrowedBits} = /${p.newPrefix}.`,
-  'step.subnets-spare': (p) => `${fmtNumber(p.power)} subnet, ne avanzano ${fmtNumber(p.spare)}; ognuna con ${fmtNumber(p.usableHostsPerSubnet)} host.`,
-  'step.both-hosts': (p) => `Per ${fmtNumber(p.hosts)} host serve al massimo un /${p.hostsPrefix}.`,
+  'step.subnets-prefix': (p) =>
+    p.borrowedBits === 0
+      ? `Non serve prendere bit in prestito: resta /${p.newPrefix}.`
+      : `Si ${p.borrowedBits === 1 ? 'prende' : 'prendono'} in prestito ${p.borrowedBits} bit: /${p.blockPrefix} + ${p.borrowedBits} = /${p.newPrefix}.`,
+  'step.subnets-spare': (p) => `${plural(p.power, 'subnet', 'subnet')}, ${spareText(p.spare)}; ${p.power === 1 ? 'con' : 'ognuna con'} ${fmtNumber(p.usableHostsPerSubnet)} host.`,
+  'step.both-hosts': (p) => `Per ${fmtNumber(p.hosts)} host ogni subnet deve avere il prefisso /${p.hostsPrefix} o uno più corto (subnet più grandi).`,
   'step.both-subnets': (p) =>
     p.subnetsPrefix === null
       ? `Il blocco /${p.blockPrefix} non contiene ${fmtNumber(p.subnets)} subnet.`
-      : `Per ${fmtNumber(p.subnets)} subnet dal /${p.blockPrefix} serve almeno un /${p.subnetsPrefix}.`,
+      : `Per ${fmtNumber(p.subnets)} subnet dal /${p.blockPrefix} serve il prefisso /${p.subnetsPrefix} o uno più lungo.`,
   'step.both-feasible': (p) =>
     `Vanno bene i prefissi da /${p.range[0]} a /${p.range[1]}. Consigliato /${p.recommended} (${fmtNumber(p.subnetsAtRecommended)} subnet della dimensione minima sufficiente)${p.alternative !== p.recommended ? `; con /${p.alternative} le subnet sono più grandi` : ''}.`,
   'step.both-infeasible': (p) =>
     p.reason === 'BOTH_BLOCK_TOO_SMALL'
       ? `Non si può: gli host richiedono un /${p.hostsPrefix}, più grande del blocco /${p.blockPrefix}.`
-      : `Non si può con subnet tutte uguali: gli host chiedono al massimo /${p.hostsPrefix}, le subnet almeno ${p.subnetsPrefix === null ? 'più di /32' : `/${p.subnetsPrefix}`}. Serve un blocco più grande o il VLSM.`,
+      : `Non si può con subnet tutte uguali: gli host chiedono /${p.hostsPrefix} o un prefisso più corto, le subnet ${p.subnetsPrefix === null ? 'non entrano nemmeno con /32' : `chiedono /${p.subnetsPrefix} o un prefisso più lungo`}. Serve un blocco più grande o il VLSM.`,
 
   // ---------------------------------------------------------------- passaggi: F06 (cap. 11, 13)
-  'step.subdivide-borrowed': (p) => `Da /${p.blockPrefix} a /${p.newPrefix}: ${p.borrowedBits} bit presi in prestito, 2${sup(p.borrowedBits)} = ${fmtNumber(p.count)} subnet.`,
+  'step.subdivide-borrowed': (p) => `Da /${p.blockPrefix} a /${p.newPrefix}: ${borrowedText(p.borrowedBits)}, 2${sup(p.borrowedBits)} = ${fmtNumber(p.count)} subnet.`,
   'step.subdivide-sequence': (p) =>
     p.count > 2
       ? `Le subnet avanzano di ${p.magic} nel ${ord(p.index)} ottetto: ${p.first}, ${p.second}, … fino a ${p.last}.`

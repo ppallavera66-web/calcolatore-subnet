@@ -146,3 +146,29 @@ describe('testi italiani (strings.it.js)', () => {
     ]);
   });
 });
+
+describe('revisione A8 · accordi, maiuscole e formulazioni', () => {
+  test('plurali di bit e avanzi', () => {
+    expect(t('step.subdivide-borrowed', { blockPrefix: 24, newPrefix: 25, borrowedBits: 1, count: 2 })).toMatch(/1 bit preso in prestito/);
+    expect(t('step.subdivide-borrowed', { blockPrefix: 24, newPrefix: 24, borrowedBits: 0, count: 1 })).toMatch(/nessun bit preso in prestito/);
+    expect(t('step.subdivide-borrowed', { blockPrefix: 16, newPrefix: 19, borrowedBits: 3, count: 8 })).toMatch(/3 bit presi in prestito/);
+    expect(t('step.hosts-spare', { usableHosts: 62, spare: 1 })).toBe('Host disponibili 62: ne avanza 1.');
+    expect(t('step.hosts-spare', { usableHosts: 2, spare: 0 })).toBe('Host disponibili 2: non ne avanza nessuno.');
+    expect(t('step.subnets-spare', { power: 8, spare: 2, usableHostsPerSubnet: 8190 })).toBe('8 subnet, ne avanzano 2; ognuna con 8.190 host.');
+    expect(t('step.subnets-prefix', { borrowedBits: 1, blockPrefix: 24, newPrefix: 25 })).toMatch(/^Si prende in prestito 1 bit/);
+    expect(t('step.subnets-prefix', { borrowedBits: 0, blockPrefix: 24, newPrefix: 24 })).toMatch(/^Non serve prendere bit in prestito/);
+  });
+  test('iniziali maiuscole e ottetto indicato', () => {
+    expect(t('step.octet-weights', { index: 2, value: 10, rows: [{ fits: true, weight: 8 }, { fits: true, weight: 2 }], binary: '00001010' })).toMatch(/^Terzo ottetto, 10/);
+    expect(t('step.octet-divisions', { index: 0, value: 1, binary: '00000001' })).toMatch(/^Primo ottetto/);
+    expect(t('step.mask-octet-invalid', { index: 2, value: 250, binary: '11111010' })).toMatch(/^Terzo ottetto: 250 \(11111010\)/);
+  });
+  test('messaggi di errore', () => {
+    expect(t('SUBNETS_TOO_MANY', { requested: 3, max: 2 })).toBe('Il blocco contiene al massimo 2 subnet, ma ne servono 3.');
+    expect(t('SUBNETS_TOO_MANY', { requested: 2, max: 1 })).not.toMatch(/bastano/);
+    expect(t('HOSTS_RANGE', { value: 4294967295 })).toMatch(/hai scritto 4\.294\.967\.295/);
+    expect(t('step.both-hosts', { hosts: 20, hostsPrefix: 27 })).not.toMatch(/al massimo/);
+    expect(t('step.both-subnets', { subnets: 10, blockPrefix: 24, subnetsPrefix: 28 })).toMatch(/\/28 o uno più lungo/);
+    expect(t('step.both-infeasible', { reason: 'BOTH_CONFLICT', hostsPrefix: 27, subnetsPrefix: 28 })).not.toMatch(/al massimo|almeno/);
+  });
+});
