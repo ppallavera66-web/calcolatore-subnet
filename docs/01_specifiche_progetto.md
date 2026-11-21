@@ -81,7 +81,8 @@ Opzione "Cifra il file" all'export del JSON, **facoltativa e disattivata per def
 | 5 | Impostazioni, persistenza, export/import, cifratura | Opus 5.5 | Alto |
 | 6 | Integrazione delle due guide e collegamenti con l'app | Sonnet 5.5 | Medio |
 | 7 | Verifica finale (con revisione indipendente) e rilascio v1 | Opus 5.5 | Medio |
-| 8 | Revisione finale di Paolo su applicazione e guide: correzioni, bug, ampliamenti raccolti in un'unica lista | Opus 5.5 | Medio |
+| 8 | Revisione finale tecnica (segnalazioni della revisione indipendente e dello stato), rilascio v1.1.0 · **completata** | Opus 5.5 | Medio |
+| 9 | Note di Paolo su applicazione e guide: correzioni, bug, ampliamenti raccolti in un'unica lista, guida al subnetting v1.0, rilascio v1.2.0 | Opus 5.5 | Medio |
 | – | Correzioni minori tra una fase e l'altra | Sonnet 5.5 | Basso |
 
 Stima: v1 completa in 6–7 conversazioni. La v2 richiede altre 2–3 conversazioni.
@@ -91,7 +92,7 @@ Stima: v1 completa in 6–7 conversazioni. La v2 richiede altre 2–3 conversazi
 - **Chiusura di ogni fase**: oltre ai file prodotti, si aggiorna `STATO_PROGETTO.md` e si fornisce sempre a Paolo, nella risposta finale e nello stato del progetto:
   - il **titolo** della conversazione successiva, nel formato `Fase N · Titolo`;
   - il **prompt** completo da incollare per avviarla.
-- **Revisione di Paolo**: le note personali (Errore, Chiarezza, Mancanza, Taglio) non vengono raccolte fase per fase. Paolo rivede tutto alla fine, applicazione e guide insieme, e le correzioni si applicano in un colpo solo (fase 8). Eventuali segnalazioni sparse nel frattempo si annotano in `STATO_PROGETTO.md`.
+- **Revisione di Paolo**: le note personali (Errore, Chiarezza, Mancanza, Taglio) non vengono raccolte fase per fase. Paolo rivede tutto alla fine, applicazione e guide insieme, e le correzioni si applicano in un colpo solo (fase 9, dopo la revisione tecnica della fase 8). Eventuali segnalazioni sparse nel frattempo si annotano in `STATO_PROGETTO.md`.
 
 ## 8. Difetti noti della guida v0.1
 Tutti risolti nella v0.3 (fase 1), tranne il n. 6, rimandato alla fase 6.
