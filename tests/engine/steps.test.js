@@ -4,6 +4,8 @@ import fc from 'fast-check';
 import { explain, methodsFor, resolveMethod, METHODS, analyzeText, toDotted, validateMask } from '../../src/engine/index.js';
 import { byFunction } from './generators.js';
 import { val } from '../helpers.js';
+import { t } from '../../src/i18n/strings.it.js';
+import { analyze, snippets, subdivide } from '../../src/engine/index.js';
 
 /**
  * Valori finali dei passaggi: unione dei `values` nell'ordine (vale l'ultimo).
@@ -167,5 +169,51 @@ describe('scelta del metodo (4.2)', () => {
         return /^cap-\d+$/.test(ex.chapter) && ex.chapter === /** @type {any} */ (METHODS)[fn][m] && ex.steps.every((s) => /^cap-\d+$/.test(s.chapter));
       });
     }), { numRuns: 300 });
+  });
+});
+
+describe('revisione A7 · frasi dei passaggi vere anche ai bordi', () => {
+  /** @param {{ steps: { id: string, values: any }[] }} ex */
+  const text = (ex) => ex.steps.map((st) => t(`step.${st.id}`, st.values)).join(' ');
+  const arb = fc.tuple(fc.integer({ min: 0, max: 0xffffffff }), fc.integer({ min: 0, max: 32 }));
+
+  test('F01: niente "a destra" con l\'ottetto interessante al 4° posto; niente "scavalca" senza una rete successiva', () => {
+    fc.assert(fc.property(arb, ([x, p]) => {
+      const r = val(analyze(x, p));
+      for (const m of ['binary', 'magic', 'multiples']) {
+        const s = text(explain('F01', r, m));
+        if (r.interesting.index === 3 && /a destra/.test(s)) return false;
+        if (r.nextNetwork === null && /scavalca/.test(s)) return false;
+        if (r.nextNetwork === null && p <= 30 && m !== 'binary' && !/ultimo blocco dello spazio IPv4/.test(s)) return false;
+      }
+      return true;
+    }));
+  });
+
+  test('esempi: 255.255.255.252/30, 192.168.1.1/32, 10.1.1.1/30 nel binario', () => {
+    expect(text(explain('F01', val(analyzeText('255.255.255.253/30')), 'magic'))).not.toMatch(/scavalca/);
+    expect(text(explain('F01', val(analyzeText('255.255.255.253/30')), 'magic'))).toMatch(/ultimo blocco dello spazio IPv4/);
+    expect(text(explain('F01', val(analyzeText('192.168.10.200/26')), 'magic'))).toMatch(/scavalca/);
+    const single = text(explain('F01', val(analyzeText('192.168.1.1/32')), 'magic'));
+    expect(single).toMatch(/multiplo di 8/);
+    expect(single).not.toMatch(/a destra/);
+    expect(text(explain('F01', val(analyzeText('10.1.1.1/30')), 'binary'))).not.toMatch(/a destra/);
+    expect(text(explain('F01', val(analyzeText('10.1.1.1/20')), 'binary'))).toMatch(/255 negli ottetti a destra/);
+  });
+
+  test('F10: "a sinistra" solo se ci sono ottetti a sinistra, "a destra" solo se ci sono a destra', () => {
+    fc.assert(fc.property(arb, ([x, p]) => {
+      const r = val(snippets(x, p));
+      const s = text(explain('F10', r));
+      const index = p === 0 ? 0 : p % 8 === 0 ? p / 8 - 1 : Math.floor(p / 8);
+      return (index > 0) === /a sinistra/.test(s) && (index < 3) === /a destra/.test(s);
+    }));
+  });
+
+  test('F06: con 2 subnet la sequenza le nomina entrambe, senza "…"', () => {
+    const s = text(explain('F06', val(subdivide(0x0a000000, 24, 25))));
+    expect(s).toMatch(/sono due, 10\.0\.0\.0 e 10\.0\.0\.128/);
+    expect(s).not.toMatch(/…/);
+    expect(text(explain('F06', val(subdivide(0x0a000000, 24, 26))))).toMatch(/10\.0\.0\.64, … fino a 10\.0\.0\.192/);
   });
 });

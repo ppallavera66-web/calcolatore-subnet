@@ -57,7 +57,7 @@ export function analyzeBinary(r) {
     const bcOctet = netOctet | (255 - maskO[i]);
     const bcO = compose(ipO, i, bcOctet, 255);
     steps.push(
-      step('or-broadcast', 'cap-7', { index: i, networkOctet: netOctet, broadcastOctet: bcOctet, broadcast: joinOctets(bcO) }, [
+      step('or-broadcast', 'cap-7', { index: i, networkOctet: netOctet, broadcastOctet: bcOctet, rightOctets: 3 - i, broadcast: joinOctets(bcO) }, [
         { label: 'network', value: octetToBinary(netOctet), prefix: io.bits },
         { label: 'broadcast', value: octetToBinary(bcOctet), prefix: io.bits },
       ]),

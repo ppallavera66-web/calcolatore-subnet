@@ -52,7 +52,9 @@ export function broadcastAndHosts(ipO, p, blockStart) {
         broadcastOctet: bcOctet,
         rightOctets: k,
         nextNetworkOctet: blockStart + M,
-        carry: io.index > 0 && blockStart + M === 256,
+        // ultimo blocco dello spazio IPv4: non c'è una rete successiva, quindi nessun riporto (revisione A7)
+        lastInSpace: bc === 0xffffffff,
+        carry: io.index > 0 && blockStart + M === 256 && bc !== 0xffffffff,
         broadcast: joinOctets(bcO),
       }),
     );

@@ -540,7 +540,7 @@ export const STRINGS = {
     return `Converti in binario solo l'ottetto interessante: ${p.ipOctet} = ${p.ipOctetBinary}.${rest ? ` ${rest}.` : ''}`;
   },
   'step.and-network': (p) => `Rete = IP AND mask: ${p.ipOctet} AND ${p.maskOctet} = ${p.networkOctet}, quindi la rete è ${p.network}.`,
-  'step.or-broadcast': (p) => `Broadcast = rete con tutti i bit di host a 1: ${p.networkOctet} diventa ${p.broadcastOctet}, e 255 a destra. Broadcast ${p.broadcast}.`,
+  'step.or-broadcast': (p) => `Broadcast = rete con tutti i bit di host a 1: ${p.networkOctet} diventa ${p.broadcastOctet}${p.rightOctets ? ', e 255 negli ottetti a destra' : ''}. Broadcast ${p.broadcast}.`,
   'step.no-broadcast': (p) =>
     p.prefix === 31
       ? 'Con /31 non ci sono indirizzi di rete e di broadcast da togliere: è un collegamento punto-punto (RFC 3021).'
@@ -553,7 +553,7 @@ export const STRINGS = {
   // ---------------------------------------------------------------- passaggi: numero magico e multipli (cap. 9, 12, 13)
   'step.interesting-octet': (p) => `Ottetto interessante del /${p.prefix}: il ${ord(p.index)}${p.bits ? `, con ${p.bits} bit di rete` : ''}.`,
   'step.boundary-convention': (p) =>
-    `/${p.prefix} è un multiplo di 8: il confine cade tra due ottetti. Per convenzione l'ottetto interessante è l'ultimo che vale 255 (il ${ord(p.index)}), M = 1: le subnet avanzano di 1 lì e gli ottetti a destra vanno da 0 a 255.`,
+    `/${p.prefix} è un multiplo di 8: il confine cade tra due ottetti. Per convenzione l'ottetto interessante è l'ultimo che vale 255 (il ${ord(p.index)}), M = 1: le subnet avanzano di 1 lì${p.index < 3 ? ' e gli ottetti a destra vanno da 0 a 255' : ''}.`,
   'step.zero-prefix': '/0 non ha bit di rete: per convenzione l\'ottetto interessante è il primo e M = 256, cioè un unico blocco da 0 a 255 che contiene tutti gli indirizzi.',
   'step.magic-number': (p) => `M = 256 − ${p.maskOctet} = ${p.magic} (oppure 2${sup(p.exponent)} = ${p.magic}).`,
   'step.block-multiple': (p) =>
@@ -562,7 +562,7 @@ export const STRINGS = {
   'step.remainder': (p) =>
     `${p.ipOctet} mod ${p.magic} = ${p.remainder}, e ${p.ipOctet} − ${p.remainder} = ${p.blockStart}. L'indirizzo è il ${fmtNumber(p.position)}° del blocco${p.remainderIsLast && p.rightOctets === 0 ? ': resto = M − 1, è il broadcast' : ''}.`,
   'step.broadcast-quick': (p) =>
-    `Broadcast = ${p.blockStart} + ${p.magic} − 1 = ${p.broadcastOctet}${p.rightOctets ? ', e 255 a destra' : ''}: ${p.broadcast}.${p.carry ? ` La rete successiva scavalca nell'ottetto a sinistra (${p.blockStart} + ${p.magic} = 256).` : ''}`,
+    `Broadcast = ${p.blockStart} + ${p.magic} − 1 = ${p.broadcastOctet}${p.rightOctets ? ', e 255 a destra' : ''}: ${p.broadcast}.${p.carry ? ` La rete successiva scavalca nell'ottetto a sinistra (${p.blockStart} + ${p.magic} = 256).` : ''}${p.lastInSpace ? ' È l\'ultimo blocco dello spazio IPv4: dopo non c\'è un\'altra rete.' : ''}`,
   'step.host-quick': (p) =>
     p.rightOctets
       ? `Host = ${p.magic} × 256${p.rightOctets > 1 ? sup(p.rightOctets) : ''} − 2 = ${fmtNumber(p.usableHosts)}.`
@@ -617,9 +617,11 @@ export const STRINGS = {
   // ---------------------------------------------------------------- passaggi: F06 (cap. 11, 13)
   'step.subdivide-borrowed': (p) => `Da /${p.blockPrefix} a /${p.newPrefix}: ${p.borrowedBits} bit presi in prestito, 2${sup(p.borrowedBits)} = ${fmtNumber(p.count)} subnet.`,
   'step.subdivide-sequence': (p) =>
-    p.count > 1
+    p.count > 2
       ? `Le subnet avanzano di ${p.magic} nel ${ord(p.index)} ottetto: ${p.first}, ${p.second}, … fino a ${p.last}.`
-      : `Una sola subnet: ${p.first}.`,
+      : p.count === 2
+        ? `Le subnet avanzano di ${p.magic} nel ${ord(p.index)} ottetto: sono due, ${p.first} e ${p.second}.`
+        : `Una sola subnet: ${p.first}.`,
   'step.carry': (p) => `Riporto: dopo ${p.before} viene ${p.after}, perché nel ${ord(p.index)} ottetto si arriva a 256 (cap. 13).`,
 
   // ---------------------------------------------------------------- passaggi: F07 (cap. 15)
@@ -639,7 +641,8 @@ export const STRINGS = {
 
   // ---------------------------------------------------------------- passaggi: F10 (cap. 14)
   'step.wildcard-rule': (p) => `Wildcard = 255 − mask, ottetto per ottetto: ${p.octets.map((/** @type {any} */ o) => `255 − ${o.mask} = ${o.wildcard}`).join(' · ')} → ${p.wildcard}.`,
-  'step.wildcard-magic': (p) => `In pratica: nell'ottetto interessante (il ${ord(p.index)}) vale M − 1 = ${p.wildcardOctet}, 0 a sinistra e 255 a destra.`,
+  'step.wildcard-magic': (p) =>
+    `In pratica: nell'ottetto interessante (il ${ord(p.index)}) vale M − 1 = ${p.wildcardOctet}${[p.index > 0 ? '0 negli ottetti a sinistra' : '', p.index < 3 ? '255 in quelli a destra' : ''].filter(Boolean).map((x) => `, ${x}`).join('')}.`,
   'step.snippet-host': (p) => `Con /32 le ACL usano la parola chiave host: host ${p.network}.`,
   'step.snippet-any': 'Con /0 le ACL usano la parola chiave any (qualunque indirizzo).',
 
