@@ -23,7 +23,7 @@
 <dl class="facts">
 <dt>Numero</dt><dd>da 0 a 4.294.967.295, in decimale, binario o esadecimale, convertito nelle altre due basi con la somma dei pesi. In binario puoi separare i gruppi con spazi o punti; <code>0b</code> e <code>0x</code> sono accettati. La larghezza (automatica, 8 o 32 bit) decide quante cifre binarie mostrare.</dd>
 <dt>Indirizzo</dt><dd>un indirizzo puntato in binario, in esadecimale per ottetto e a 32 bit, e come intero.</dd>
-<dt>Prefisso e mask</dt><dd>da <code>/20</code> alla mask decimale e binaria, o al contrario. Il collegamento <span class="ui">Vai alla validazione della mask</span> apre la scheda Mask.</dd>
+<dt>Prefisso e mask</dt><dd>da <code>/20</code> alla mask decimale e binaria, o al contrario. Se la mask non è valida compare il pulsante <span class="ui">Vai alla validazione della mask</span>, che apre la scheda Mask con il motivo.</dd>
 </dl>
 <p>Con la modalità didattica i passaggi mostrano la sottrazione dei pesi o le divisioni successive (<a href="#/guide/subnetting/cap-3">capitolo 3</a>).</p>
 </section>
@@ -57,7 +57,7 @@
 <dt>Numero di subnet</dt><dd>prefisso del blocco e subnet richieste: dà il nuovo prefisso, i bit presi in prestito e le subnet di scorta.</dd>
 <dt>Entrambi</dt><dd>blocco, host e subnet: dice se si può fare con subnet tutte uguali, con il prefisso consigliato e l'alternativa con subnet più grandi. Se non si può, servirà il pianificatore VLSM (versione 2).</dd>
 </dl>
-<p><span class="ui">Apri in Analisi</span> porta il risultato nella scheda Analisi. Teoria nel <a href="#/guide/subnetting/cap-11">capitolo 11</a>.</p>
+<p>Con <span class="ui">Host per subnet</span> il pulsante <span class="ui">Apri in Analisi</span> porta il prefisso trovato nella scheda Analisi: l'indirizzo IP già scritto lì resta; se non c'è, scrivilo tu. Teoria nel <a href="#/guide/subnetting/cap-11">capitolo 11</a>.</p>
 </section>
 
 <section class="chap prose" id="uso-suddivisione">
