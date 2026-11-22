@@ -155,6 +155,19 @@ describe('fase 9: guida al subnetting v0.5', () => {
   });
 });
 
+describe('fase 9: guida all\'uso', () => {
+  test('U1: "Browser e apertura da disco" dice solo quello che è stato provato (Chrome sul computer)', () => {
+    const sec = text(GUIDES.uso.slice(GUIDES.uso.indexOf('id="uso-browser"')));
+    expect(sec).toMatch(/finora è stato provato in Chrome sul computer/);
+    expect(sec).not.toMatch(/funziona nelle ultime versioni|prove da disco in corso|tutte le funzioni sono disponibili/);
+    expect(sec).toMatch(/Edge, Firefox, Safari\s*non ancora provati/);
+  });
+  test('U2: nel calcolo inverso la scorta è di host, come nell\'app', () => {
+    expect(text(GUIDES.uso)).not.toMatch(/indirizzi di scorta/);
+    expect(text(GUIDES.uso)).toMatch(/host di scorta/);
+  });
+});
+
 describe('collegamenti dall\'app verso le guide', () => {
   const subIds = new Set(ids(GUIDES.subnetting));
   const usoIds = new Set(ids(GUIDES.uso));

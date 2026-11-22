@@ -18,7 +18,7 @@ Prove della specifica tecnica, sezione 11: Web Crypto, localStorage e appunti co
 
 ## Come preparare le prove
 
-1. Scarica `calcolatore-subnet-v1.0.0.html` dalla Release v1.0.0 del repository (è `dist/index.html` della build). Per le prove da HTTPS usa la pubblicazione su GitHub Pages.
+1. Scarica il file `calcolatore-subnet-vX.Y.Z.html` dalla Release più recente del repository (<https://github.com/ppallavera66-web/calcolatore-subnet/releases/latest>; è `dist/index.html` della build). Per le prove da HTTPS usa la pubblicazione su GitHub Pages (<https://ppallavera66-web.github.io/calcolatore-subnet/>). Annota nella tabella la versione provata (Impostazioni → Informazioni → Versione).
 2. Mettilo in una cartella, per esempio `Documenti/prova-subnet/`, e aprilo con un doppio clic o trascinandolo nel browser.
 3. Per ogni browser compila la tabella dei risultati in fondo: **sì**, **no**, oppure una breve nota.
 
