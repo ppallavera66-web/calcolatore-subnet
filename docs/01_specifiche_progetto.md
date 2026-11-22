@@ -82,7 +82,8 @@ Opzione "Cifra il file" all'export del JSON, **facoltativa e disattivata per def
 | 6 | Integrazione delle due guide e collegamenti con l'app | Sonnet 5.5 | Medio |
 | 7 | Verifica finale (con revisione indipendente) e rilascio v1 | Opus 5.5 | Medio |
 | 8 | Revisione finale tecnica (segnalazioni della revisione indipendente e dello stato), rilascio v1.1.0 · **completata** | Opus 5.5 | Medio |
-| 9 | Note di Paolo su applicazione e guide: correzioni, bug, ampliamenti raccolti in un'unica lista, guida al subnetting v1.0, rilascio v1.2.0 | Opus 5.5 | Medio |
+| 9 | Rilettura di testi e guide, guida al subnetting v0.5, rilascio v1.1.1 · **completata** (le note di Paolo sono rimandate) | Opus 5.5 | Medio |
+| 10 | Pianificazione della v2 (specifica tecnica v2, fasi), con il posto per le note di Paolo (v1.2.0) e la guida al subnetting v1.0 | Opus 5.5 | Alto |
 | – | Correzioni minori tra una fase e l'altra | Sonnet 5.5 | Basso |
 
 Stima: v1 completa in 6–7 conversazioni. La v2 richiede altre 2–3 conversazioni.

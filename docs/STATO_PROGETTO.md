@@ -1,29 +1,29 @@
 # Stato del progetto: Calcolatore Subnet
 
-Ultimo aggiornamento: 21 novembre 2026 (fase 8, rilascio v1.1.0 pronto: tag da pubblicare)
+Ultimo aggiornamento: 22 novembre 2026 (fase 9, rilascio v1.1.1 pronto: tag da pubblicare)
 
 ## Fase corrente
-**Fase 9 · Note di Paolo su applicazione e guide (v1.2)**
-Modello consigliato: **Opus 5.5** · Impegno: **Medio**
-Contenuto: le note di Paolo su applicazione e guide (Errore, Chiarezza, Mancanza, Taglio) in un'unica lista; revisione dei contenuti della guida al subnetting (dalla v0.4 "versione di studio" alla v1.0) e della guida all'uso; rilettura dei testi dei passaggi e dell'interfaccia insieme alle guide; eventuali prove nei browser; rilascio v1.2.0.
+**Fase 10 · Pianificazione della v2**
+Modello consigliato: **Opus 5.5** · Impegno: **Alto**
+Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export XLSX, snippet avanzati), con specifica tecnica dedicata, suddivisione in fasi e criteri di accettazione; posto nel piano per le note di Paolo rimandate dalla fase 9 (versione 1.2.0) e per la guida al subnetting v1.0; eventuale manifest PWA solo per Pages (`docs/decisione-pwa.md`).
 
 **Prima di iniziare (azione per Paolo):**
-- pubblicare il tag `v1.1.0` (comandi nella sezione Repository) e controllare la Release;
-- usare l'app (Release v1.1.0 o GitHub Pages) e leggere le due guide, annotando le note con le quattro etichette;
-- se possibile, compilare la tabella di `docs/verifiche-browser-fase5.md` (Edge, Firefox, Safari, telefoni).
+- pubblicare il tag `v1.1.1` (comandi nella sezione Repository) e controllare la Release;
+- facoltativo: le note su app e guide (Errore, Chiarezza, Mancanza, Taglio) e i risultati di `docs/verifiche-browser-fase5.md`, se sono pronti.
 
 ## Repository
 - **GitHub**: <https://github.com/ppallavera66-web/calcolatore-subnet>, ramo `main`, con tutta la storia delle fasi 3–7 (un commit per passo), unita al commit iniziale creato da GitHub.
 - **Tag `v1.0.0`**: pubblicato da Paolo il 21 novembre 2026 (il proxy della sessione rifiuta il push dei tag, HTTP 403). Il workflow ha creato la **Release v1.0.0** con `calcolatore-subnet-v1.0.0.html` (635.192 byte), la sua impronta `.sha256` e la nota `docs/note-rilascio/v1.0.0.md`: <https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.0.0>. L'impronta coincide con quella della build locale (`03708850…8f37`).
 - **Visibilità**: repository **pubblico** (decisione D4), reso tale da Paolo il 21 novembre 2026.
 - **GitHub Pages**: attivo con sorgente "GitHub Actions", pubblicato a ogni push su `main`: <https://ppallavera66-web.github.io/calcolatore-subnet/>.
-- **Tag `v1.1.0`**: preparato nella fase 8 sull'ultimo commit di `main` (aggiornamento di questo file), **da pubblicare da Paolo**:
+- **Tag `v1.1.0`**: pubblicato da Paolo il 22 novembre 2026 (00:05) sul commit `5857ea6`. **Release v1.1.0** (Latest) con `calcolatore-subnet-v1.1.0.html` (643.309 byte) e impronta `3f7b8628…f268b`, verificata scaricando il file: versione 1.1.0 in Informazioni. Workflow del tag verde (test, e2e, Release); Pages servito dallo stesso commit.
+- **Tag `v1.1.1`**: preparato nella fase 9 sull'ultimo commit di `main` (aggiornamento di questo file), **da pubblicare da Paolo** (in PowerShell, nella cartella del clone):
   ```
   git pull
-  git tag -a v1.1.0 -m "Calcolatore Subnet v1.1.0"
-  git push origin v1.1.0
+  git tag -a v1.1.1 -m "Calcolatore Subnet v1.1.1"
+  git push origin v1.1.1
   ```
-  Il workflow controlla che il tag coincida con la versione di `package.json` (1.1.0) e che esista `docs/note-rilascio/v1.1.0.md`, poi crea la Release con `calcolatore-subnet-v1.1.0.html` e la sua impronta `.sha256`.
+  Il workflow controlla che il tag coincida con la versione di `package.json` (1.1.1) e che esista `docs/note-rilascio/v1.1.1.md`, poi crea la Release con `calcolatore-subnet-v1.1.1.html` e la sua impronta `.sha256`.
 - **Nei rilasci successivi** il tag va pubblicato dal computer di Paolo, finché il proxy della sessione lo rifiuta: `git pull`, poi `git tag -a vX.Y.Z -m "Calcolatore Subnet vX.Y.Z"` e `git push origin vX.Y.Z` (in PowerShell, nella cartella del clone).
 - **Autore dei commit**: fino alla fase 7 `Paolo Pallavera <paolo.pallavera@users.noreply.github.com>`; dalla fase 8 l'indirizzo noreply dell'account, `Paolo Pallavera <358547414+ppallavera66-web@users.noreply.github.com>`, che collega i commit al profilo GitHub.
 
@@ -212,6 +212,27 @@ Contenuto: le note di Paolo su applicazione e guide (Errore, Chiarezza, Mancanza
     - e2e 64/64 in Chrome da `file://` (12 prove nuove), anche su GitHub Actions con Chrome 157. Le prove nuove falliscono senza le correzioni, tranne quella di C8: il caso non si è presentato, la correzione resta come garanzia;
     - GitHub Actions: un giro intermedio rosso per un errore del controllo dei tipi in `tools/e2e.js`, corretto nel commit successivo; poi `test`, `e2e` e `pages` verdi.
 
+- **Fase 9 · Rilettura di app e guide → v1.1.1** (22 novembre 2026):
+  - **note di Paolo non incluse**: Paolo non ha avuto il tempo di rivedere pezzo per pezzo app e guide; le note (Errore, Chiarezza, Mancanza, Taglio) **mancano e saranno fatte più avanti**, in una versione 1.2.0 con la guida al subnetting v1.0. Per questo il rilascio è una **1.1.1** (solo correzioni di testo) e la guida passa alla **v0.5**;
+  - **lista unificata**: le tre voci "Per la fase 9" delle segnalazioni, rese concrete da una rilettura di `strings.it.js` e delle due guide;
+  - **interfaccia**:
+    - "Host di scorta" al posto di "Indirizzi di scorta" nel Calcolo inverso e nel suo export (il valore conta gli host) (I1);
+    - gateway fuori dalla subnet: avviso dell'app, cap. 15 e cap. 18 con la stessa formulazione ("rifiutata oppure accettata con risultati imprevedibili") (I2);
+    - migliaia nell'etichetta della subnet del piano (I3: gli altri testi della finestra di export erano già formattati da chi li chiama);
+    - plurali negli avvisi dell'import (I4); riepilogo dell'import con "calcoli" come l'anteprima ed "elementi scartati" (I5), anche negli esempi della specifica tecnica (6.4, 9.10);
+  - **guida al subnetting v0.5**: apertura che non presenta VLSM e summarization come già presenti (G1); cap. 11, perché 60 postazioni non vanno in un /26 (G3); cap. 14, "valori pari del terzo ottetto" (G4); cap. 18 "Casi limite: /30, /31, /32 e /0", anche in `ui.cap.cap-18` (G5); **appendice C "Il calcolatore e la guida"** al posto di "Specifiche del calcolatore" e "Decisioni prese": capitolo → argomento → scheda dell'app, oppure "arriverà con la versione N", a tre colonne per il telefono (G6); versione v0.5, "versione di studio" (G7);
+  - **guida all'uso**: "Browser e apertura da disco" dice solo quello che è stato provato (Chrome sul computer; Edge, Firefox, Safari e telefoni "non ancora provati") (U1); "host di scorta" (U2); `docs/verifiche-browser-fase5.md` parte dalla Release più recente (U3);
+  - **motore e dati**: nessun intervento;
+  - **rilascio**: versione 1.1.1, `CHANGELOG.md`, `docs/note-rilascio/v1.1.1.md`, README, `docs/verifica-requisiti-v1.md` (requisiti invariati);
+  - **verifiche**:
+    - 1.081 test in 29 file (erano 1.072); i test nuovi falliscono senza le correzioni;
+    - copertura di motore, testi, export, sessione e storage: 99,6% istruzioni, 97,2% rami, 99,8% funzioni;
+    - oracolo: 82.575 casi, 0 differenze, fixture rigenerati identici;
+    - `npm run check` senza errori (un errore di tipo nel nuovo test dell'export, corretto prima del push);
+    - `dist/index.html` di 642.575 byte (61,3% del limite di 1 MB): JavaScript 204 KB, CSS 50 KB, font 245 KB, guide 128 KB;
+    - e2e 66/66 in Chrome da `file://` (2 prove nuove: "Host di scorta" 19 per 43 host; appendice C con axe senza violazioni e collegamento alla scheda);
+    - GitHub Actions: `test`, `e2e` e `pages` verdi al primo giro sul commit del rilascio (`8bd90a5`) e sull'aggiornamento di questo file.
+
 ## Decisioni di Paolo
 **Fase 1**
 - Alla chiusura di ogni fase va sempre fornito il **titolo** della conversazione successiva (`Fase N · Titolo`) e il **prompt** da incollare per avviarla (regola registrata nella sezione 7.1 delle specifiche).
@@ -260,6 +281,13 @@ Contenuto: le note di Paolo su applicazione e guide (Errore, Chiarezza, Mancanza
 - Busta cifrata: i campi in più nell'intestazione si rifiutano (M4).
 - Nessuna prova nei browser: la sezione "Browser e apertura da disco" resta prudente.
 - Repository pubblico, Pages attivo, tag v1.0.0 pubblicati da Paolo; il tag v1.1.0 lo pubblica Paolo.
+
+**Fase 9**
+- Le note di Paolo su app e guide **non sono incluse**: non c'è stato il tempo di rivedere tutto pezzo per pezzo. Restano da fare più avanti e sono segnalate nel CHANGELOG, nella nota di rilascio e qui.
+- Versione **1.1.1** invece della 1.2.0, perché sono solo correzioni di testo; la 1.2.0 resta per le note.
+- Guida al subnetting **v0.5**, ancora "versione di studio"; la **v1.0** dopo la revisione di Paolo.
+- Appendice C riscritta come **"Il calcolatore e la guida"** (approvata).
+- Nessun risultato delle prove nei browser: la sezione "Browser e apertura da disco" dice solo ciò che è stato provato.
 
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
 - **Codici aggiunti**: `MASK_OCTET_VALUE` e `MASK_NONCONTIGUOUS` anche come errori, sul campo `mask`, per una mask non valida dentro `IP mask` o `IP/mask` (caso E della 10.2); `ACL_NAME_FORMAT` e `ACL_ACTION_VALUE` per F10; motivi `BOTH_BLOCK_TOO_SMALL` e `BOTH_CONFLICT` per F05 caso C.
@@ -330,15 +358,21 @@ Contenuto: le note di Paolo su applicazione e guide (Errore, Chiarezza, Mancanza
 - **Toolbar**: tabindex mobile, frecce in entrambe le direzioni con ritorno all'inizio, Inizio e Fine.
 - **Guida su telefono**: blocchi binari a 12 px sotto i 560 px, senza andare a capo (l'allineamento in colonna è il contenuto); quelli oltre circa 46 caratteri scorrono, con un'ombra sul bordo.
 
+## Scelte tecniche della fase 9 (dove la specifica non decideva)
+- **Gateway fuori dalla subnet**: la frase comune "rifiutata oppure accettata con risultati imprevedibili" è controllata da un test in tre punti (avviso `W_GATEWAY_OUTSIDE`, cap. 15, cap. 18).
+- **Appendice C**: collegamenti alle schede senza input (rotte canoniche, ammesse dal test dei collegamenti); niente identificativi F, che l'utente non vede.
+- **Riepilogo dell'import**: gli scarti contano cronologia e piani insieme, quindi "elementi" e non "voci".
+
 ## Segnalazioni da applicare nella revisione finale
 - **Chiuse nella fase 8**: tutto l'elenco "Per la fase 8" di `docs/revisione-fase7.md`; blocchi binari su telefono; convenzione di /0 e righe /0–/7; blocchi speciali del cap. 4; righe bit per bit di F03; nomi dei pulsanti nella guida all'uso.
-- **Per la fase 9 (v1.2), insieme alle note di Paolo**:
-  - testi dei passaggi didattici e dell'interfaccia (`strings.it.js`): rilettura di tono e coerenza con i capitoli. Nella fase 8 sono state corrette solo le frasi false e gli accordi (A7, A8);
-  - guida all'uso: rilettura del tono e degli esempi; sezione "Browser e apertura da disco" con le prove nei browser, quando ci sono;
-  - guida al subnetting: revisione dei contenuti e passaggio alla v1.0.
+- **Chiuse nella fase 9**: rilettura dei testi dell'app, della guida all'uso e della guida al subnetting (voci I1–I5, U1–U3, G1–G7, dettagli nella sezione Completato).
+- **Rimandate (versione 1.2.0)**:
+  - **note di Paolo** su app e guide, con le etichette Errore, Chiarezza, Mancanza, Taglio: **mancano**, Paolo le aggiungerà dopo aver rivisto tutto pezzo per pezzo;
+  - **guida al subnetting v1.0**, dopo le note di Paolo;
+  - sezione "Browser e apertura da disco" con i risultati delle prove, quando ci sono.
 
 ## Problemi aperti
-- **GitHub Actions**: verde sull'ultimo commit di `main` (`test`, `e2e` con Chrome 157, `pages`). Release v1.1.0 dopo il push del tag da parte di Paolo.
+- **GitHub Actions**: verde sull'ultimo commit di `main` (`test`, `e2e`, `pages`). Release v1.1.1 dopo il push del tag da parte di Paolo.
 - **Da verificare su dispositivo**:
   - **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata);
   - Safari su iPhone e Android con Chrome. Le prove sono state fatte solo in Chrome desktop, con l'emulazione del telefono.
@@ -347,36 +381,35 @@ Contenuto: le note di Paolo su applicazione e guide (Errore, Chiarezza, Mancanza
   - **da fare a mano** in Edge, Firefox, Safari e sui telefoni, con la lista `docs/verifiche-browser-fase5.md`, compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel;
   - i risultati vanno nella sezione "Browser e apertura da disco" della guida all'uso (`src/guides/uso/03-risultati-dati.html`, `id="uso-browser"`).
 - **Lettori di schermo reali** (NVDA, VoiceOver, TalkBack): mai provati. C8 è corretto come garanzia, ma va confermato con un lettore vero.
-- **Peso del file unico**: `npm run size` a ogni build (fase 8: 643.309 byte, 61,4%; restano circa 400 KB).
+- **Peso del file unico**: `npm run size` a ogni build (fase 9: 642.575 byte, 61,3%; restano circa 400 KB).
 - **Safari**: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore e nella guida all'uso (Memorizza i dati, Browser).
 
 ## Prossima conversazione
-**Titolo:** Fase 9 · Note di Paolo su applicazione e guide (v1.2)
-**Modello:** Opus 5.5 · **Impegno:** Medio
+**Titolo:** Fase 10 · Pianificazione della v2
+**Modello:** Opus 5.5 · **Impegno:** Alto
 
 **Prompt da incollare:**
 
-> Iniziamo la fase 9: le mie note su applicazione e guide del Calcolatore Subnet, con rilascio v1.2.0.
+> Iniziamo la fase 10: la pianificazione della v2 del Calcolatore Subnet.
 >
-> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md, 02_specifica_tecnica_v1.md e, nel repository, docs/revisione-fase7.md (con l'esito della fase 8) e CHANGELOG.md. Poi conferma modello e impegno per questa fase.
+> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md, 02_specifica_tecnica_v1.md e, nel repository, CHANGELOG.md, docs/decisione-pwa.md e la guida al subnetting (cap. 8, 16, 17 e appendice C). Poi conferma modello e impegno per questa fase.
 >
-> Il codice è nel repository GitHub `ppallavera66-web/calcolatore-subnet` (tag v1.1.0), collegato alla sessione: lavora lì, con un commit per passo, e pubblica su `main`. Il tag v1.2.0 lo pubblico io: preparalo e scrivimi i comandi.
+> Il codice è nel repository GitHub `ppallavera66-web/calcolatore-subnet` (tag v1.1.1), collegato alla sessione: lavora lì, con un commit per passo, e pubblica su `main`. In questa fase non si scrive codice dell'app: si producono i documenti di pianificazione.
 >
-> Le mie note, con le etichette Errore, Chiarezza, Mancanza, Taglio, sono qui sotto. Se qui sotto non trovi note, fermati e chiedimele prima di proporre la lista.
+> Le mie note su app e guide (Errore, Chiarezza, Mancanza, Taglio), rimandate dalla fase 9, mancano ancora. Se le trovi qui sotto, proponimi dove metterle nel piano (una versione 1.2.0 prima della v2, oppure insieme); se non ci sono, lasciale come voce aperta del piano, con la guida al subnetting v1.0.
 >
-> [Incolla le note.]
+> [Facoltativo: le mie note.]
 >
 > [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`.]
 >
 > Obiettivo:
-> - un'unica lista di interventi che unisca le mie note e le voci "Per la fase 9" delle segnalazioni di STATO_PROGETTO.md, raggruppata per area (motore e passaggi, interfaccia e accessibilità, dati, guida all'uso, guida al subnetting) e con la gravità;
-> - correzioni dell'applicazione e delle due guide, ognuna con un test o una prova nel browser quando si può; guida al subnetting portata alla v1.0;
-> - rilettura dei testi dei passaggi e dell'interfaccia insieme alle guide, per tono e coerenza;
-> - se arrivano i risultati delle prove nei browser: aggiornamento della sezione "Browser e apertura da disco" della guida all'uso;
-> - rilascio v1.2.0: versione, CHANGELOG, nota di rilascio in docs/note-rilascio, tag preparato;
-> - tutti i controlli verdi: test, copertura, oracolo, `npm run check`, `npm run size`, `npm run e2e`, GitHub Actions.
+> - ambito della v2: F08 pianificatore VLSM, F09 summarization con avviso di riassunto troppo largo, F13 allenamento con verifica e tempi, export XLSX (con il peso della libreria rispetto al limite di 1 MB), snippet avanzati (ACL estese, altri produttori); per ognuna dire che cosa entra e che cosa resta fuori;
+> - specifica tecnica della v2 (`docs/03_specifica_tecnica_v2.md`): interfaccia del motore, passaggi didattici, schermate, dati salvati (piani `vlsm` e `summary` nello schema di sessione, con le migrazioni), export, test e oracolo;
+> - suddivisione in fasi, con modello e impegno per ognuna e criteri di accettazione;
+> - decisioni da prendere, con la tua raccomandazione, comprese il manifest PWA per Pages e la versione 1.2.0 con le mie note;
+> - specifiche di progetto aggiornate (sezioni 5 e 7).
 >
-> Prima di scrivere codice proponimi la lista unificata e l'ordine di lavoro; dopo la mia conferma procedi, esegui test e controlli e riportami i risultati. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt della fase successiva (pianificazione della v2).
+> Prima di scrivere i documenti proponimi l'indice e le decisioni da prendere; dopo la mia conferma procedi. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt della fase successiva.
 
 ## Fasi successive
-- **Fase 10 · Pianificazione della v2**: F08 VLSM, F09 summarization, F13 allenamento, export XLSX, snippet avanzati; 2–3 conversazioni secondo la sezione 7 delle specifiche; eventuale manifest PWA solo per Pages (`docs/decisione-pwa.md`).
+- **Dopo la fase 10**: le fasi di sviluppo della v2 decise nel piano (2–3 conversazioni secondo la sezione 7 delle specifiche) e la versione 1.2.0 con le note di Paolo e la guida al subnetting v1.0.
