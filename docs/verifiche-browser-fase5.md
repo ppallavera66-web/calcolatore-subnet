@@ -4,7 +4,7 @@ Prove della specifica tecnica, sezione 11: Web Crypto, localStorage e appunti co
 
 ## Già verificato in automatico
 
-`npm run e2e` usa Chrome for Testing 153.0.8010.12, senza interfaccia, su Linux, con la pagina aperta da disco. Esito: 40 prove su 40 nella fase 5, 52 su 52 nella fase 7 (v1.0.0).
+`npm run e2e` usa Chrome for Testing 153.0.8010.12, senza interfaccia, su Linux, con la pagina aperta da disco. Esito: 40 prove su 40 nella fase 5, 52 su 52 nella fase 7 (v1.0.0), 64 su 64 nella fase 8 (v1.1.0), 66 su 66 nella fase 9 (v1.1.1).
 
 | Voce | Esito in Chrome da `file://` |
 |---|---|

@@ -1,6 +1,6 @@
 # Verifica dei requisiti della v1
 
-Versione 1.1.0 · fase 8 · 21 novembre 2026 (prima stesura: 1.0.0, fase 7)
+Versione 1.1.1 · fase 9 · 22 novembre 2026 (prima stesura: 1.0.0, fase 7; requisiti invariati dalla 1.1.0, cambiano solo testi e guide)
 
 Requisiti presi da `01_specifiche_progetto.md` (sezioni 2–6) e da `02_specifica_tecnica_v1.md` (sezioni 0 e 9). Per ogni requisito: dove è fatto, come è verificato, esito.
 

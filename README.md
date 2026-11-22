@@ -2,7 +2,7 @@
 
 Calcolatore di subnet IPv4 in un **unico file HTML** autosufficiente, che funziona offline e si apre da disco o da qualunque web server. Serve per il calcolo rapido, la didattica (passaggi con il metodo binario, del numero magico o dei multipli) e il lavoro professionale.
 
-**Versione 1.1.0.**
+**Versione 1.1.1.**
 - **Scarica** il file unico dalla pagina [Releases](https://github.com/ppallavera66-web/calcolatore-subnet/releases) e aprilo con un doppio clic;
 - **oppure usalo online**: <https://ppallavera66-web.github.io/calcolatore-subnet/>.
 

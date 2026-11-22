@@ -1,6 +1,6 @@
 {
   "name": "calcolatore-subnet",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Calcolatore Subnet IPv4: calcolo rapido, didattica e lavoro professionale, in un unico file HTML",
   "private": true,
   "type": "module",

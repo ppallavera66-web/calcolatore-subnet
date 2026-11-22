@@ -2,6 +2,38 @@
 
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); versioni secondo [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.1.1] · 22 novembre 2026
+
+Correzioni di testo nell'app e nelle due guide, dalla rilettura della fase 9. Nessuna funzione nuova, nessun cambiamento ai calcoli né ai formati dei file.
+
+**Le note di revisione di Paolo** (Errore, Chiarezza, Mancanza, Taglio) **non sono incluse**: richiedono di rivedere pezzo per pezzo app e guide, e arriveranno in una versione successiva, insieme alla guida al subnetting v1.0.
+
+### Interfaccia
+- **Calcolo inverso**: "Host di scorta" al posto di "Indirizzi di scorta", anche nell'export: il valore conta gli host (43 host in un /26 → 19 di scorta).
+- **Gateway fuori dalla subnet**: l'avviso di Stessa subnet dice la stessa cosa dei cap. 15 e 18: a seconda del sistema operativo la configurazione viene rifiutata oppure accettata con risultati imprevedibili.
+- **Import della sessione**: il riepilogo parla di "calcoli", come l'anteprima ("Importati 34 calcoli e 2 piani"); plurali corretti negli avvisi ("1 etichetta non valida esclusa").
+- Separatore delle migliaia nell'etichetta della colonna dei piani ("subnet n. 65.536").
+
+### Guide
+- **Guida al subnetting v0.5**, ancora "versione di studio":
+  - l'apertura non presenta più VLSM e summarization come funzioni già presenti;
+  - cap. 11: perché un laboratorio da 60 postazioni non va in un /26;
+  - cap. 14: "valori pari del terzo ottetto";
+  - cap. 15 e 18: stessa descrizione del gateway fuori dalla subnet;
+  - cap. 18: "Casi limite: /30, /31, /32 e /0", come il contenuto;
+  - appendice C riscritta come **"Il calcolatore e la guida"**: per ogni capitolo la scheda dell'app che lo mette in pratica, o la versione in cui arriverà.
+- **Guida all'uso**: "Browser e apertura da disco" dice solo quello che è stato provato (Chrome sul computer); "host di scorta" nel calcolo inverso.
+- `docs/verifiche-browser-fase5.md`: le prove partono dalla Release più recente.
+
+### Verifica
+- 1.081 test (erano 1.072); copertura 99,6% istruzioni, 97,2% rami, 99,8% funzioni.
+- Oracolo: 82.575 casi, 0 differenze, fixture invariati.
+- 66 prove nel browser (erano 64), in Chrome da `file://`.
+
+### Ancora da fare
+- Note di revisione di Paolo su app e guide; guida al subnetting v1.0.
+- Prove in Edge, Firefox, Safari e sui telefoni ([`docs/verifiche-browser-fase5.md`](docs/verifiche-browser-fase5.md)); lettori di schermo reali.
+
 ## [1.1.0] · 21 novembre 2026
 
 Revisione finale tecnica: le segnalazioni "Per la fase 8" della revisione indipendente ([`docs/revisione-fase7.md`](docs/revisione-fase7.md)) e quelle raccolte nello stato del progetto. Nessuna funzione nuova, nessun cambiamento ai formati dei file, tranne la busta cifrata, che rifiuta i campi in più.
@@ -98,5 +130,6 @@ Prima versione pubblica: un unico file HTML che funziona offline, da disco o da 
 - Manifest PWA: non nella v1 ([`docs/decisione-pwa.md`](docs/decisione-pwa.md)).
 - Prove in Edge, Firefox, Safari e sui telefoni: da fare ([`docs/verifiche-browser-fase5.md`](docs/verifiche-browser-fase5.md)).
 
+[1.1.1]: https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.1.1
 [1.1.0]: https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.1.0
 [1.0.0]: https://github.com/ppallavera66-web/calcolatore-subnet/releases/tag/v1.0.0
