@@ -1,15 +1,16 @@
 # Stato del progetto: Calcolatore Subnet
 
-Ultimo aggiornamento: 22 novembre 2026 (fase 9, rilascio v1.1.1 pronto: tag da pubblicare)
+Ultimo aggiornamento: 22 novembre 2026 (fase 10, piano della v2 e specifica tecnica v2 approvati; tag v1.1.1 ancora da pubblicare)
 
 ## Fase corrente
-**Fase 10 · Pianificazione della v2**
+**Fase 11 · VLSM e summarization**
 Modello consigliato: **Opus 5.5** · Impegno: **Alto**
-Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export XLSX, snippet avanzati), con specifica tecnica dedicata, suddivisione in fasi e criteri di accettazione; posto nel piano per le note di Paolo rimandate dalla fase 9 (versione 1.2.0) e per la guida al subnetting v1.0; eventuale manifest PWA solo per Pages (`docs/decisione-pwa.md`).
+Contenuto: F08 pianificatore VLSM e F09 summarization, dal motore alle schermate (VLSM e Riassunto in Pianifica), con passaggi didattici, oracolo, piani `vlsm` e `summary`, sessione v2 con migrazione 1 → 2, persistenza, export nei formati v1, cap. 11, 16, 17 e appendice C, guida all'uso; CI con beta come pre-release e Pages dai tag; beta `2.0.0-beta.1`. Riferimenti: `docs/piano-v2.md` (sezioni 1.1, 1.2, 2), `docs/03_specifica_tecnica_v2.md`.
 
-**Prima di iniziare (azione per Paolo):**
+**Prima di iniziare (azioni per Paolo):**
 - pubblicare il tag `v1.1.1` (comandi nella sezione Repository) e controllare la Release;
-- facoltativo: le note su app e guide (Errore, Chiarezza, Mancanza, Taglio) e i risultati di `docs/verifiche-browser-fase5.md`, se sono pronti.
+- in GitHub, Settings → Environments → `github-pages` → "Deployment branches and tags": aggiungere una regola per i tag `v*` (serve a pubblicare Pages dai tag, decisione V3; la fase 11 controlla il passaggio con la prima beta);
+- facoltativo: risultati di `docs/verifiche-browser-fase5.md`, se pronti.
 
 ## Repository
 - **GitHub**: <https://github.com/ppallavera66-web/calcolatore-subnet>, ramo `main`, con tutta la storia delle fasi 3–7 (un commit per passo), unita al commit iniziale creato da GitHub.
@@ -17,14 +18,15 @@ Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export 
 - **Visibilità**: repository **pubblico** (decisione D4), reso tale da Paolo il 21 novembre 2026.
 - **GitHub Pages**: attivo con sorgente "GitHub Actions", pubblicato a ogni push su `main`: <https://ppallavera66-web.github.io/calcolatore-subnet/>.
 - **Tag `v1.1.0`**: pubblicato da Paolo il 22 novembre 2026 (00:05) sul commit `5857ea6`. **Release v1.1.0** (Latest) con `calcolatore-subnet-v1.1.0.html` (643.309 byte) e impronta `3f7b8628…f268b`, verificata scaricando il file: versione 1.1.0 in Informazioni. Workflow del tag verde (test, e2e, Release); Pages servito dallo stesso commit.
-- **Tag `v1.1.1`**: preparato nella fase 9 sull'ultimo commit di `main` (aggiornamento di questo file), **da pubblicare da Paolo** (in PowerShell, nella cartella del clone):
+- **Tag `v1.1.1`**: preparato nella fase 9 sul commit `ce42b2a` di `main`, **da pubblicare da Paolo** (al 22 novembre 2026 sul repository ci sono solo v1.0.0 e v1.1.0). Dopo la fase 10 `main` contiene anche i documenti della v2, quindi il tag va messo su quel commit, indicandolo (in PowerShell, nella cartella del clone):
   ```
   git pull
-  git tag -a v1.1.1 -m "Calcolatore Subnet v1.1.1"
+  git tag -a v1.1.1 ce42b2a -m "Calcolatore Subnet v1.1.1"
   git push origin v1.1.1
   ```
   Il workflow controlla che il tag coincida con la versione di `package.json` (1.1.1) e che esista `docs/note-rilascio/v1.1.1.md`, poi crea la Release con `calcolatore-subnet-v1.1.1.html` e la sua impronta `.sha256`.
 - **Nei rilasci successivi** il tag va pubblicato dal computer di Paolo, finché il proxy della sessione lo rifiuta: `git pull`, poi `git tag -a vX.Y.Z -m "Calcolatore Subnet vX.Y.Z"` e `git push origin vX.Y.Z` (in PowerShell, nella cartella del clone).
+- **Rilasci della v2** (decisione V3): beta `2.0.0-beta.N` alla fine delle fasi 11–13, `2.0.0-rc.1` nella fase 14, `2.0.0` nella fase 15. I tag con il trattino diventano pre-release; dalla fase 11 GitHub Pages pubblica l'ultimo tag e non più ogni push su `main` (fino ad allora, i push di soli documenti ripubblicano la stessa versione 1.1.1).
 - **Autore dei commit**: fino alla fase 7 `Paolo Pallavera <paolo.pallavera@users.noreply.github.com>`; dalla fase 8 l'indirizzo noreply dell'account, `Paolo Pallavera <358547414+ppallavera66-web@users.noreply.github.com>`, che collega i commit al profilo GitHub.
 
 ## Completato
@@ -233,6 +235,18 @@ Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export 
     - e2e 66/66 in Chrome da `file://` (2 prove nuove: "Host di scorta" 19 per 43 host; appendice C con axe senza violazioni e collegamento alla scheda);
     - GitHub Actions: `test`, `e2e` e `pages` verdi al primo giro sul commit del rilascio (`8bd90a5`) e sull'aggiornamento di questo file.
 
+- **Fase 10 · Pianificazione della v2** (22 novembre 2026):
+  - **documenti**:
+    - `docs/piano-v2.md`: ambito di F08, F09, F13, export XLSX e snippet avanzati, con ciò che entra e ciò che resta fuori; fasi 11–15 con modello, impegno e criteri di accettazione; decisioni V1–V11; voci aperte;
+    - `docs/03_specifica_tecnica_v2.md`: moduli nuovi e budget di peso; motore di F08, F09, F13 e F10 avanzato con codici di errore e avviso; passaggi didattici; export con il documento comune esteso e lo scrittore XLSX; sessione v2 (piani `vlsm` e `summary`, tentativi dell'allenamento, F08 e F09 in cronologia, migrazione 1 → 2, compatibilità con la 1.1.x); persistenza; schermate, frammenti e schizzi; modifiche alle guide; casi di test, proprietà P14–P25, oracolo v2, prove nel browser; rischi;
+    - `docs/01_specifiche_progetto.md` 1.2: sezioni 4, 5 e 7 aggiornate, regole di lavoro;
+  - **note di Paolo**: non c'erano; restano una voce aperta, da applicare nella fase 15 con la guida al subnetting v1.0 (V1);
+  - **misure per l'export XLSX** (solo la scrittura, minificato con esbuild): SheetJS 0.18.5 da npm 287 KB, ExcelJS 4.4.0 947 KB, write-excel-file 4.1.1 72 KB, fflate (solo deflate) 5,9 KB, **prototipo di scrittore nostro 4,2 KB**; il prototipo ha prodotto un file con 65.536 righe riletto correttamente da `openpyxl` (numeri come numeri, intestazione bloccata, testi con `=` lasciati come testo), 30 MB senza compressione e 2,1 MB con deflate;
+  - **verifiche**:
+    - esempi numerici di F08 (E1–E7) e F09 (otto elenchi) calcolati con uno script indipendente basato su `ipaddress` (fuori dal repository); wildcard degli snippet controllate;
+    - sintassi di Cisco IOS (ACL estese), Juniper Junos, MikroTik RouterOS 7 e nftables controllata sulla documentazione dei produttori (fonti nella 5.4 della specifica v2);
+    - cambiati solo file in `docs/`: codice dell'app, test e strumenti sono quelli della 1.1.1 (controllato con `git diff --stat ce42b2a`).
+
 ## Decisioni di Paolo
 **Fase 1**
 - Alla chiusura di ogni fase va sempre fornito il **titolo** della conversazione successiva (`Fase N · Titolo`) e il **prompt** da incollare per avviarla (regola registrata nella sezione 7.1 delle specifiche).
@@ -288,6 +302,20 @@ Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export 
 - Guida al subnetting **v0.5**, ancora "versione di studio"; la **v1.0** dopo la revisione di Paolo.
 - Appendice C riscritta come **"Il calcolatore e la guida"** (approvata).
 - Nessun risultato delle prove nei browser: la sezione "Browser e apertura da disco" dice solo ciò che è stato provato.
+
+**Fase 10** (indice e decisioni approvati come raccomandati; dettagli in `docs/piano-v2.md`, sezione 3)
+- **V1**: nessuna 1.2.0 separata; le note di Paolo su app e guide si applicano insieme, alla fine (fase 15), con la guida al subnetting v1.0 e il rilascio 2.0.0. Un errore di calcolo trovato nel frattempo diventa una correzione 1.1.x.
+- **V2**: fasi per funzione (VLSM con Riassunto, Allenamento, XLSX con snippet).
+- **V3**: una beta per fase di sviluppo (pre-release), poi `2.0.0-rc.1` e `2.0.0`; Pages pubblica l'ultimo tag.
+- **V4**: schema di sessione versione 2 con migrazione; chiavi del browser `subnetcalc:v1:*` invariate, più `subnetcalc:v1:training`.
+- **V5**: export XLSX con uno scrittore nostro (circa 5 KB) e `CompressionStream`, nessuna libreria.
+- **V6**: Allenamento come terza sottoscheda di Guide.
+- **V7**: tentativi dell'allenamento salvati (al massimo 500), statistiche ricalcolate; serie condivisibile con il seme nel collegamento.
+- **V8**: F08 e F09 in cronologia, entro i limiti (256 segmenti, 1.024 reti).
+- **V9**: nessun manifest PWA nella 2.0.0; se ne riparla dopo le prove sui telefoni.
+- **V10**: budget di peso per fase, soglia di attenzione 900 KB.
+- **V11**: Opus 5.5 per le fasi 11–15; impegno Alto per 11 e 12, Medio per 13, 14 e 15.
+- Paolo chiede di indicare sempre, in ogni risposta di lavoro, la **fase** e le **decisioni** (regola aggiunta alla 7.1 delle specifiche).
 
 ## Scelte tecniche della fase 3 (dove la specifica non decideva)
 - **Codici aggiunti**: `MASK_OCTET_VALUE` e `MASK_NONCONTIGUOUS` anche come errori, sul campo `mask`, per una mask non valida dentro `IP mask` o `IP/mask` (caso E della 10.2); `ACL_NAME_FORMAT` e `ACL_ACTION_VALUE` per F10; motivi `BOTH_BLOCK_TOO_SMALL` e `BOTH_CONFLICT` per F05 caso C.
@@ -366,13 +394,14 @@ Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export 
 ## Segnalazioni da applicare nella revisione finale
 - **Chiuse nella fase 8**: tutto l'elenco "Per la fase 8" di `docs/revisione-fase7.md`; blocchi binari su telefono; convenzione di /0 e righe /0–/7; blocchi speciali del cap. 4; righe bit per bit di F03; nomi dei pulsanti nella guida all'uso.
 - **Chiuse nella fase 9**: rilettura dei testi dell'app, della guida all'uso e della guida al subnetting (voci I1–I5, U1–U3, G1–G7, dettagli nella sezione Completato).
-- **Rimandate (versione 1.2.0)**:
+- **Rimandate alla fase 15** (decisione V1: nessuna versione 1.2.0 separata, tutto nella 2.0.0):
   - **note di Paolo** su app e guide, con le etichette Errore, Chiarezza, Mancanza, Taglio: **mancano**, Paolo le aggiungerà dopo aver rivisto tutto pezzo per pezzo;
   - **guida al subnetting v1.0**, dopo le note di Paolo;
   - sezione "Browser e apertura da disco" con i risultati delle prove, quando ci sono.
 
 ## Problemi aperti
-- **GitHub Actions**: verde sull'ultimo commit di `main` (`test`, `e2e`, `pages`). Release v1.1.1 dopo il push del tag da parte di Paolo.
+- **GitHub Actions**: verde sull'ultimo commit di `main` (`test`, `e2e`, `pages`). Release v1.1.1 dopo il push del tag da parte di Paolo (tag non ancora pubblicato al 22 novembre 2026).
+- **Pages dai tag** (fase 11): l'ambiente `github-pages` deve ammettere i tag `v*`, altrimenti la pubblicazione da un tag viene rifiutata (azione di Paolo, piano 3.1).
 - **Da verificare su dispositivo**:
   - **tastiera numerica iOS** in italiano (i campi hanno `inputmode="decimal"`, la virgola è accettata);
   - Safari su iPhone e Android con Chrome. Le prove sono state fatte solo in Chrome desktop, con l'emulazione del telefono.
@@ -381,35 +410,40 @@ Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export 
   - **da fare a mano** in Edge, Firefox, Safari e sui telefoni, con la lista `docs/verifiche-browser-fase5.md`, compresi lo spazio condiviso tra file aperti da cartelle diverse e il CSV aperto in Excel;
   - i risultati vanno nella sezione "Browser e apertura da disco" della guida all'uso (`src/guides/uso/03-risultati-dati.html`, `id="uso-browser"`).
 - **Lettori di schermo reali** (NVDA, VoiceOver, TalkBack): mai provati. C8 è corretto come garanzia, ma va confermato con un lettore vero.
-- **Peso del file unico**: `npm run size` a ogni build (fase 9: 642.575 byte, 61,3%; restano circa 400 KB).
+- **Peso del file unico**: `npm run size` a ogni build (fase 9: 642.575 byte, 61,3%; restano circa 400 KB). Budget della v2: 740, 780 e 810 KB dopo le fasi 11, 12 e 13; soglia di attenzione 900 KB (specifica v2, 2.4).
 - **Safari**: può cancellare i dati locali dopo un periodo di inattività. La nota è accanto all'interruttore e nella guida all'uso (Memorizza i dati, Browser).
 
 ## Prossima conversazione
-**Titolo:** Fase 10 · Pianificazione della v2
+**Titolo:** Fase 11 · VLSM e summarization
 **Modello:** Opus 5.5 · **Impegno:** Alto
 
 **Prompt da incollare:**
 
-> Iniziamo la fase 10: la pianificazione della v2 del Calcolatore Subnet.
+> Iniziamo la fase 11: VLSM e summarization (F08 e F09) del Calcolatore Subnet.
 >
-> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md, 02_specifica_tecnica_v1.md e, nel repository, CHANGELOG.md, docs/decisione-pwa.md e la guida al subnetting (cap. 8, 16, 17 e appendice C). Poi conferma modello e impegno per questa fase.
+> Leggi STATO_PROGETTO.md, 01_specifiche_progetto.md e, nel repository, docs/piano-v2.md (sezioni 1.1, 1.2, 1.6 e 2), docs/03_specifica_tecnica_v2.md (tutto, in particolare 2, 3.1–3.3, 4.2–4.3, 5.1, 6, 7, 8.1–8.4, 9, 10) e la guida al subnetting (cap. 11, 16, 17 e appendice C). Poi conferma modello e impegno per questa fase.
 >
-> Il codice è nel repository GitHub `ppallavera66-web/calcolatore-subnet` (tag v1.1.1), collegato alla sessione: lavora lì, con un commit per passo, e pubblica su `main`. In questa fase non si scrive codice dell'app: si producono i documenti di pianificazione.
+> Il codice è nel repository GitHub `ppallavera66-web/calcolatore-subnet`, collegato alla sessione: lavora lì, con un commit per passo, e pubblica su `main`. Indicami sempre la fase e le decisioni.
 >
-> Le mie note su app e guide (Errore, Chiarezza, Mancanza, Taglio), rimandate dalla fase 9, mancano ancora. Se le trovi qui sotto, proponimi dove metterle nel piano (una versione 1.2.0 prima della v2, oppure insieme); se non ci sono, lasciale come voce aperta del piano, con la guida al subnetting v1.0.
->
-> [Facoltativo: le mie note.]
+> Stato del tag v1.1.1 e della regola per i tag `v*` nell'ambiente `github-pages`: [scrivi qui se li hai fatti].
 >
 > [Facoltativo: risultati delle prove di `docs/verifiche-browser-fase5.md`.]
 >
-> Obiettivo:
-> - ambito della v2: F08 pianificatore VLSM, F09 summarization con avviso di riassunto troppo largo, F13 allenamento con verifica e tempi, export XLSX (con il peso della libreria rispetto al limite di 1 MB), snippet avanzati (ACL estese, altri produttori); per ognuna dire che cosa entra e che cosa resta fuori;
-> - specifica tecnica della v2 (`docs/03_specifica_tecnica_v2.md`): interfaccia del motore, passaggi didattici, schermate, dati salvati (piani `vlsm` e `summary` nello schema di sessione, con le migrazioni), export, test e oracolo;
-> - suddivisione in fasi, con modello e impegno per ognuna e criteri di accettazione;
-> - decisioni da prendere, con la tua raccomandazione, compresi il manifest PWA per Pages e la versione 1.2.0 con le mie note;
-> - specifiche di progetto aggiornate (sezioni 5 e 7).
+> Obiettivo, secondo il piano e la specifica tecnica v2:
+> - motore di F08 (`vlsm.js`, `parseSegments`) e F09 (`summary.js`), con `cidr.js`, codici della 3.1, passaggi didattici della 4.2 e 4.3, testi in `strings.it.js`;
+> - test: casi della 10.1, proprietà P14–P20 e P25, oracolo v2 per F08 e F09 (`oracle-v2.json`), test di architettura con i moduli nuovi; fixture v1 invariati;
+> - schermate VLSM e Riassunto in Pianifica (8.2, 8.3), frammenti della 8.4, Piani salvati con i tre tipi, collegamento dal caso C del Calcolo inverso;
+> - sessione v2 (schema, regole 11, 12 e 14, migrazione 1 → 2 con il corpus v1) e persistenza (7); export di F08 e F09 nei formati v1 (5.1);
+> - guide: cap. 11, 16, 17 e appendice C (9.1, guida al subnetting v0.6), guida all'uso (`uso-vlsm`, `uso-riassunto`, `uso-piani`);
+> - CI (2.5): pre-release per i tag con il trattino, Pages dai tag;
+> - e2e della 10.4 per la fase 11, axe senza violazioni; peso entro 740 KB;
+> - rilascio `2.0.0-beta.1`: versione, CHANGELOG, nota di rilascio, tag da pubblicare da parte mia.
 >
-> Prima di scrivere i documenti proponimi l'indice e le decisioni da prendere; dopo la mia conferma procedi. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt della fase successiva.
+> Prima di modificare proponimi l'elenco degli interventi e le decisioni da prendere dove la specifica non decide; dopo la mia conferma procedi. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt della fase successiva.
 
 ## Fasi successive
-- **Dopo la fase 10**: le fasi di sviluppo della v2 decise nel piano (2–3 conversazioni secondo la sezione 7 delle specifiche) e la versione 1.2.0 con le note di Paolo e la guida al subnetting v1.0.
+- **Fase 12 · Allenamento** (Opus 5.5 · Alto): F13 con generatore a seme, verifica, tempi, statistiche, serie condivisibile; beta `2.0.0-beta.2`.
+- **Fase 13 · Export XLSX e snippet avanzati** (Opus 5.5 · Medio): scrittore XLSX, snippet Cisco estesi, Junos, RouterOS, nftables; beta `2.0.0-beta.3`.
+- **Fase 14 · Verifica finale v2** (Opus 5.5 · Medio): revisione indipendente con tre revisori, `2.0.0-rc.1`.
+- **Fase 15 · Revisione di Paolo e rilascio 2.0.0** (Opus 5.5 · Medio): note di Paolo su app e guide, guida al subnetting v1.0, rilascio 2.0.0.
+- Dettagli e criteri di accettazione: `docs/piano-v2.md`, sezione 2.
