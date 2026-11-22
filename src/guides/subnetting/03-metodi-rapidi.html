@@ -114,7 +114,7 @@
 <p><strong>Esempio completo.</strong> Un'aula con 40 postazioni, più il gateway e due stampanti: 43 host. 43 + 2 = 45 → 2⁶ = 64 → h = 6 → <strong>/26</strong> → la mask è 24 bit pieni più 2 bit nel quarto ottetto, cioè <code>255.255.255.192</code> (tabella del capitolo 6). Restano 62 − 43 = 19 indirizzi per la crescita.</p>
 
 <div class="box warn"><span class="lbl">In pratica</span>
-<p>Gli host includono anche il gateway, le interfacce di gestione degli switch, eventuali stampanti e un margine di crescita. Un laboratorio da 60 postazioni non va in un /26.</p></div>
+<p>Gli host includono anche il gateway, le interfacce di gestione degli switch, eventuali stampanti e un margine di crescita. Un laboratorio da 60 postazioni non va in un /26: con il gateway, la gestione degli switch e una stampante si superano già i 62 host, e non resta margine.</p></div>
 
 <h4>Caso B · Mi servono S subnet: che prefisso uso?</h4>
 <div class="box trick"><span class="lbl">La regola</span>
@@ -240,7 +240,7 @@ router ospf 1
 
 <div class="box trick"><span class="lbl">Broadcast con la wildcard</span>
 <p><strong>Broadcast = rete + wildcard</strong>, ottetto per ottetto, senza riporti: <code>172.16.32.0</code> + <code>0.0.15.255</code> = <code>172.16.47.255</code>. È l'OR del capitolo 7, fatto in decimale.</p></div>
-<p class="mu small">Nota: nelle ACL una wildcard può anche essere non contigua (per esempio per selezionare solo i terzi ottetti pari). Una subnet mask invece no.</p>
+<p class="mu small">Nota: nelle ACL una wildcard può anche essere non contigua (per esempio per selezionare solo i valori pari del terzo ottetto). Una subnet mask invece no.</p>
 <div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore: sezione "Wildcard e configurazione" di Analisi</p><ul>
 <li><a href="#/calcola/analisi?ip=192.168.10.64&amp;p=26&amp;f10=1&amp;did=1">Apri nel calcolatore: wildcard e ACL di 192.168.10.64/26</a></li>
 <li><a href="#/calcola/analisi?ip=10.1.64.0&amp;p=19&amp;f10=1&amp;did=1">Apri nel calcolatore: wildcard e OSPF di 10.1.64.0/19</a></li>
@@ -268,7 +268,7 @@ router ospf 1
 
 <div class="box warn"><span class="lbl">Mask diverse sui due host</span>
 <p>Ogni host decide con la <strong>propria</strong> mask. Se A è <code>192.168.1.10/24</code> e B è <code>192.168.1.200/25</code>, A considera B locale e lo cerca con ARP; B invece calcola la propria rete <code>192.168.1.128/25</code>, considera A remoto e manda la risposta al proprio gateway.</p>
-<p>C'è di più: se il gateway è il solito <code>192.168.1.1</code>, per B sta <strong>fuori dalla sua subnet</strong>. A seconda del sistema operativo, la configurazione di B viene rifiutata oppure accettata trattando il gateway come raggiungibile direttamente. Il risultato è un traffico asimmetrico, o a senso unico, che funziona "a volte": uno dei guasti più difficili da diagnosticare senza questo ragionamento.</p></div>
+<p>C'è di più: se il gateway è il solito <code>192.168.1.1</code>, per B sta <strong>fuori dalla sua subnet</strong>. A seconda del sistema operativo la configurazione di B viene rifiutata oppure accettata con risultati imprevedibili: in alcuni casi il gateway viene raggiunto direttamente, in altri il traffico verso l'esterno non parte. Insieme alla diversa idea di "locale" di A e B, il risultato è un traffico asimmetrico, o a senso unico, che funziona "a volte": uno dei guasti più difficili da diagnosticare senza questo ragionamento.</p></div>
 
 <div class="open-calc" role="group" aria-label="Apri nel calcolatore"><p class="oc-label" aria-hidden="true">Nel calcolatore</p><ul>
 <li><a href="#/calcola/stessa?a=10.1.63.5&amp;pa=19&amp;b=10.1.64.5&amp;pb=19&amp;did=1&amp;metodo=magic">Apri nel calcolatore: il tranello 10.1.63.5 e 10.1.64.5 /19</a></li>

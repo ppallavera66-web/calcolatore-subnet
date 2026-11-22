@@ -547,7 +547,7 @@ export const STRINGS = {
   'ui.cap.cap-15': 'Stessa subnet o no?',
   'ui.cap.cap-16': 'VLSM: il piano di indirizzamento',
   'ui.cap.cap-17': 'Supernetting e summarization',
-  'ui.cap.cap-18': 'Casi limite: /30, /31, /32',
+  'ui.cap.cap-18': 'Casi limite: /30, /31, /32 e /0',
   'ui.cap.cap-19': 'Cenni di IPv6',
 
   // ---------------------------------------------------------------- passaggi: F01 binario (cap. 7)

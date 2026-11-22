@@ -74,7 +74,7 @@ Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre
 </section>
 
 <section class="chap prose" id="cap-18">
-<h3><span class="num">18</span>Casi limite: /30, /31, /32</h3>
+<h3><span class="num">18</span>Casi limite: /30, /31, /32 e /0</h3>
 <div class="tbl"><table>
 <thead><tr><th>Prefisso</th><th>Indirizzi</th><th>Uso tipico</th><th>Note</th></tr></thead>
 <tbody>
@@ -100,7 +100,7 @@ Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre
 <h4>Errori frequenti, in breve</h4>
 <ul>
 <li>Assegnare a un host l'indirizzo di rete o di broadcast (esercizio 5 del capitolo 8).</li>
-<li>Gateway fuori dalla subnet dell'host: spesso la configurazione viene accettata, ma il traffico verso l'esterno non parte.</li>
+<li>Gateway fuori dalla subnet dell'host: a seconda del sistema operativo la configurazione viene rifiutata oppure accettata con risultati imprevedibili (capitolo 15).</li>
 <li>Mask diverse tra host della stessa VLAN (capitolo 15).</li>
 <li>Subnet sovrapposte in un piano VLSM non allineato (capitolo 16).</li>
 </ul>
@@ -143,7 +143,7 @@ Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre
 <tr><td class="mono">ff00::/8</td><td>Multicast</td><td>Classe D</td></tr>
 <tr><td class="mono">2001:db8::/32</td><td>Documentazione</td><td>RFC 5737</td></tr>
 </tbody></table></div>
-<p>Per il lavoro quotidiano su IPv4 questo capitolo è solo un riferimento; il calcolatore includerà un modulo IPv6 di base (appendice C).</p>
+<p>Per il lavoro quotidiano su IPv4 questo capitolo è solo un riferimento; un modulo IPv6 di base arriverà con la versione 3 del calcolatore (appendice C).</p>
 </section>
 
 <!-- =================== APPENDICI =================== -->
@@ -269,36 +269,28 @@ Bit in comune: 8 + 8 + 6 = 22   →   <span class="r">172.16.32.0/22</span></pre
 </section>
 
 <section class="chap prose" id="app-c">
-<h3><span class="num">C</span>Specifiche del calcolatore</h3>
-<p>Ogni capitolo della guida si traduce in una funzione del software. La caratteristica distintiva rispetto ai calcolatori esistenti è la <strong>modalità didattica</strong>: per ogni risultato, il programma può mostrare i passaggi con il metodo scelto (binario, numero magico, multipli), come in questa guida. Il dettaglio è nel documento delle specifiche di progetto.</p>
+<h3><span class="num">C</span>Il calcolatore e la guida</h3>
+<p>Dove ritrovare nel calcolatore i metodi di ogni capitolo. Con la <strong>modalità didattica</strong> accesa, ogni risultato mostra i passaggi con il metodo del capitolo e il collegamento per tornare qui.</p>
 <div class="tbl"><table>
-<thead><tr><th>ID</th><th>Funzione</th><th>Input → Output</th><th>Cap.</th><th>Rilascio</th></tr></thead>
+<thead><tr><th>Cap.</th><th>Argomento</th><th>Nel calcolatore</th><th>Disponibile</th></tr></thead>
 <tbody>
-<tr><td class="mono">F01</td><td>Analisi subnet</td><td>IP + prefisso o mask → rete, broadcast, range, host, mask, wildcard, M</td><td class="mono">7, 9, 13</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F02</td><td>Conversioni</td><td>Decimale ↔ binario ↔ esadecimale, CIDR ↔ mask decimale</td><td class="mono">3, 6</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F03</td><td>Validazione mask</td><td>Mask → valida/non valida, con il motivo</td><td class="mono">6</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F04</td><td>Tipo di indirizzo</td><td>IP → classe storica, privato/pubblico, speciale</td><td class="mono">4</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F05</td><td>Calcolo inverso</td><td>Host o subnet richiesti → prefisso minimo</td><td class="mono">11</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F06</td><td>Suddivisione</td><td>Blocco + nuovo prefisso → elenco di tutte le subnet</td><td class="mono">11, 13</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F07</td><td>Stessa subnet</td><td>Due IP + prefisso (o due prefissi diversi) → esito e spiegazione</td><td class="mono">15</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F08</td><td>Pianificatore VLSM</td><td>Blocco + elenco di segmenti con host richiesti → piano ordinato, spazio libero, avvisi</td><td class="mono">16</td><td class="mono">v2</td></tr>
-<tr><td class="mono">F09</td><td>Summarization</td><td>Elenco di reti → rotta riassuntiva esatta o minima, con avviso di eccesso</td><td class="mono">17</td><td class="mono">v2</td></tr>
-<tr><td class="mono">F10</td><td>Wildcard e snippet</td><td>Subnet → wildcard e righe pronte per ACL/OSPF</td><td class="mono">14</td><td class="mono">v1 base, v2</td></tr>
-<tr><td class="mono">F11</td><td>Modulo IPv6 di base</td><td>Abbreviazione/espansione, suddivisione /48 → /64</td><td class="mono">19</td><td class="mono">v3</td></tr>
-<tr><td class="mono">F12</td><td>Modalità didattica</td><td>Passaggi mostrati con il metodo scelto, con rimando al capitolo della guida</td><td class="mono">7–17</td><td class="mono">v1</td></tr>
-<tr><td class="mono">F13</td><td>Allenamento</td><td>Esercizi casuali per livello, con verifica della risposta e tempo impiegato</td><td class="mono">8</td><td class="mono">v2</td></tr>
+<tr><td class="mono">2, 15</td><td>Stessa subnet o no, anche con mask diverse e con il gateway</td><td><a href="#/calcola/stessa">Calcola → Stessa subnet</a></td><td>oggi</td></tr>
+<tr><td class="mono">3</td><td>Binario, esadecimale, sottrazione dei pesi e divisioni</td><td><a href="#/calcola/conversioni">Calcola → Conversioni</a></td><td>oggi</td></tr>
+<tr><td class="mono">4</td><td>Classe storica, indirizzi privati e speciali</td><td><a href="#/calcola/analisi">Calcola → Analisi, tipo di indirizzo</a></td><td>oggi</td></tr>
+<tr><td class="mono">6</td><td>Subnet mask, CIDR, mask non valide</td><td><a href="#/calcola/mask">Calcola → Mask e Conversioni</a></td><td>oggi</td></tr>
+<tr><td class="mono">7, 9, 12, 13</td><td>Rete, broadcast e host con il metodo binario, il numero magico o i multipli</td><td><a href="#/calcola/analisi">Calcola → Analisi, con i passaggi</a></td><td>oggi</td></tr>
+<tr><td class="mono">11</td><td>Calcolo inverso: da host o subnet al prefisso</td><td><a href="#/pianifica/inverso">Pianifica → Calcolo inverso</a></td><td>oggi</td></tr>
+<tr><td class="mono">11, 13</td><td>Suddivisione di un blocco, piani con etichette</td><td><a href="#/pianifica/suddivisione">Pianifica → Suddivisione e Piani salvati</a></td><td>oggi</td></tr>
+<tr><td class="mono">14</td><td>Wildcard, ACL e OSPF</td><td><a href="#/calcola/analisi">Calcola → Analisi, sezione "Wildcard e configurazione"</a></td><td>oggi</td></tr>
+<tr><td class="mono">18</td><td>/31, /32 e /0</td><td><a href="#/calcola/analisi">Calcola → Analisi, con gli avvisi</a></td><td>oggi</td></tr>
+<tr><td class="mono">8</td><td>Allenamento con verifica della risposta e tempi</td><td>—</td><td>versione 2</td></tr>
+<tr><td class="mono">16</td><td>Pianificatore VLSM</td><td>—</td><td>versione 2</td></tr>
+<tr><td class="mono">17</td><td>Summarization, con l'avviso di riassunto troppo largo</td><td>—</td><td>versione 2</td></tr>
+<tr><td class="mono">19</td><td>Modulo IPv6 di base</td><td>—</td><td>versione 3</td></tr>
 </tbody></table></div>
-<h4>Decisioni prese</h4>
-<ul>
-<li><strong>Piattaforma</strong>: un unico file HTML autosufficiente, che funziona offline e si apre da disco o da qualunque web server; responsive e pensato prima per il telefono.</li>
-<li><strong>Modalità d'uso</strong>: calcolo rapido, didattica e professionale, attivabili con interruttori indipendenti (modalità didattica, export, memorizza i dati), tutti spenti per default.</li>
-<li><strong>Dati</strong>: salvataggio nel browser solo se richiesto; per spostare o condividere il lavoro, export e import della sessione in JSON, con cifratura facoltativa protetta da passphrase.</li>
-<li><strong>Export</strong>: appunti, CSV, JSON, Markdown, testo, stampa/PDF e snippet di configurazione.</li>
-<li><strong>Temi</strong>: Automatico, Chiaro, Scuro e Alto contrasto, gli stessi di questa guida.</li>
-<li><strong>Guide</strong>: questa guida e la <a href="#/guide/uso">guida all'uso</a>, integrate nel calcolatore. Gli esempi hanno collegamenti "Apri nel calcolatore" che aprono la funzione con i dati dell'esempio e i passaggi didattici.</li>
-</ul>
+<p>Come si usano le schermate, l'export e il salvataggio del lavoro: <a href="#/guide/uso">guida all'uso</a>.</p>
 </section>
 
 <footer class="guide-foot">
-<p>Guida al subnetting IPv4 · v0.4, versione di studio, integrata nel Calcolatore Subnet. Gli esempi usano indirizzi privati o di documentazione; tutti i calcoli sono stati verificati con uno script.</p>
+<p>Guida al subnetting IPv4 · v0.5, versione di studio, integrata nel Calcolatore Subnet. Gli esempi usano indirizzi privati o di documentazione; tutti i calcoli sono stati verificati con uno script.</p>
 </footer>

@@ -102,8 +102,9 @@ describe('contenuto delle guide', () => {
       expect(html).not.toMatch(/<h1|<h5|<h6/);
     }
   });
-  test('la guida al subnetting è la v0.4 e non ha più i widget interni (difetto n. 6)', () => {
-    expect(GUIDES.subnetting).toMatch(/v0\.4/);
+  test('la guida al subnetting è la v0.5 e non ha più i widget interni (difetto n. 6)', () => {
+    expect(GUIDES.subnetting).toMatch(/v0\.5/);
+    expect(GUIDES.subnetting).not.toMatch(/v0\.4/);
     expect(GUIDES.subnetting).not.toMatch(/w-bits|w-sub|w-train|w-inv|w-same|function analyze/);
     expect(GUIDES.subnetting).not.toMatch(/saranno sostituiti/);
   });
@@ -120,8 +121,37 @@ describe('contenuto delle guide', () => {
 
   test('revisione C16: la guida al subnetting è una "versione di studio", senza "da revisionare"', () => {
     expect(GUIDES.subnetting).not.toMatch(/revisionare/i);
-    expect(GUIDES.subnetting).toMatch(/v0\.4 · VERSIONE DI STUDIO/);
-    expect(GUIDES.subnetting).toMatch(/v0\.4, versione di studio/);
+    expect(GUIDES.subnetting).toMatch(/v0\.5 · VERSIONE DI STUDIO/);
+    expect(GUIDES.subnetting).toMatch(/v0\.5, versione di studio/);
+  });
+});
+
+describe('fase 9: guida al subnetting v0.5', () => {
+  const sub = text(GUIDES.subnetting);
+  const appC = GUIDES.subnetting.slice(GUIDES.subnetting.indexOf('id="app-c"'), GUIDES.subnetting.indexOf('<footer'));
+
+  test('G1: l\'apertura non promette come già presenti VLSM e summarization', () => {
+    expect(sub).not.toMatch(/Ogni metodo descritto qui è una funzione del calcolatore/);
+    expect(sub).toMatch(/Il pianificatore VLSM e la summarization arriveranno con la versione 2/);
+  });
+
+  test('I2/G2: gateway fuori dalla subnet descritto allo stesso modo nell\'avviso dell\'app e nei cap. 15 e 18', () => {
+    const core = 'rifiutata oppure accettata con risultati imprevedibili';
+    expect(t('W_GATEWAY_OUTSIDE', { gateway: '192.168.1.1', host: 'b', network: '192.168.1.128', prefix: 25 })).toContain(core);
+    const chap = (/** @type {string} */ id) => text(GUIDES.subnetting.split(/<section class="chap/).find((c) => c.includes(`id="${id}"`)) ?? '');
+    expect(chap('cap-15')).toContain(core);
+    expect(chap('cap-18')).toContain(core);
+    expect(sub).not.toMatch(/spesso la configurazione viene accettata/);
+  });
+
+  test('G6: appendice C "Il calcolatore e la guida", con le schede dell\'app e senza identificativi interni né decisioni di progetto', () => {
+    expect(appC).toMatch(/<h3><span class="num">C<\/span>Il calcolatore e la guida<\/h3>/);
+    expect(appC).not.toMatch(/\bF\d\d\b|Decisioni prese|specifiche di progetto|calcolatori esistenti/);
+    const links = hrefs(appC);
+    for (const view of ['#/calcola/analisi', '#/calcola/conversioni', '#/calcola/mask', '#/calcola/stessa', '#/pianifica/inverso', '#/pianifica/suddivisione', '#/guide/uso']) {
+      expect(links).toContain(view);
+    }
+    expect(text(appC)).toMatch(/versione 2.*versione 3/);
   });
 });
 
