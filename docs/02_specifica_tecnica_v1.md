@@ -622,7 +622,7 @@ Rapporto: `{ historyImported, historySkipped, plansImported, plansSkipped, setti
 2. Se cifrato, richiesta della passphrase (sezione 7.3).
 3. Validazione e **anteprima**: data del file, versione dell'app che lo ha scritto, numero di voci di cronologia e di piani, eventuali scarti.
 4. Scelta: **Sostituisci** (rimpiazza cronologia e piani attuali) oppure **Unisci** (aggiunge; a parità di `id` tiene l'elemento già presente); casella "Applica anche le impostazioni del file", spenta per default.
-5. Conferma con il riepilogo ("Importate 34 voci e 2 piani; 1 voce scartata").
+5. Conferma con il riepilogo ("Importati 34 calcoli e 2 piani; 1 elemento scartato perché non valido").
 
 L'export della sessione funziona anche con "Memorizza i dati" spento: esporta lo stato della visita in corso.
 
@@ -867,7 +867,7 @@ Impostazioni → Importa sessione → scelta del file
   → (se cifrato) passphrase → errore? "Passphrase errata o file danneggiato"
   → anteprima: data, versione, 34 calcoli, 2 piani, 1 voce scartata
   → [Sostituisci] [Unisci]   [ ] Applica anche le impostazioni del file
-  → riepilogo "Importate 34 voci e 2 piani"
+  → riepilogo "Importati 34 calcoli e 2 piani"
 ```
 
 ---

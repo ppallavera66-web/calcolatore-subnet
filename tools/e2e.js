@@ -1354,6 +1354,29 @@ async function main() {
     await ctx.close();
   });
 
+  await check('fase 9: Calcolo inverso per 43 host mostra "Host di scorta" 19 (I1)', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/pianifica/inverso?h=43');
+    await page.waitForSelector('.kv-primary');
+    const txt = (await page.innerText('#main')).replace(/\s+/g, ' ');
+    assert(/Host di scorta 19\b/.test(txt), `scheda: ${txt.slice(0, 300)}`);
+    assert(!/Indirizzi di scorta/.test(txt), 'etichetta vecchia');
+    await ctx.close();
+  });
+
+  await check('fase 9: appendice C della guida al subnetting, collegamenti alle schede e axe senza violazioni', async () => {
+    const { ctx, page } = await open(browser);
+    await go(page, '#/guide/subnetting/app-c');
+    await page.waitForFunction(() => document.activeElement?.closest('#app-c') !== null);
+    const title = await page.textContent('#app-c h3');
+    assert(title?.includes('Il calcolatore e la guida'), `titolo: ${title}`);
+    const v = await axe(page);
+    assert(v.length === 0, v.join('\n'));
+    await page.locator('#app-c a', { hasText: 'Pianifica → Calcolo inverso' }).click();
+    await page.waitForFunction(() => location.hash === '#/pianifica/inverso' && (document.querySelector('#main h1')?.textContent ?? '').includes('Calcolo inverso'));
+    await ctx.close();
+  });
+
   console.log('\nStampa (9.9)');
   await check('stampa: fondo chiaro, navigazione nascosta, intestazione, F10 aperto, PDF', async () => {
     const { ctx, page } = await open(browser, { colorScheme: 'dark' });
