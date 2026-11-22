@@ -47,6 +47,13 @@ const CASES = /** @type {[string, any, any?][]} */ ([
 ]);
 
 describe('modello comune (5.1)', () => {
+  test('fase 9 (I1): nel calcolo inverso per host la scorta è di host (43 host → /26, 19 di scorta)', () => {
+    const r = prefixForHostsText('43');
+    const doc = toRows('F05', val(r), { warnings: r.warnings });
+    expect(doc.pairs).toContainEqual({ label: 'Host di scorta', value: 19 });
+    expect(doc.pairs.some((p) => /indirizzi di scorta/i.test(p.label))).toBe(false);
+  });
+
   test.each(CASES)('%s: documento completo, testi puliti, in tutti i formati', (fn, r, input) => {
     const v = val(r);
     const doc = toRows(fn, v, { warnings: r.warnings, input });

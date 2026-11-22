@@ -861,7 +861,7 @@ async function main() {
     assert(v.length === 0, v.join('\n'));
     await b.page.getByRole('button', { name: 'Sostituisci' }).click();
     await b.page.waitForTimeout(150);
-    assert((await b.page.textContent('.toast'))?.startsWith('Importate 1 voce e 0 piani'), `riepilogo: ${await b.page.textContent('.toast')}`);
+    assert((await b.page.textContent('.toast'))?.startsWith('Importati 1 calcolo e 0 piani'), `riepilogo: ${await b.page.textContent('.toast')}`);
     assert((await b.page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === null, 'impostazioni applicate senza la casella');
     await b.page.setInputFiles('input[type=file]', { name: file.name, mimeType: 'application/json', buffer: Buffer.from(file.text) });
     await b.page.getByLabel('Applica anche le impostazioni del file').check();

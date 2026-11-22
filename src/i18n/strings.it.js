@@ -136,7 +136,7 @@ export const STRINGS = {
   W_LOOKS_LIKE_WILDCARD: (p) => `Sembra una wildcard: invertita è la mask valida /${p.prefix} (cap. 14).`,
   W_MASKS_DIFFER: (p) => `I due host usano prefissi diversi (/${p.prefixA} e /${p.prefixB}): ognuno decide con la propria mask (cap. 15).`,
   W_GATEWAY_OUTSIDE: (p) =>
-    `Il gateway ${p.gateway} è fuori dalla subnet dell'host ${hostName(p.host)} (${p.network}/${p.prefix}): a seconda del sistema operativo la configurazione viene rifiutata o il traffico verso l'esterno non parte.`,
+    `Il gateway ${p.gateway} è fuori dalla subnet dell'host ${hostName(p.host)} (${p.network}/${p.prefix}): a seconda del sistema operativo la configurazione viene rifiutata oppure accettata con risultati imprevedibili: in alcuni casi il gateway viene raggiunto direttamente, in altri il traffico verso l'esterno non parte (cap. 15).`,
   W_GATEWAY_IS_NETWORK: (p) => `Il gateway ${p.gateway} è l'indirizzo di rete della subnet dell'host ${hostName(p.host)}.`,
   W_GATEWAY_IS_BROADCAST: (p) => `Il gateway ${p.gateway} è il broadcast della subnet dell'host ${hostName(p.host)}.`,
   W_GATEWAY_IS_HOST: (p) => `Il gateway ${p.gateway} coincide con l'host ${hostName(p.host)} stesso.`,
@@ -429,7 +429,7 @@ export const STRINGS = {
   'ui.inv.result.prefix': 'Prefisso',
   'ui.inv.result.mask': 'Mask',
   'ui.inv.result.available': 'Host disponibili',
-  'ui.inv.result.spare': 'Indirizzi di scorta',
+  'ui.inv.result.spare': 'Host di scorta',
   'ui.inv.result.newPrefix': 'Nuovo prefisso',
   'ui.inv.result.count': 'Subnet ottenute',
   'ui.inv.result.spareSubnets': 'Subnet di scorta',
@@ -735,7 +735,7 @@ export const STRINGS = {
   'ui.si.merge.desc': 'Cronologia e piani del file si aggiungono a quelli attuali; a parità di elemento resta quello attuale. La cronologia tiene le 200 voci più recenti e i piani sono al massimo 100: oltre, gli elementi più vecchi della cronologia e i piani nuovi in più restano fuori.',
   'ui.si.merge.dropped': (p) => `Con Unisci ${plural(p.n, 'elemento resterebbe fuori', 'elementi resterebbero fuori')} per questi limiti.`,
   'ui.si.done': (p) =>
-    `Importate ${plural(p.history, 'voce', 'voci')} e ${plural(p.plans, 'piano', 'piani')}${p.skipped ? `; ${plural(p.skipped, 'voce scartata', 'voci scartate')}` : ''}${p.dropped ? `; ${plural(p.dropped, 'elemento escluso', 'elementi esclusi')} per il limite di 200 calcoli e 100 piani` : ''}.${p.settings ? ' Impostazioni applicate.' : ''}`,
+    `Importati ${plural(p.history, 'calcolo', 'calcoli')} e ${plural(p.plans, 'piano', 'piani')}${p.skipped ? `; ${plural(p.skipped, 'elemento scartato perché non valido', 'elementi scartati perché non validi')}` : ''}${p.dropped ? `; ${plural(p.dropped, 'elemento escluso', 'elementi esclusi')} per il limite di 200 calcoli e 100 piani` : ''}.${p.settings ? ' Impostazioni applicate.' : ''}`,
   'ui.si.failed': 'Import non riuscito',
   'ui.si.reading': 'Lettura del file…',
 
@@ -796,7 +796,7 @@ export const STRINGS = {
   'ui.plans.closedByEdit': 'Blocco o prefissi cambiati: il piano è stato chiuso e resta in Piani salvati.',
   'ui.plans.notFound': 'Il piano indicato nel collegamento non esiste (forse è stato eliminato).',
   'ui.plans.mismatch': 'Blocco e prefissi del collegamento non sono quelli del piano indicato: il piano non è stato aperto. Aprilo da Piani salvati.',
-  'ui.plans.labelFor': (p) => `Etichetta della subnet n. ${p.n}`,
+  'ui.plans.labelFor': (p) => `Etichetta della subnet n. ${fmtNumber(p.n)}`,
   'ui.plans.labelsHint': 'Scrivi le etichette (VLAN, uso) nella colonna a destra: si salvano da sole.',
   'ui.plans.notPersisted': 'I piani restano solo per questa visita: per conservarli accendi "Memorizza i dati" in Impostazioni o esporta la sessione.',
   'ui.sub.col.label': 'Etichetta',
@@ -842,10 +842,10 @@ export const STRINGS = {
   IMPORT_CRYPTO_UNAVAILABLE:
     'Con la pagina aperta così il browser non mette a disposizione la cifratura (Web Crypto). Apri l\'app da un indirizzo HTTPS (per esempio GitHub Pages) o da localhost.',
   IMPORT_W_MIGRATED: (p) => `Il file era nella versione ${p.from} del formato ed è stato aggiornato alla ${p.to}.`,
-  IMPORT_W_HISTORY_TRUNCATED: (p) => `Cronologia oltre le ${p.max} voci: tenute le più recenti, ${fmtNumber(p.dropped)} escluse.`,
-  IMPORT_W_PLANS_TRUNCATED: (p) => `Più di ${p.max} piani: tenuti quelli modificati più di recente, ${fmtNumber(p.dropped)} esclusi.`,
-  IMPORT_W_LABELS_DROPPED: (p) => `Piano "${p.plan}": ${fmtNumber(p.count)} etichette non valide escluse.`,
-  IMPORT_W_DUPLICATE_ID: (p) => `${fmtNumber(p.count)} elementi con identificativo ripetuto nel file: tenuto il primo.`,
+  IMPORT_W_HISTORY_TRUNCATED: (p) => `Cronologia oltre i ${p.max} calcoli: tenuti i più recenti, ${plural(p.dropped, 'escluso', 'esclusi')}.`,
+  IMPORT_W_PLANS_TRUNCATED: (p) => `Più di ${p.max} piani: tenuti quelli modificati più di recente, ${plural(p.dropped, 'escluso', 'esclusi')}.`,
+  IMPORT_W_LABELS_DROPPED: (p) => `Piano "${p.plan}": ${plural(p.count, 'etichetta non valida esclusa', 'etichette non valide escluse')}.`,
+  IMPORT_W_DUPLICATE_ID: (p) => `${p.count === 1 ? '1 elemento ha' : `${fmtNumber(p.count)} elementi hanno`} un identificativo già usato nel file: per ogni identificativo resta il primo.`,
 };
 
 /**
