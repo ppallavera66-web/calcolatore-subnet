@@ -93,7 +93,7 @@ Stima: v1 completa in 6–7 conversazioni. La v2 richiede altre 2–3 conversazi
 - **Chiusura di ogni fase**: oltre ai file prodotti, si aggiorna `STATO_PROGETTO.md` e si fornisce sempre a Paolo, nella risposta finale e nello stato del progetto:
   - il **titolo** della conversazione successiva, nel formato `Fase N · Titolo`;
   - il **prompt** completo da incollare per avviarla.
-- **Revisione di Paolo**: le note personali (Errore, Chiarezza, Mancanza, Taglio) non vengono raccolte fase per fase. Paolo rivede tutto alla fine, applicazione e guide insieme, e le correzioni si applicano in un colpo solo (fase 9, dopo la revisione tecnica della fase 8). Eventuali segnalazioni sparse nel frattempo si annotano in `STATO_PROGETTO.md`.
+- **Revisione di Paolo**: le note personali (Errore, Chiarezza, Mancanza, Taglio) non vengono raccolte fase per fase. Paolo rivede tutto alla fine, applicazione e guide insieme, e le correzioni si applicano in un colpo solo. La fase 9 ha fatto la rilettura dei testi e delle guide (v1.1.1); le note di Paolo sono rimandate a una versione 1.2.0, da collocare nel piano della fase 10. Eventuali segnalazioni sparse nel frattempo si annotano in `STATO_PROGETTO.md`.
 
 ## 8. Difetti noti della guida v0.1
 Tutti risolti nella v0.3 (fase 1), tranne il n. 6, rimandato alla fase 6.

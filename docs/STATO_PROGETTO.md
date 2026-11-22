@@ -406,7 +406,7 @@ Contenuto: piano della v2 (F08 VLSM, F09 summarization, F13 allenamento, export 
 > - ambito della v2: F08 pianificatore VLSM, F09 summarization con avviso di riassunto troppo largo, F13 allenamento con verifica e tempi, export XLSX (con il peso della libreria rispetto al limite di 1 MB), snippet avanzati (ACL estese, altri produttori); per ognuna dire che cosa entra e che cosa resta fuori;
 > - specifica tecnica della v2 (`docs/03_specifica_tecnica_v2.md`): interfaccia del motore, passaggi didattici, schermate, dati salvati (piani `vlsm` e `summary` nello schema di sessione, con le migrazioni), export, test e oracolo;
 > - suddivisione in fasi, con modello e impegno per ognuna e criteri di accettazione;
-> - decisioni da prendere, con la tua raccomandazione, comprese il manifest PWA per Pages e la versione 1.2.0 con le mie note;
+> - decisioni da prendere, con la tua raccomandazione, compresi il manifest PWA per Pages e la versione 1.2.0 con le mie note;
 > - specifiche di progetto aggiornate (sezioni 5 e 7).
 >
 > Prima di scrivere i documenti proponimi l'indice e le decisioni da prendere; dopo la mia conferma procedi. Alla fine aggiorna STATO_PROGETTO.md con titolo e prompt della fase successiva.
