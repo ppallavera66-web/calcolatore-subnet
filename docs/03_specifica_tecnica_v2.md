@@ -50,7 +50,7 @@ Le decisioni V1–V11 della fase 10 sono nel piano (sezione 3). Qui le scelte te
 | t3 | F08 e F09 restituiscono risultati anche grandi (256 segmenti, 1.024 reti, fino a 1.024 blocchi estranei): niente paginazione, tutto in memoria. |
 | t4 | Lo scrittore XLSX sta in `src/export/xlsx.js` ed è l'unico codice che conosce il formato; riceve il documento comune dell'export (5.1). |
 | t5 | Lo schema di sessione passa alla versione 2; la migrazione 1 → 2 è pura e senza perdite (6.5). |
-| t6 | I parametri di frammento con elenchi (segmenti di F08, reti di F09) hanno un limite di 2.000 caratteri invece di 200 (8.3). |
+| t6 | I parametri di frammento con elenchi (segmenti di F08, reti di F09) hanno un limite di 2.000 caratteri invece di 200 (8.4). |
 | t7 | Le statistiche dell'allenamento non si salvano: si ricalcolano dai tentativi (stessa regola m6 della v1: si salvano gli input). |
 
 ---
@@ -158,7 +158,6 @@ Avvisi (`warnings`):
 | `W_VLSM_FULL` | nessuno spazio libero dopo l'assegnazione |
 | `W_VLSM_GROWTH_PREFIX` | il margine di crescita ha cambiato il prefisso di almeno un segmento (`count`) |
 | `W_VLSM_DUPLICATE_NAME` | due o più segmenti con lo stesso nome non vuoto (`names`) |
-| `W_NO_USABLE_HOSTS` | (v1) un segmento /31 o /32 senza l'opzione punto-punto (non può capitare con le regole della 3.2; resta per sicurezza) |
 | `W_SUMMARY_TOO_WIDE` | il riassunto unico contiene indirizzi estranei (`extra`, `blocks`) |
 | `W_SUMMARY_DUPLICATE` | reti ripetute, tolte (`count`) |
 | `W_SUMMARY_CONTAINED` | reti contenute in altre, tolte (`count`) |
